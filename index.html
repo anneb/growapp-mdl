@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>growapp-mdl</title>
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+
+    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+    <!--link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"-->
+    <link rel="stylesheet" href="./node_modules/material-design-icons/iconfont/material-icons.css">
+    
+    <link rel="stylesheet" href="./openlayers-3.11.2/ol.css">
+    <script src="./openlayers-3.11.2/ol.js"></script>
+    <script src="./node_modules/proj4/dist/proj4.js"></script>
+    <script src="./app.js"></script>
+    
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Roboto', 'Noto', sans-serif;
+        background-color: transparent;
+      }
+      .page-content {
+          position: absolute;
+          display: block;
+          left: 0px;
+          top: 0px;
+          bottom: 0px;
+          right: 0px;
+      }
+      #gapp_map {
+        position: relative;
+        display: block;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        border: 1px solid black;
+        right: 0px;
+        width: 100%;
+        height: 100%;
+      }
+      #gapp_button_location {
+          position: absolute;
+          bottom: 80px;
+          right: 10px;
+      }
+      #gapp_button_camera {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+      }
+    </style>
+  </head>
+  <body onload="App.init('https://phenology.geodan.nl', 'gapp_map', (typeof cordova !== 'undefined'))">
+      <!-- Always shows a header, even in smaller screens. -->
+      <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+          <header class="mdl-layout__header">
+              <div class="mdl-layout__header-row">
+                  <!-- Title -->
+                  <span class="mdl-layout-title">GrowApp - Photo Locations</span>
+                  <!-- Add spacer, to align navigation to the right -->
+                  <div class="mdl-layout-spacer"></div>
+                  <!-- Navigation. We hide it in small screens. -->
+                  <nav class="mdl-navigation mdl-layout--large-screen-only">
+                      <a class="mdl-navigation__link" href="">Link</a>
+                      <a class="mdl-navigation__link" href="">Link</a>
+                      <a class="mdl-navigation__link" href="">Link</a>
+                      <a class="mdl-navigation__link" href="">Link</a>
+                  </nav>
+              </div>
+          </header>
+          <div class="mdl-layout__drawer">
+              <img src="xxxhdpi.png" style="margin-top: 10px; width:239px; height:239px">
+              <hr>
+              <span class="mdl-layout-title">Title</span>
+              <nav class="mdl-navigation">
+                  <a class="mdl-navigation__link" href="">Link</a>
+                  <a class="mdl-navigation__link" href="">Link</a>
+                  <a class="mdl-navigation__link" href="">Link</a>
+                  <a class="mdl-navigation__link" href="">Link</a>
+              </nav>
+          </div>
+          <main class="mdl-layout__content">
+              <div class="page-content">
+                <div id="gapp_map"></div>
+                <button id="gapp_button_location" class="mdl-button mdl-js-button mdl-button--fab mdl-color--white mdl-color-text--blue-700" >
+                      <i class="material-icons">my_location</i>
+                </button>
+                <button id="gapp_button_camera" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                      <i class="material-icons">photo_camera</i>
+                </button>
+              </div>
+          </main>
+          <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
+            <div class="mdl-snackbar__text">hallo</div>
+            <button class="mdl-snackbar__action" type="button"></button>
+          </div>
+      </div>
+  </body>
+</html>
