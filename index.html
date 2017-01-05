@@ -44,14 +44,17 @@
         height: 100%;
       }
       #gapp_button_location {
-          position: absolute;
-          bottom: 80px;
-          right: 10px;
+        position: absolute;
+        bottom: 80px;
+        right: 10px;
+      }
+      #gapp_button_location.inactive {
+        color: black !important;
       }
       #gapp_button_camera {
-          position: absolute;
-          bottom: 10px;
-          right: 10px;
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
       }
     </style>
   </head>
@@ -87,7 +90,7 @@
           <main class="mdl-layout__content">
               <div class="page-content">
                 <div id="gapp_map"></div>
-                <button id="gapp_button_location" class="mdl-button mdl-js-button mdl-button--fab mdl-color--white mdl-color-text--blue-700" >
+                <button id="gapp_button_location" class="mdl-button mdl-js-button mdl-button--fab" disabled>
                       <i class="material-icons">my_location</i>
                 </button>
                 <button id="gapp_button_camera" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">

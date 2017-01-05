@@ -66,6 +66,10 @@ var OLMap = new function() {
         console.warn('unhandled geolocation Error: ' + message);
     };
     
+    this.geoLocationChangedHandler = function(coordinates) {
+        console.warn('unhandled geolocation Changed handler');
+    };
+    
     this.loadGeoLocation = function ()
     {
         // geolocation
@@ -106,6 +110,7 @@ var OLMap = new function() {
                     olMap.isManualMove = true;
                 }, 300);
             }
+            olMap.geoLocationChangedHandler(coordinates); 
         });
         new ol.layer.Vector({
             map: this.olmap,
@@ -118,7 +123,7 @@ var OLMap = new function() {
         this.geoLocation.on('error', function(error) {
             olMap.geoLocationErrorHandler(error.message);
         });
-    }
+    };
     
     this.updatePhotos = function() {
         //adds or reloads photo positions into Photolayer
@@ -163,11 +168,6 @@ var OLMap = new function() {
 var App = new function() {
     var app = this;
     
-    this.toggleButtonLocation =  function()
-    {
-        /* temp */
-        app.showMessage("geklikt!");
-    };
     
     this.init = function(server, mapId, isMobileDevice) {
         if (typeof isMobileDevice == 'undefined') {
@@ -176,18 +176,39 @@ var App = new function() {
         if (!isMobileDevice) {
             _utils.disableElement('#gapp_button_camera');
         }
+        OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
+        OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
         OLMap.loadMap(server, mapId);
         OLMap.loadGeoLocation();
         this.buttonLocation = document.querySelector("#gapp_button_location");
-        this.buttonLocation.addEventListener('click', this.toggleButtonLocation);
+        this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
         this.snackbarContainer = document.querySelector('#gapp-snackbar');
-        OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
+        
     };
     
     this.geoLocationErrorHandler = function(message) {
       app.showMessage(message);
       app.buttonLocation.classList.remove('mdl-color--white');
       _utils.disableElement("#gapp_button_location");
+    };
+    
+    this.geoLocationFixed = false;
+    this.geoLocationChangedHandler = function (coordinates) {
+        if (!app.geoLocationFixed) {
+            app.geoLocationFixed = true;
+            app.buttonLocation.removeAttribute('disabled');
+            app.buttonLocation.classList.add('mdl-color--white');
+            app.buttonLocation.classList.add('mdl-color-text--blue-700');
+        }
+    }
+    
+    this.setMapTracking = function(enabled) {
+        OLMap.mapTracking = enabled;
+        if (enabled) {
+            app.buttonLocation.classList.remove("inactive");
+        } else {
+            app.buttonLocation.classList.add("inactive");
+        }
     };
     
     this.showMessage = function(message, timeout)
