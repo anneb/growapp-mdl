@@ -3,6 +3,12 @@
 app.js
 assumes openlayers.js and proj4.js are loaded
 
+Main objects in this module:
+
+_utils: general utility functions
+OLMap: openlayers, geolocation
+App: UI and handler hooks into OLMap
+
 */
 
 /* global ol */
@@ -37,6 +43,12 @@ var _utils = {
 
 var OLMap = new function() {
     var olMap = this;
+    
+    this.init = function(server, mapId) {
+        olMap.loadMap(server, mapId);
+        olMap.loadGeoLocation();
+        olMap.loadDragHandler();
+    };
     
     this.loadMap = function (server, mapId) {
         this.server = server;
@@ -163,33 +175,66 @@ var OLMap = new function() {
             });
         }
     };
+    
+    this.dragStart = false;
+    this.dragPrevPixel = null;
+    
+    this.dragHandler = function (status, pixel, prevpixel) {
+        console.log ("dragging: " + status + ", current: " + JSON.stringify(pixel) + ", prevpoint: " + JSON.stringify(prevpixel));
+    };
+    
+    this.loadDragHandler = function() {
+      this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental
+          if (!olMap.dragStart) {
+            olMap.dragStart = true;
+            olMap.dragStartPixel = this.dragPrevPixel = event.pixel;
+            olMap.dragHandler('dragstart', event.pixel, event.pixel);
+          } else {
+            olMap.dragHandler('dragging', event.pixel, olMap.dragPrevPixel);
+            olMap.dragPrevPixel = event.pixel;
+          }
+      });
+      this.olmap.on('moveend', function (event){
+          if (olMap.dragStart) {
+              olMap.dragStart = false;
+              olMap.dragHandler('dragend', olMap.dragPrevPixel, olMap.dragPrevPixel);
+          }
+      });
+    };
 };
 
+// main app object
 var App = new function() {
     var app = this;
     
-    
     this.init = function(server, mapId, isMobileDevice) {
+        // init message popups at bottom of screen
+        this.snackbarContainer = document.querySelector('#gapp-snackbar');
+        // select setup for mobile device or web
         if (typeof isMobileDevice == 'undefined') {
             isMobileDevice = true; // default
         }
         if (!isMobileDevice) {
             _utils.disableElement('#gapp_button_camera');
         }
+        // setup handler hooks into OLMap
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
         OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
+        OLMap.dragHandler = this.mapDragHandler;
+        // intialise OLMap
         OLMap.loadMap(server, mapId);
         OLMap.loadGeoLocation();
+        OLMap.loadDragHandler();
         this.buttonLocation = document.querySelector("#gapp_button_location");
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
-        this.snackbarContainer = document.querySelector('#gapp-snackbar');
+        
         
     };
     
     this.geoLocationErrorHandler = function(message) {
-      app.showMessage(message);
-      app.buttonLocation.classList.remove('mdl-color--white');
-      _utils.disableElement("#gapp_button_location");
+      app.showMessage('location: ' + message);
+      // app.buttonLocation.classList.remove('mdl-color--white');
+      // _utils.disableElement("#gapp_button_location");
     };
     
     this.geoLocationFixed = false;
@@ -200,14 +245,30 @@ var App = new function() {
             app.buttonLocation.classList.add('mdl-color--white');
             app.buttonLocation.classList.add('mdl-color-text--blue-700');
         }
-    }
+    };
     
     this.setMapTracking = function(enabled) {
         OLMap.mapTracking = enabled;
         if (enabled) {
             app.buttonLocation.classList.remove("inactive");
+            var coordinates = OLMap.geoLocation.getPosition();
+            if (coordinates) {
+                OLMap.olmap.getView().setCenter(coordinates);
+            }
         } else {
             app.buttonLocation.classList.add("inactive");
+        }
+    };
+    
+    this.mapDragHandler = function (status, pixel, prevpixel) {
+        switch(status) {
+            case 'dragstart':
+                app.setMapTracking(false);
+                break;
+            case 'dragging':
+                break;
+            case 'dragend':
+                break;
         }
     };
     
