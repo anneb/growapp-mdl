@@ -44,13 +44,14 @@ var _utils = {
 var OLMap = new function() {
     var olMap = this;
     
-    this.init = function(server, mapId) {
-        olMap.loadMap(server, mapId);
-        olMap.loadGeoLocation();
-        olMap.loadDragHandler();
+    this.init = function(server, mapId, featureFieldName) {
+        olMap.initMap(server, mapId);
+        olMap.initGeoLocation();
+        olMap.initDragHandler();
+        olMap.initClickFeatureHandler(featureFieldName);
     };
     
-    this.loadMap = function (server, mapId) {
+    this.initMap = function (server, mapId) {
         this.server = server;
         this.updatePhotos();
         this.openStreetMapLayer = new ol.layer.Tile({
@@ -72,7 +73,7 @@ var OLMap = new function() {
                 zoom: 16
             })
         });
-    };/* loadMap */
+    };/* initMap */
     
     this.geoLocationErrorHandler = function(message) {
         console.warn('unhandled geolocation Error: ' + message);
@@ -82,7 +83,7 @@ var OLMap = new function() {
         console.warn('unhandled geolocation Changed handler');
     };
     
-    this.loadGeoLocation = function ()
+    this.initGeoLocation = function ()
     {
         // geolocation
         this.geoLocation = new ol.Geolocation({
@@ -183,7 +184,7 @@ var OLMap = new function() {
         console.log ("dragging: " + status + ", current: " + JSON.stringify(pixel) + ", prevpoint: " + JSON.stringify(prevpixel));
     };
     
-    this.loadDragHandler = function() {
+    this.initDragHandler = function() {
       this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental
           if (!olMap.dragStart) {
             olMap.dragStart = true;
@@ -200,6 +201,32 @@ var OLMap = new function() {
               olMap.dragHandler('dragend', olMap.dragPrevPixel, olMap.dragPrevPixel);
           }
       });
+    };
+    
+    /* find first feature at pixel that has featureFieldName */
+    this.getFeatureFromPixel = function(pixel, featureFieldName) {
+      var resultfeature = null;
+      this.olmap.forEachFeatureAtPixel(pixel, function(feature, layer) {
+        if (feature.get(featureFieldName)) {
+            resultfeature = feature;
+            return true; // feature found
+        } else {
+            return false; // try next feature
+        }
+      });
+      return resultfeature;
+    };
+    
+    this.clickFeatureHandler = function (feature) {
+        console.log('feature: ' + feature);
+    };
+    
+    this.initClickFeatureHandler = function(featureFieldName) {
+        this.olmap.on('click', function(event){
+            if (!event.dragging) {
+                olMap.clickFeatureHandler(olMap.getFeatureFromPixel(olMap.olmap.getEventPixel(event.originalEvent), featureFieldName));
+            }
+        });
     };
 };
 
@@ -222,13 +249,9 @@ var App = new function() {
         OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
         OLMap.dragHandler = this.mapDragHandler;
         // intialise OLMap
-        OLMap.loadMap(server, mapId);
-        OLMap.loadGeoLocation();
-        OLMap.loadDragHandler();
+        OLMap.init(server, mapId, 'filename');
         this.buttonLocation = document.querySelector("#gapp_button_location");
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
-        
-        
     };
     
     this.geoLocationErrorHandler = function(message) {
@@ -239,7 +262,7 @@ var App = new function() {
     
     this.geoLocationFixed = false;
     this.geoLocationChangedHandler = function (coordinates) {
-        if (!app.geoLocationFixed) {
+        if (!app.geoLocationFixed && coordinates) {
             app.geoLocationFixed = true;
             app.buttonLocation.removeAttribute('disabled');
             app.buttonLocation.classList.add('mdl-color--white');
