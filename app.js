@@ -11,7 +11,12 @@ App: UI and handler hooks into OLMap
 
 */
 
-/* global ol */
+/* global ol, Image */
+
+Number.prototype.toRad = function() { // helper
+    return this * Math.PI / 180;
+}
+
 var _utils = {
     hideElement : function (selector) {
         var element = document.querySelector(selector);
@@ -38,16 +43,31 @@ var _utils = {
             element.removeAttribute("disabled");
             // componentHandler.upgradeElement(element);
         }
+    },
+    // calculate world distance in km between two world points (lat/lon)
+    calculateDistance: function(pos1, pos2) {
+        var R = 6371; // km
+        var dLon = (pos2[0] - pos1[0]).toRad();
+        var dLat = (pos2[1] - pos1[1]).toRad();
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(pos1[1].toRad()) * Math.cos(pos2[1].toRad()) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c;
+        return d;
     }
 };
+
 
 var OLMap = new function() {
     var olMap = this;
     
     this.init = function(server, mapId, featureFieldName) {
+        this.server = server;
         olMap.initMap(server, mapId);
         olMap.initGeoLocation();
         olMap.initDragHandler();
+        olMap.initPanZoomHandler();
         olMap.initClickFeatureHandler(featureFieldName);
     };
     
@@ -188,7 +208,7 @@ var OLMap = new function() {
       this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental
           if (!olMap.dragStart) {
             olMap.dragStart = true;
-            olMap.dragStartPixel = this.dragPrevPixel = event.pixel;
+            olMap.dragStartPixel = olMap.dragPrevPixel = event.pixel;
             olMap.dragHandler('dragstart', event.pixel, event.pixel);
           } else {
             olMap.dragHandler('dragging', event.pixel, olMap.dragPrevPixel);
@@ -200,6 +220,17 @@ var OLMap = new function() {
               olMap.dragStart = false;
               olMap.dragHandler('dragend', olMap.dragPrevPixel, olMap.dragPrevPixel);
           }
+          olMap.dragHandler('moveend', null, null);
+      });
+    };
+    
+    this.panZoomHandler = function(status) {
+      console.log('panzoom: ' + status);
+    };
+    
+    this.initPanZoomHandler = function () {
+      this.olmap.getView().on('change:resolution', function(){
+          olMap.panZoomHandler('zoom');
       });
     };
     
@@ -237,6 +268,8 @@ var App = new function() {
     this.init = function(server, mapId, isMobileDevice) {
         // init message popups at bottom of screen
         this.snackbarContainer = document.querySelector('#gapp-snackbar');
+        // setup variables for general access
+        this.featureInfoPopup = document.querySelector('#gapp_featureinfo');
         // select setup for mobile device or web
         if (typeof isMobileDevice == 'undefined') {
             isMobileDevice = true; // default
@@ -248,6 +281,8 @@ var App = new function() {
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
         OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
         OLMap.dragHandler = this.mapDragHandler;
+        OLMap.clickFeatureHandler = this.clickFeatureHandler;
+        OLMap.panZoomHandler = this.panZoomHandler;
         // intialise OLMap
         OLMap.init(server, mapId, 'filename');
         this.buttonLocation = document.querySelector("#gapp_button_location");
@@ -289,8 +324,92 @@ var App = new function() {
                 app.setMapTracking(false);
                 break;
             case 'dragging':
+                // drag info window along
+                app.featureInfoPopup.style.left = (parseInt(app.featureInfoPopup.style.left, 10) - (prevpixel[0] - pixel[0])) + 'px';
+                app.featureInfoPopup.style.top = (parseInt(app.featureInfoPopup.style.top, 10) - (prevpixel[1] - pixel[1])) + 'px';
                 break;
             case 'dragend':
+                if (app.activeFeature) {
+                    var geometry = app.activeFeature.getGeometry();
+                    var coordinates = geometry.getCoordinates();
+                    var endpixel = OLMap.olmap.getPixelFromCoordinate(coordinates);
+
+                    app.featureInfoPopup.style.left = endpixel[0] + 'px';
+                    app.featureInfoPopup.style.top = (endpixel[1] - 15) + 'px';
+                }
+                break;
+            case 'moveend':
+                break;
+        }
+    };
+    
+    this.clickFeatureHandler = function(feature) {
+        app.activeFeature = feature;
+        if (feature) {
+            app.featureInfoPopup.classList.add('hidden');
+            
+            var geometry = feature.getGeometry();
+            var coordinates = geometry.getCoordinates();
+            var pixel = OLMap.olmap.getPixelFromCoordinate(coordinates);
+
+            app.featureInfoPopup.style.left = pixel[0] + 'px';
+            app.featureInfoPopup.style.top = (pixel[1] - 15) + 'px';
+        
+            // calculate distance between user and feature
+            var userLocation = OLMap.geoLocation.getPosition();
+            var distance = 1000; // initialize at 1000 km
+            if (userLocation) {
+                distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
+            }
+        
+            var picture_url = this.server + '/uploads/' + feature.get('filename');
+            var spinner = document.querySelector('#gapp_featureinfo_spinner');
+            var domPhoto = document.querySelector('#gapp_featureinfo_photo');
+            domPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+            spinner.classList.add('is-active');
+            var photo = new Image();
+            photo.onload = function() {
+                spinner.classList.remove('is-active');
+                domPhoto.src = picture_url; // not: this.src, may show delayed loading picture
+            };
+            
+            photo.src = picture_url;
+            var picture_width = feature.get('width');
+            var picture_height = feature.get('height');
+            var aspectratio = 1.0;
+            if (picture_height && picture_width) {
+                aspectratio = picture_width / picture_height;
+            }
+            if (aspectratio >= 1) {
+                // landscape
+                app.featureInfoPopup.style.width = Math.floor(200 * aspectratio) + "px";
+                app.featureInfoPopup.style.height = "200px";
+            }
+            else {
+                // portrait
+                app.featureInfoPopup.style.width = "200px";
+                app.featureInfoPopup.style.height = Math.floor(200 / aspectratio) + "px";
+            }
+        
+            var addphotobutton = document.querySelector('#gapp_featureinfo_addphoto');
+            if (distance < 0.08) {
+                addphotobutton.removeAttribute('disabled');
+            }
+            else {
+                addphotobutton.setAttribute('disabled', '');
+            }
+            app.featureInfoPopup.classList.remove('hidden');
+        }
+        else {
+            app.featureInfoPopup.classList.add('hidden');
+        }
+    };
+    
+    this.panZoomHandler = function(status) {
+        switch (status) {
+            case 'zoom': 
+                app.activeFeature = null;
+                app.featureInfoPopup.classList.add('hidden');
                 break;
         }
     };
