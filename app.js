@@ -15,7 +15,7 @@ App: UI and handler hooks into OLMap
 
 Number.prototype.toRad = function() { // helper
     return this * Math.PI / 180;
-}
+};
 
 var _utils = {
     hideElement : function (selector) {
@@ -219,8 +219,9 @@ var OLMap = new function() {
           if (olMap.dragStart) {
               olMap.dragStart = false;
               olMap.dragHandler('dragend', olMap.dragPrevPixel, olMap.dragPrevPixel);
+          } else {
+            olMap.dragHandler('moveend', null, null);
           }
-          olMap.dragHandler('moveend', null, null);
       });
     };
     
@@ -263,13 +264,15 @@ var OLMap = new function() {
 
 // main app object
 var App = new function() {
+    // set self (geodan policy: use lowercase class name)
     var app = this;
     
     this.init = function(server, mapId, isMobileDevice) {
         // init message popups at bottom of screen
         this.snackbarContainer = document.querySelector('#gapp-snackbar');
-        // setup variables for general access
-        this.featureInfoPopup = document.querySelector('#gapp_featureinfo');
+        
+        this.featureInfoPopupInit();
+        
         // select setup for mobile device or web
         if (typeof isMobileDevice == 'undefined') {
             isMobileDevice = true; // default
@@ -287,6 +290,46 @@ var App = new function() {
         OLMap.init(server, mapId, 'filename');
         this.buttonLocation = document.querySelector("#gapp_button_location");
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
+    };
+    
+    this.featureInfoPopupInit = function()
+    {
+        this.featureInfoPopup = document.querySelector('#gapp_featureinfo');
+        this.featureInfoPopup.show = function() {
+            app.featureInfoPopup.classList.remove('hidden');
+            document.addEventListener('backbutton', app.featureInfoPopup.hide);
+        };
+        
+        this.featureInfoPopup.hide = function() {
+            app.featureInfoPopup.classList.add('hidden');
+            document.removeEventListener('backbutton', app.featureInfoPopup.hide);
+            app.activeFeature = null;
+        };
+        
+        /* todo: zoomable fullscreen photo? http://ignitersworld.com/lab/imageViewer.html */
+        this.fullscreenphotopopup = document.querySelector('#gapp_fullscreenphotopopup');
+        this.fullscreenphotopopup.show = function() {
+            app.fullscreenphoto = document.querySelector('#gapp_fullscreenphoto');
+            var featureinfophoto = document.querySelector('#gapp_featureinfo_photo');
+            app.fullscreenphoto.src = featureinfophoto.src;
+            document.removeEventListener('backbutton', app.featureInfoPopup.hide);
+            document.addEventListener('backbutton', app.fullscreenphotopopup.hide);
+            app.fullscreenphotopopup.classList.remove('hidden');
+        };
+        this.fullscreenphotopopup.hide = function() {
+            document.removeEventListener('backbutton', app.fullscreenphotopopup.hide);
+            document.addEventListener('backbutton', app.featureInfoPopup.hide);
+            app.fullscreenphotopopup.classList.add('hidden');
+        };
+        
+        var gappFeatureInfoClose = document.querySelector("#gapp_featureinfo_close");
+        gappFeatureInfoClose.addEventListener('click', app.featureInfoPopup.hide);
+        
+        var gappFeatureInfoFullScreen = document.querySelector('#gapp_featureinfo_fullscreen');
+        gappFeatureInfoFullScreen.addEventListener('click', app.fullscreenphotopopup.show);
+        
+        var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
+        gappFeatureInfoFullScreenClose.addEventListener('click', app.fullscreenphotopopup.hide);
     };
     
     this.geoLocationErrorHandler = function(message) {
@@ -329,6 +372,7 @@ var App = new function() {
                 app.featureInfoPopup.style.top = (parseInt(app.featureInfoPopup.style.top, 10) - (prevpixel[1] - pixel[1])) + 'px';
                 break;
             case 'dragend':
+            case 'moveend':
                 if (app.activeFeature) {
                     var geometry = app.activeFeature.getGeometry();
                     var coordinates = geometry.getCoordinates();
@@ -338,16 +382,13 @@ var App = new function() {
                     app.featureInfoPopup.style.top = (endpixel[1] - 15) + 'px';
                 }
                 break;
-            case 'moveend':
-                break;
         }
     };
     
     this.clickFeatureHandler = function(feature) {
+        app.featureInfoPopup.hide();
         app.activeFeature = feature;
         if (feature) {
-            app.featureInfoPopup.classList.add('hidden');
-            
             var geometry = feature.getGeometry();
             var coordinates = geometry.getCoordinates();
             var pixel = OLMap.olmap.getPixelFromCoordinate(coordinates);
@@ -398,18 +439,14 @@ var App = new function() {
             else {
                 addphotobutton.setAttribute('disabled', '');
             }
-            app.featureInfoPopup.classList.remove('hidden');
-        }
-        else {
-            app.featureInfoPopup.classList.add('hidden');
+            app.featureInfoPopup.show();
         }
     };
     
     this.panZoomHandler = function(status) {
         switch (status) {
             case 'zoom': 
-                app.activeFeature = null;
-                app.featureInfoPopup.classList.add('hidden');
+                app.featureInfoPopup.hide();
                 break;
         }
     };
@@ -425,4 +462,4 @@ var App = new function() {
         };
         app.snackbarContainer.MaterialSnackbar.showSnackbar(data);
     };
-};
+}();
