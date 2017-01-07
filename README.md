@@ -3,7 +3,11 @@ GrowApp cordova/web-client creates time-lapse animations of vegetation
 
 using [material design lite](https://getmdl.io/)
 
-## Prerequisites
+## Overview
+![overview](overview.png)
+
+
+## Pre-requisites
 * git
 * node with npm
 * android studio
@@ -19,14 +23,14 @@ cd growapp-mdl/www
 npm install
 ```
 
-# Prepare Cordova
+## Prepare Cordova
 ```
 cd growapp-mdl
 #install cordova dependencies as defined in config.xml
 cordova prepare
 ```
 
-# Setup device or emulator
+## Setup device or emulator
 **Device**
 
 Connect your device to USB 
