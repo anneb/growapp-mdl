@@ -279,6 +279,8 @@ var App = new function() {
         }
         if (!isMobileDevice) {
             _utils.disableElement('#gapp_button_camera');
+        } else {
+            this.cameraPopupInit();
         }
         // setup handler hooks into OLMap
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
@@ -330,6 +332,25 @@ var App = new function() {
         
         var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
         gappFeatureInfoFullScreenClose.addEventListener('click', app.fullscreenphotopopup.hide);
+    };
+    
+    this.cameraPopupInit = function () {
+        this.cameraPopup = document.querySelector('#gapp_camera_popup');
+        this.cameraPopup.show = function() {
+            document.querySelector('#mainUI').classList.add('hidden');
+            app.cameraPopup.classList.remove('hidden');
+        };
+        this.cameraPopup.hide = function() {
+            document.querySelector('#mainUI').classList.remove('hidden');
+            app.cameraPopup.classList.add('hidden');
+        };
+        var cameraButton = document.querySelector('#gapp_button_camera');
+        cameraButton.addEventListener('click', function() {
+            app.cameraPopup.show();
+        });
+        
+        var cameraClose = document.querySelector('#gapp_camera_close');
+        cameraClose.addEventListener('click', app.cameraPopup.hide);
     };
     
     this.geoLocationErrorHandler = function(message) {

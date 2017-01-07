@@ -13,8 +13,9 @@
     <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
     <link rel="stylesheet" href="./material.min.css">
     <script src="./node_modules/material-design-lite/material.min.js"></script>
-    <!--link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"-->
-    <link rel="stylesheet" href="./node_modules/material-design-icons/iconfont/material-icons.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!--link rel="stylesheet" href="./node_modules/material-design-icons/iconfont/material-icons.css"-->
+    
     
     <link rel="stylesheet" href="./openlayers-3.11.2/ol.css">
     <script src="./openlayers-3.11.2/ol.js"></script>
@@ -116,15 +117,41 @@
         right: 10px;
         top: 10px;
       }
+      #gapp_camera_popup {
+        position: absolute;
+        max-height: 100%;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        background-color: transparent;
+        border: 4px blue solid;
+      }
+      #gapp_camera_takephoto {
+        position: absolute;
+        display: block;
+        bottom: 10px;
+        left: 50%;
+        margin-left: -15px;
+      }
+      #gapp_camera_close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+      }
       .gapp_color_gray_transparent {
         background-color: #757575;
         background-color: rgba(112, 112, 112, 0.3);
       }
     </style>
   </head>
-  <body onload="App.init('https://phenology.geodan.nl', 'gapp_map', (typeof cordova !== 'undefined'))">
+  <body onload="App.init('https://phenology.geodan.nl', 'gapp_map', (typeof cordova == 'undefined'))">
       <!-- Always shows a header, even in smaller screens. -->
-      <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <div id="mainUI" class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
           <header class="mdl-layout__header">
               <div class="mdl-layout__header-row">
                   <!-- Title -->
@@ -155,14 +182,14 @@
               <div class="page-content">
                 <div id="gapp_map"></div>
                 <button id="gapp_button_location" class="mdl-button mdl-js-button mdl-button--fab" disabled>
-                      <i class="material-icons">my_location</i>
+                      <i class="material-icons">&#xE55C;</i>
                 </button>
                 <button id="gapp_button_camera" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
-                      <i class="material-icons">photo_camera</i>
+                      <i class="material-icons">&#xE412;</i>
                 </button>
                 <div id="gapp_featureinfo" class="hidden">
                   <img id="gapp_featureinfo_photo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-                  <button id="gapp_featureinfo_addphoto" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" disabled><i class="material-icons">add_a_photo</i></button>
+                  <button id="gapp_featureinfo_addphoto" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" disabled><i class="material-icons">&#xE439;</i></button>
                   <button id="gapp_featureinfo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
                   <button id="gapp_featureinfo_fullscreen" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">fullscreen</i></button>
                   <div id="gapp_featureinfo_spinner" class="mdl-spinner mdl-js-spinner is-active"></div>
@@ -177,6 +204,14 @@
       <div id="gapp_fullscreenphotopopup" class="hidden">
         <img id="gapp_fullscreenphoto" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
         <button id="gapp_fullscreenphotopopup_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
+      </div>
+      <div id="gapp_camera_popup" class="hidden">
+         <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab">
+           <i class="material-icons">&#xE412;</i>
+         </button>
+         <button id="gapp_camera_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent">
+           <i class="material-icons">close</i>
+         </button>
       </div>
   </body>
 </html>
