@@ -1,0 +1,4 @@
+cordova-plugin-android-permissions
+cordova-plugin-geolocation
+https://github.com/anneb/cordova-plugin-camera-preview.git
+cordova-plugin-statusbar
