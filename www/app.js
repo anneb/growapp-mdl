@@ -267,7 +267,7 @@ var OLMap = new function() {
 var App = new function() {
     // set self (geodan policy: use lowercase class name)
     var app = this;
-        
+
     this.init = function(server, mapId, isMobileDevice) {
         // init message popups at bottom of screen
         this.snackbarContainer = document.querySelector('#gapp-snackbar');
@@ -339,7 +339,7 @@ var App = new function() {
             window.addEventListener('orientationchange', app.cameraPopup.resetCamera);
             if (typeof StatusBar !== 'undefined') {
                 StatusBar.hide();
-            }            
+            }
             this.startCamera();
             document.querySelector('#mainUI').classList.add('hidden');
             app.cameraPopup.classList.remove('hidden');
@@ -382,68 +382,73 @@ var App = new function() {
                 var toBack = true; // camera z-value can either be completely at the back or completey on top
                 CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: "back", tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
                 CameraPreview.setZoom(0);
-                window.plugins.insomnia.keepAwake();                
+                window.plugins.insomnia.keepAwake();
             }
         };
         this.cameraPopup.stopCamera = function() {
             if (app.isMobileDevice) {
                 CameraPreview.stopCamera();
-                window.plugins.insomnia.allowSleepAgain();                
+                window.plugins.insomnia.allowSleepAgain();
             }
         };
         this.cameraPopup.resetCamera = function() {
             /* todo: replace setTimeout by wait for resize event */
+            /* todo: resize: handle case where resetCamera() is called by code */
             app.cameraPopup.stopCamera();
             setTimeout(app.cameraPopup.startCamera, 1000);
         };
-        var cameraButton = document.querySelector('#gapp_button_camera');        
+        var cameraButton = document.querySelector('#gapp_button_camera');
         cameraButton.addEventListener('click', function() {
             app.cameraPopup.show();
         });
-        
+
         /* Preview Photo taken by camera */
         this.cameraPreviewPhotoFrame = document.querySelector('#gapp_camera_photo_preview_frame');
         this.cameraPreviewPhotoFrame.show = function () {
+            document.removeEventListener('backbutton', app.cameraPopup.hide);
+            document.addEventListener('backbutton', app.cameraPreviewPhotoFrame.hide);
             app.cameraPreviewPhotoFrame.classList.remove('hidden');
         };
         this.cameraPreviewPhotoFrame.hide = function () {
-            app.cameraPreviewPhotoFrame.classList.add('hidden');            
+            app.cameraPreviewPhotoFrame.classList.add('hidden');
+            document.removeEventListener('backbutton', app.cameraPreviewPhotoFrame.hide);
+            document.addEventListener('backbutton', app.cameraPopup.hide);
         };
         this.buttonPreviewPhotoClose = document.querySelector('#gapp_camera_photo_close');
         this.buttonPreviewPhotoClose.addEventListener('click', function() {
             app.cameraPreviewPhotoFrame.hide();
             app.cameraPopup.resetCamera();
         });
-                
+
         var buttonTakePhoto = document.querySelector('#gapp_camera_takephoto');
-        buttonTakePhoto.addEventListener('touchstart', function() { 
-            buttonTakePhoto.classList.remove('mdl-color--white'); 
+        buttonTakePhoto.addEventListener('touchstart', function() {
+            buttonTakePhoto.classList.remove('mdl-color--white');
             buttonTakePhoto.classList.add('mdl-button--colored');
         });
-        buttonTakePhoto.addEventListener('touchmove', function() { 
-            buttonTakePhoto.classList.remove('mdl-button--colored'); 
+        buttonTakePhoto.addEventListener('touchmove', function() {
+            buttonTakePhoto.classList.remove('mdl-button--colored');
             buttonTakePhoto.classList.add('mdl-color--white');
         });
-        buttonTakePhoto.addEventListener('touchend', function() { 
+        buttonTakePhoto.addEventListener('touchend', function() {
             if (buttonTakePhoto.classList.contains('mdl-button--colored')) {
-                buttonTakePhoto.classList.remove('mdl-button--colored'); 
+                buttonTakePhoto.classList.remove('mdl-button--colored');
                 buttonTakePhoto.classList.add('mdl-color--white');
                 // fires cordova.plugins.camerapreview.setOnPictureTakenHandler
                 CameraPreview.takePicture();//({maxWidth: 640, maxHeight: 640});
             }
         });
-        
+
         var cameraClose = document.querySelector('#gapp_camera_close');
         cameraClose.addEventListener('click', app.cameraPopup.hide);
     };
-    
-    this.cordovaDeviceReady = function () {        
+
+    this.cordovaDeviceReady = function () {
         CameraPreview.setOnPictureTakenHandler(function(result){
-            //uploadphotodata("data:image/jpeg;base64," + result);            
+            //uploadphotodata("data:image/jpeg;base64," + result);
             var cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_preview_frame img');
             cameraPreviewPhoto.src = "data:image/jpeg;base64," + result;
             App.cameraPreviewPhotoFrame.show();
-        });        
+        });
     };
 
     this.geoLocationErrorHandler = function(message) {
@@ -560,7 +565,7 @@ var App = new function() {
             app.featureInfoPopup.show();
         }
     };
-    
+
     this.panZoomHandler = function(status) {
         switch (status) {
             case 'zoom':
