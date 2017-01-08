@@ -329,12 +329,34 @@ var App = new function() {
 
         var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
         gappFeatureInfoFullScreenClose.addEventListener('click', app.fullscreenphotopopup.hide);
+        
+        var buttonFeatureInfoAddPhoto = document.querySelector('#gapp_featureinfo_addphoto');
+        buttonFeatureInfoAddPhoto.addEventListener('click', function(){
+            var url = app.featureInfoPhoto.url;
+            if (url.substr(-4, 4) == ".gif") {
+                // overlay_pictue: replace animated picture with first picture
+                url = url.substr(0, url.length -4) + ".jpg"
+            }
+            app.cameraPopup.show(url);
+        });
+        
     };
 
     /* camera window */
     this.cameraPopupInit = function () {
         this.cameraPopup = document.querySelector('#gapp_camera_popup');
-        this.cameraPopup.show = function() {
+        this.cameraPopup.show = function(overlayURL) {
+            if (typeof overlayURL == 'undefined') {
+                overlayURL = null;
+            }
+            var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+            if (overlayURL) {
+                var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay_picture');
+                cameraOverlayPicture.src = overlayURL;
+                cameraOverlayPictureFrame.classList.remove('hidden');
+            } else {
+                cameraOverlayPictureFrame.classList.add('hidden');
+            }
             document.addEventListener('backbutton', app.cameraPopup.hide);
             window.addEventListener('orientationchange', app.cameraPopup.resetCamera);
             if (typeof StatusBar !== 'undefined') {
@@ -403,6 +425,7 @@ var App = new function() {
         });
 
         /* Preview Photo taken by camera */
+        /* todo: add toggle to show/hide overlay-picture with preview */
         this.cameraPreviewPhotoFrame = document.querySelector('#gapp_camera_photo_preview_frame');
         this.cameraPreviewPhotoFrame.show = function () {
             document.removeEventListener('backbutton', app.cameraPopup.hide);
@@ -533,13 +556,14 @@ var App = new function() {
 
             var picture_url = this.server + '/uploads/' + feature.get('filename');
             var spinner = document.querySelector('#gapp_featureinfo_spinner');
-            var domPhoto = document.querySelector('#gapp_featureinfo_photo');
-            domPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+            app.featureInfoPhoto = document.querySelector('#gapp_featureinfo_photo');
+            app.featureInfoPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+            app.featureInfoPhoto.url = picture_url;
             spinner.classList.add('is-active');
             var photo = new Image();
             photo.onload = function() {
                 spinner.classList.remove('is-active');
-                domPhoto.src = picture_url; // not: this.src, may show delayed loading picture
+                app.featureInfoPhoto.src = app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
             };
 
             photo.src = picture_url;
