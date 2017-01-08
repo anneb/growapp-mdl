@@ -433,6 +433,7 @@ var App = new function() {
             if (buttonTakePhoto.classList.contains('mdl-button--colored')) {
                 buttonTakePhoto.classList.remove('mdl-button--colored');
                 buttonTakePhoto.classList.add('mdl-color--white');
+                // todo: photo shutter animation
                 // fires cordova.plugins.camerapreview.setOnPictureTakenHandler
                 CameraPreview.takePicture();//({maxWidth: 640, maxHeight: 640});
             }
@@ -471,6 +472,7 @@ var App = new function() {
         }
     };
 
+    // tracking: automatically keep user location in map center on/off
     this.setMapTracking = function(enabled) {
         OLMap.mapTracking = enabled;
         if (enabled) {
@@ -491,11 +493,14 @@ var App = new function() {
                 break;
             case 'dragging':
                 // drag info window along
-                app.featureInfoPopup.style.left = (parseInt(app.featureInfoPopup.style.left, 10) - (prevpixel[0] - pixel[0])) + 'px';
-                app.featureInfoPopup.style.top = (parseInt(app.featureInfoPopup.style.top, 10) - (prevpixel[1] - pixel[1])) + 'px';
+                if (app.activeFeature) {
+                    app.featureInfoPopup.style.left = (parseInt(app.featureInfoPopup.style.left, 10) - (prevpixel[0] - pixel[0])) + 'px';
+                    app.featureInfoPopup.style.top = (parseInt(app.featureInfoPopup.style.top, 10) - (prevpixel[1] - pixel[1])) + 'px';
+                }
                 break;
             case 'dragend':
             case 'moveend':
+                // handle end of kinetic effect after drag
                 if (app.activeFeature) {
                     var geometry = app.activeFeature.getGeometry();
                     var coordinates = geometry.getCoordinates();
