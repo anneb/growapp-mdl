@@ -1,5 +1,5 @@
 "use strict";
-/* 
+/*
 app.js
 assumes openlayers.js and proj4.js are loaded
 
@@ -11,20 +11,20 @@ App: UI and handler hooks into OLMap
 
 */
 
-/* global ol, Image */
+/* global document, ol, Image */
 
 Number.prototype.toRad = function() { // helper
     return this * Math.PI / 180;
 };
 
 var _utils = {
-    hideElement : function (selector) {
+    hideElement: function (selector) {
         var element = document.querySelector(selector);
         if (element) {
             element.classList.add("hidden");
         }
     },
-    showElement : function(selector) {
+    showElement: function(selector) {
         var element = document.querySelector(selector);
         if (element) {
             element.classList.remove("hidden");
@@ -61,7 +61,7 @@ var _utils = {
 
 var OLMap = new function() {
     var olMap = this;
-    
+
     this.init = function(server, mapId, featureFieldName) {
         this.server = server;
         olMap.initMap(server, mapId);
@@ -70,7 +70,7 @@ var OLMap = new function() {
         olMap.initPanZoomHandler();
         olMap.initClickFeatureHandler(featureFieldName);
     };
-    
+
     this.initMap = function (server, mapId) {
         this.server = server;
         this.updatePhotos();
@@ -94,15 +94,15 @@ var OLMap = new function() {
             })
         });
     };/* initMap */
-    
+
     this.geoLocationErrorHandler = function(message) {
         console.warn('unhandled geolocation Error: ' + message);
     };
-    
+
     this.geoLocationChangedHandler = function(coordinates) {
         console.warn('unhandled geolocation Changed handler');
     };
-    
+
     this.initGeoLocation = function ()
     {
         // geolocation
@@ -117,7 +117,7 @@ var OLMap = new function() {
         this.geoLocation.on('change:accuracyGeometry', function() {
             olMap.accuracyFeature.setGeometry(olMap.geoLocation.getAccuracyGeometry());
         });
-    
+
         this.positionFeature = new ol.Feature();
         this.positionFeature.setStyle(new ol.style.Style({
             image: new ol.style.Circle({
@@ -143,7 +143,7 @@ var OLMap = new function() {
                     olMap.isManualMove = true;
                 }, 300);
             }
-            olMap.geoLocationChangedHandler(coordinates); 
+            olMap.geoLocationChangedHandler(coordinates);
         });
         new ol.layer.Vector({
             map: this.olmap,
@@ -151,13 +151,13 @@ var OLMap = new function() {
                     features: [this.accuracyFeature, this.positionFeature]
                  })
         });
-        
+
         // handle geolocation error.
         this.geoLocation.on('error', function(error) {
             olMap.geoLocationErrorHandler(error.message);
         });
     };
-    
+
     this.updatePhotos = function() {
         //adds or reloads photo positions into Photolayer
         if (this.photoLayer) {
@@ -196,14 +196,14 @@ var OLMap = new function() {
             });
         }
     };
-    
+
     this.dragStart = false;
     this.dragPrevPixel = null;
-    
+
     this.dragHandler = function (status, pixel, prevpixel) {
         console.log ("dragging: " + status + ", current: " + JSON.stringify(pixel) + ", prevpoint: " + JSON.stringify(prevpixel));
     };
-    
+
     this.initDragHandler = function() {
       this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental
           if (!olMap.dragStart) {
@@ -224,17 +224,17 @@ var OLMap = new function() {
           }
       });
     };
-    
+
     this.panZoomHandler = function(status) {
       console.log('panzoom: ' + status);
     };
-    
+
     this.initPanZoomHandler = function () {
       this.olmap.getView().on('change:resolution', function(){
           olMap.panZoomHandler('zoom');
       });
     };
-    
+
     /* find first feature at pixel that has featureFieldName */
     this.getFeatureFromPixel = function(pixel, featureFieldName) {
       var resultfeature = null;
@@ -248,11 +248,11 @@ var OLMap = new function() {
       });
       return resultfeature;
     };
-    
+
     this.clickFeatureHandler = function (feature) {
         console.log('feature: ' + feature);
     };
-    
+
     this.initClickFeatureHandler = function(featureFieldName) {
         this.olmap.on('click', function(event){
             if (!event.dragging) {
@@ -266,17 +266,17 @@ var OLMap = new function() {
 var App = new function() {
     // set self (geodan policy: use lowercase class name)
     var app = this;
-    
+
     this.init = function(server, mapId, isMobileDevice) {
         // init message popups at bottom of screen
         this.snackbarContainer = document.querySelector('#gapp-snackbar');
-        
-		// store setup for mobile device or web
-		this.isMobileDevice = isMobileDevice;
-        
+
+        // store setup for mobile device or web
+        this.isMobileDevice = isMobileDevice;
+
         this.featureInfoPopupInit();
-		this.cameraPopupInit();
-        
+        this.cameraPopupInit();
+
         // setup handler hooks into OLMap
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
         OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
@@ -287,9 +287,9 @@ var App = new function() {
         OLMap.init(server, mapId, 'filename');
         this.buttonLocation = document.querySelector("#gapp_button_location");
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
-		
+
     };
-    
+
     this.featureInfoPopupInit = function()
     {
         this.featureInfoPopup = document.querySelector('#gapp_featureinfo');
@@ -297,13 +297,13 @@ var App = new function() {
             app.featureInfoPopup.classList.remove('hidden');
             document.addEventListener('backbutton', app.featureInfoPopup.hide);
         };
-        
+
         this.featureInfoPopup.hide = function() {
             app.featureInfoPopup.classList.add('hidden');
             document.removeEventListener('backbutton', app.featureInfoPopup.hide);
             app.activeFeature = null;
         };
-        
+
         /* todo: zoomable fullscreen photo? http://ignitersworld.com/lab/imageViewer.html */
         this.fullscreenphotopopup = document.querySelector('#gapp_fullscreenphotopopup');
         this.fullscreenphotopopup.show = function() {
@@ -319,80 +319,94 @@ var App = new function() {
             document.addEventListener('backbutton', app.featureInfoPopup.hide);
             app.fullscreenphotopopup.classList.add('hidden');
         };
-        
+
         var gappFeatureInfoClose = document.querySelector("#gapp_featureinfo_close");
         gappFeatureInfoClose.addEventListener('click', app.featureInfoPopup.hide);
-        
+
         var gappFeatureInfoFullScreen = document.querySelector('#gapp_featureinfo_fullscreen');
         gappFeatureInfoFullScreen.addEventListener('click', app.fullscreenphotopopup.show);
-        
+
         var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
         gappFeatureInfoFullScreenClose.addEventListener('click', app.fullscreenphotopopup.hide);
     };
-	
-	/* camera window */
+
+    /* camera window */
     this.cameraPopupInit = function () {
         this.cameraPopup = document.querySelector('#gapp_camera_popup');
         this.cameraPopup.show = function() {
-			document.addEventListener('backbutton', app.cameraPopup.hide);
-			if (typeof StatusBar !== 'undefined') {
-				StatusBar.hide();
-			}            
-			var width = this.offsetWidth;
-			var height = this.offsetHeight;
-			if (width > height) {
-			  // landscape
-			  if (screen.width > screen.height) {
-				width = screen.width;
-				height = screen.height;
-			  } else {
-				width = screen.height;
-				height = screen.width;
-			  }
-			} else {
-			  // portrait
-			  if (screen.width < screen.height) {
-				width = screen.width;
-				height = screen.height;
-			  } else {
-				width = screen.height;
-				height = screen.width;
-			  }
-			}
-			if (app.isMobileDevice) {
-				var tapEnabled = true;
-				var dragEnabled = true;
-				var toBack = true; // camera z-value can either be completely at the back or completey on top
-				CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: "back", tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
-				CameraPreview.setZoom(0);
-			}
+            document.addEventListener('backbutton', app.cameraPopup.hide);
+            window.addEventListener('orientationchange', app.cameraPopup.resetCamera);
+            if (typeof StatusBar !== 'undefined') {
+                StatusBar.hide();
+            }            
+            this.startCamera();
             document.querySelector('#mainUI').classList.add('hidden');
             app.cameraPopup.classList.remove('hidden');
         };
         this.cameraPopup.hide = function() {
-			document.removeEventListener('backbutton', app.cameraPopup.hide);
-			if (app.isMobileDevice) {
-				CameraPreview.stopCamera();
-			}
-			if (typeof StatusBar !== 'undefined') {
-				StatusBar.show();
-			}
+            document.removeEventListener('backbutton', app.cameraPopup.hide);
+            document.removeEventListener('orientationchange', app.cameraPopup.resetCamera);
+            app.cameraPopup.stopCamera();
+            if (typeof StatusBar !== 'undefined') {
+                StatusBar.show();
+            }
             document.querySelector('#mainUI').classList.remove('hidden');
             app.cameraPopup.classList.add('hidden');
+        };
+        this.cameraPopup.startCamera = function() {
+            if (app.isMobileDevice) {
+                var width = app.cameraPopup.offsetWidth;
+                var height = app.cameraPopup.offsetHeight;
+                if (width > height) {
+                    // landscape
+                    if (screen.width > screen.height) {
+                        width = screen.width;
+                        height = screen.height;
+                    } else {
+                        width = screen.height;
+                        height = screen.width;
+                    }
+                } else {
+                    // portrait
+                    if (screen.width < screen.height) {
+                        width = screen.width;
+                        height = screen.height;
+                    } else {
+                        width = screen.height;
+                        height = screen.width;
+                    }
+                }
+                var tapEnabled = true;
+                var dragEnabled = true;
+                var toBack = true; // camera z-value can either be completely at the back or completey on top
+                CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: "back", tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
+                CameraPreview.setZoom(0);
+                window.plugins.insomnia.keepAwake();                
+            }
+        };
+        this.cameraPopup.stopCamera = function() {
+            if (app.isMobileDevice) {
+                CameraPreview.stopCamera();
+                window.plugins.insomnia.allowSleepAgain();                
+            }
+        };
+        this.cameraPopup.resetCamera = function() {
+            app.cameraPopup.stopCamera();
+            setTimeout(app.cameraPopup.startCamera, 1000);
         };
         var cameraButton = document.querySelector('#gapp_button_camera');
         cameraButton.addEventListener('click', function() {
             app.cameraPopup.show();
         });
-        
+
         var cameraClose = document.querySelector('#gapp_camera_close');
-        cameraClose.addEventListener('click', app.cameraPopup.hide);		
+        cameraClose.addEventListener('click', app.cameraPopup.hide);
     };
-    
+
     this.geoLocationErrorHandler = function(message) {
       app.showMessage('location: ' + message);
     };
-    
+
     this.geoLocationFixed = false;
     this.geoLocationChangedHandler = function (coordinates) {
         if (!app.geoLocationFixed && coordinates) {
@@ -400,15 +414,15 @@ var App = new function() {
             app.buttonLocation.removeAttribute('disabled');
             app.buttonLocation.classList.add('mdl-color--white');
             app.buttonLocation.classList.add('mdl-color-text--blue-700');
-			
-			if (app.isMobileDevice) {
-				// enable camera button
-				var cameraButton = document.querySelector('#gapp_button_camera');
-				cameraButton.removeAttribute('disabled');
-			}
+
+            if (app.isMobileDevice) {
+                // enable camera button
+                var cameraButton = document.querySelector('#gapp_button_camera');
+                cameraButton.removeAttribute('disabled');
+            }
         }
     };
-    
+
     this.setMapTracking = function(enabled) {
         OLMap.mapTracking = enabled;
         if (enabled) {
@@ -421,7 +435,7 @@ var App = new function() {
             app.buttonLocation.classList.add("inactive");
         }
     };
-    
+
     this.mapDragHandler = function (status, pixel, prevpixel) {
         switch(status) {
             case 'dragstart':
@@ -445,7 +459,7 @@ var App = new function() {
                 break;
         }
     };
-    
+
     this.clickFeatureHandler = function(feature) {
         app.featureInfoPopup.hide();
         app.activeFeature = feature;
@@ -456,14 +470,14 @@ var App = new function() {
 
             app.featureInfoPopup.style.left = pixel[0] + 'px';
             app.featureInfoPopup.style.top = (pixel[1] - 15) + 'px';
-        
+
             // calculate distance between user and feature
             var userLocation = OLMap.geoLocation.getPosition();
             var distance = 1000; // initialize at 1000 km
             if (userLocation) {
                 distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
             }
-        
+
             var picture_url = this.server + '/uploads/' + feature.get('filename');
             var spinner = document.querySelector('#gapp_featureinfo_spinner');
             var domPhoto = document.querySelector('#gapp_featureinfo_photo');
@@ -474,7 +488,7 @@ var App = new function() {
                 spinner.classList.remove('is-active');
                 domPhoto.src = picture_url; // not: this.src, may show delayed loading picture
             };
-            
+
             photo.src = picture_url;
             var picture_width = feature.get('width');
             var picture_height = feature.get('height');
@@ -492,7 +506,7 @@ var App = new function() {
                 app.featureInfoPopup.style.width = "200px";
                 app.featureInfoPopup.style.height = Math.floor(200 / aspectratio) + "px";
             }
-        
+
             var addphotobutton = document.querySelector('#gapp_featureinfo_addphoto');
             if (distance < 0.08) {
                 addphotobutton.removeAttribute('disabled');
@@ -503,15 +517,15 @@ var App = new function() {
             app.featureInfoPopup.show();
         }
     };
-    
+
     this.panZoomHandler = function(status) {
         switch (status) {
-            case 'zoom': 
+            case 'zoom':
                 app.featureInfoPopup.hide();
                 break;
         }
     };
-    
+
     this.showMessage = function(message, timeout)
     {
         if (typeof timeout == 'undefined') {
