@@ -143,6 +143,41 @@
         right: 10px;
         top: 10px;
       }
+	  #gapp_camera_photo_preview_frame {
+	    position: absolute;
+        max-height: 100%;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+		background-color: black;
+	  }
+	  #gapp_camera_photo_preview_frame img {
+	    max-height: 100%;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+	  }
+	  #gapp_camera_photo_ok {
+		position: absolute;
+		bottom: 20%;
+		left: 25%
+	  }
+	  #gapp_camera_photo_close {
+		position: absolute;
+		bottom: 20%;
+		right: 25%;
+	  }
       .gapp_color_gray_transparent {
         background-color: #757575;
         background-color: rgba(112, 112, 112, 0.3);
@@ -201,22 +236,33 @@
                 </div>
               </div>
           </main>
-          <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
-            <div class="mdl-snackbar__text">hallo</div>
-            <button class="mdl-snackbar__action" type="button"></button>
-          </div>
+          
       </div>
       <div id="gapp_fullscreenphotopopup" class="hidden">
         <img id="gapp_fullscreenphoto" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
         <button id="gapp_fullscreenphotopopup_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
       </div>
       <div id="gapp_camera_popup" class="hidden">
-         <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab">
+         <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab mdl-color--white">
            <i class="material-icons">&#xE412;</i>
          </button>
          <button id="gapp_camera_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent">
            <i class="material-icons">close</i>
          </button>
+		 <div id="gapp_camera_photo_preview_frame" class="hidden">
+			<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+			<button id="gapp_camera_photo_ok" class="mdl-button mdl-js-button mdl-button--fab mdl-color-text--primary-contrast gapp_color_gray_transparent">
+				<i class="material-icons">done</i>
+			</button>
+			<button id="gapp_camera_photo_close" class="mdl-button mdl-js-button mdl-button--fab mdl-color-text--primary-contrast gapp_color_gray_transparent">
+				<i class="material-icons">close</i>
+			</button>
+		 </div>
+      </div>
+	  
+	  <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
+            <div class="mdl-snackbar__text">hallo</div>
+            <button class="mdl-snackbar__action" type="button"></button>
       </div>
 	  <script type="text/javascript" src="./cordova.js"></script>
   </body>
