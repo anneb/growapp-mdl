@@ -149,7 +149,7 @@
       }
     </style>
   </head>
-  <body onload="App.init('https://phenology.geodan.nl', 'gapp_map', (typeof cordova == 'undefined'))">
+  <body onload="App.init('https://phenology.geodan.nl', 'gapp_map', (typeof cordova !== 'undefined'))">
       <!-- Always shows a header, even in smaller screens. -->
       <div id="mainUI" class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
           <header class="mdl-layout__header">
@@ -158,12 +158,9 @@
                   <span class="mdl-layout-title">GrowApp - Photo Locations</span>
                   <!-- Add spacer, to align navigation to the right -->
                   <div class="mdl-layout-spacer"></div>
-                  <!-- Navigation. We hide it in small screens. -->
+                  <!-- Navigation -->
                   <nav class="mdl-navigation">
-                      <a class="mdl-navigation__link" href="">Link</a>
-                      <a class="mdl-navigation__link" href="">Link</a>
-                      <a class="mdl-navigation__link" href="">Link</a>
-                      <a class="mdl-navigation__link" href="">Link</a>
+                      <a class="mdl-navigation__link" href="">Link</a>                      
                   </nav>
               </div>
           </header>
@@ -172,10 +169,18 @@
               <hr>
               <span class="mdl-layout-title">Title</span>
               <nav class="mdl-navigation">
-                  <a class="mdl-navigation__link" href="">Link</a>
-                  <a class="mdl-navigation__link" href="">Link</a>
-                  <a class="mdl-navigation__link" href="">Link</a>
-                  <a class="mdl-navigation__link" href="">Link</a>
+                  <a class="mdl-navigation__link" href="">Account</a>
+				  <hr>
+                  <a class="mdl-navigation__link" href="">Manage photos</a>
+				  <hr>				  
+                  <a class="mdl-navigation__link" href=""></a>
+                  <a class="mdl-navigation__link" href="">Start of season</a>
+				  <a class="mdl-navigation__link" href="">Vegetation trend</a>
+				  <a class="mdl-navigation__link" href="">Yesterday's day temperature</a>
+				  <hr>
+				  <a class="mdl-navigation__link" href="">Language</a>
+				  <a class="mdl-navigation__link" href="">Help</a>
+				  <a class="mdl-navigation__link" href="">About GrowApp</a>				  
               </nav>
           </div>
           <main class="mdl-layout__content">
@@ -184,7 +189,7 @@
                 <button id="gapp_button_location" class="mdl-button mdl-js-button mdl-button--fab" disabled>
                       <i class="material-icons">&#xE55C;</i>
                 </button>
-                <button id="gapp_button_camera" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                <button id="gapp_button_camera" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" disabled>
                       <i class="material-icons">&#xE412;</i>
                 </button>
                 <div id="gapp_featureinfo" class="hidden">

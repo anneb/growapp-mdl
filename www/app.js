@@ -271,17 +271,12 @@ var App = new function() {
         // init message popups at bottom of screen
         this.snackbarContainer = document.querySelector('#gapp-snackbar');
         
-        this.featureInfoPopupInit();
+		// store setup for mobile device or web
+		this.isMobileDevice = isMobileDevice;
         
-        // select setup for mobile device or web
-        if (typeof isMobileDevice == 'undefined') {
-            isMobileDevice = true; // default
-        }
-        if (!isMobileDevice) {
-            _utils.disableElement('#gapp_button_camera');
-        } else {
-            this.cameraPopupInit();
-        }
+        this.featureInfoPopupInit();
+		this.cameraPopupInit();
+        
         // setup handler hooks into OLMap
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
         OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
@@ -292,6 +287,7 @@ var App = new function() {
         OLMap.init(server, mapId, 'filename');
         this.buttonLocation = document.querySelector("#gapp_button_location");
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
+		
     };
     
     this.featureInfoPopupInit = function()
@@ -333,14 +329,54 @@ var App = new function() {
         var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
         gappFeatureInfoFullScreenClose.addEventListener('click', app.fullscreenphotopopup.hide);
     };
-    
+	
+	/* camera window */
     this.cameraPopupInit = function () {
         this.cameraPopup = document.querySelector('#gapp_camera_popup');
         this.cameraPopup.show = function() {
+			document.addEventListener('backbutton', app.cameraPopup.hide);
+			if (typeof StatusBar !== 'undefined') {
+				StatusBar.hide();
+			}            
+			var width = this.offsetWidth;
+			var height = this.offsetHeight;
+			if (width > height) {
+			  // landscape
+			  if (screen.width > screen.height) {
+				width = screen.width;
+				height = screen.height;
+			  } else {
+				width = screen.height;
+				height = screen.width;
+			  }
+			} else {
+			  // portrait
+			  if (screen.width < screen.height) {
+				width = screen.width;
+				height = screen.height;
+			  } else {
+				width = screen.height;
+				height = screen.width;
+			  }
+			}
+			if (app.isMobileDevice) {
+				var tapEnabled = true;
+				var dragEnabled = true;
+				var toBack = true; // camera z-value can either be completely at the back or completey on top
+				CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: "back", tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
+				CameraPreview.setZoom(0);
+			}
             document.querySelector('#mainUI').classList.add('hidden');
             app.cameraPopup.classList.remove('hidden');
         };
         this.cameraPopup.hide = function() {
+			document.removeEventListener('backbutton', app.cameraPopup.hide);
+			if (app.isMobileDevice) {
+				CameraPreview.stopCamera();
+			}
+			if (typeof StatusBar !== 'undefined') {
+				StatusBar.show();
+			}
             document.querySelector('#mainUI').classList.remove('hidden');
             app.cameraPopup.classList.add('hidden');
         };
@@ -350,13 +386,11 @@ var App = new function() {
         });
         
         var cameraClose = document.querySelector('#gapp_camera_close');
-        cameraClose.addEventListener('click', app.cameraPopup.hide);
+        cameraClose.addEventListener('click', app.cameraPopup.hide);		
     };
     
     this.geoLocationErrorHandler = function(message) {
       app.showMessage('location: ' + message);
-      // app.buttonLocation.classList.remove('mdl-color--white');
-      // _utils.disableElement("#gapp_button_location");
     };
     
     this.geoLocationFixed = false;
@@ -366,6 +400,12 @@ var App = new function() {
             app.buttonLocation.removeAttribute('disabled');
             app.buttonLocation.classList.add('mdl-color--white');
             app.buttonLocation.classList.add('mdl-color-text--blue-700');
+			
+			if (app.isMobileDevice) {
+				// enable camera button
+				var cameraButton = document.querySelector('#gapp_button_camera');
+				cameraButton.removeAttribute('disabled');
+			}
         }
     };
     
