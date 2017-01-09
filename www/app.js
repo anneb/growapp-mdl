@@ -59,25 +59,99 @@ var _utils = {
     }
 };
 
+// object for communicating with remote photoserver
 var PhotoServer = new function() {
   var photoServer = this;
-}
+  
+  this.init = function(serverURL)  {
+      this.server = serverURL;
+  };
+    
+  // reset cache time
+  this.resetCacheTime = function()
+  {
+      window.localStorage.cacheTime = new Date.now();
+  }
+  
+  // get cache time, updated to now if older then 10 minutes
+  this.getCacheTime = function() {
+    var now = Date.now();
+    var cacheTime;
+    if (window.localStorage.cacheTime) {
+        cacheTime = window.localStorage.cacheTime;
+        if (now - cacheTime > 10 * 60 * 1000) {
+            cacheTime = now;
+            window.localStorage.cacheTime = cacheTime;
+        }
+    } else {
+        cacheTime = now;
+        window.localStorage.cacheTime = cacheTime;
+    }    
+    return cacheTime;
+  };
+  
+  this.photoLayer = null;
+  this.updatePhotos = function() {
+    //adds or reloads photo positions into Photolayer
+    if (photoServer.photoLayer) {
+        // update source
+        photoServer.photoLayer.setSource(
+            new ol.source.Vector({
+                projection: 'EPSG:4326',
+                url: photoServer.server + '/photoserver/getphotos?' + photoServer.getCacheTime(), // File created in node
+                format: new ol.format.GeoJSON()
+            })
+        );
+    } else {
+        photoServer.photoLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                projection: 'EPSG:4326',
+                url: photoServer.server + '/photoserver/getphotos?' + photoServer.getCacheTime(), // File created in node
+                format: new ol.format.GeoJSON()
+            }),
+            style: new ol.style.Style({
+                image: new ol.style.RegularShape({
+                        radius: 12,
+                        points: 4,
+                        angle: Math.PI / 4,
+                        fill: new ol.style.Fill({
+                            color: 'red'
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: "black",
+                            width: 1
+                        })
+                    })
+                    //image: new ol.style.Circle({ radius: 4, fill: new ol.style.Fill({color: 'red'}), stroke: new ol.style.Stroke({color: "black", width: 1})})
+
+            })
+        });
+    }
+    return photoServer.photoLayer;
+  };
+  // return url to large version of photo
+  this.bigPhotoUrl = function(photoid) {
+    if (if (photoid.substr(-4, 4) == ".gif") {
+        /* todo: add cache update to url for gif, sequence number? */
+        return photoServer.server + '/uploads/' + photoid;
+    } 
+    return photoServer.server + '/uploads/' + photoid;
+  }
+};
 
 var OLMap = new function() {
     var olMap = this;
 
-    this.init = function(server, mapId, featureFieldName) {
-        this.server = server;
-        olMap.initMap(server, mapId);
+    this.init = function(mapId, featureFieldName) {        
+        olMap.initMap(mapId);
         olMap.initGeoLocation();
         olMap.initDragHandler();
         olMap.initPanZoomHandler();
         olMap.initClickFeatureHandler(featureFieldName);
     };
 
-    this.initMap = function (server, mapId) {
-        this.server = server;
-        this.updatePhotos();
+    this.initMap = function (mapId) {        
+        this.photoLayer = PhotoServer.updatePhotos();
         this.openStreetMapLayer = new ol.layer.Tile({
             source: new ol.source.OSM({
                 url: "https://saturnus.geodan.nl/mapproxy/osm/tiles/osmgrayscale_EPSG900913/{z}/{x}/{y}.png?origin=nw"
@@ -162,45 +236,6 @@ var OLMap = new function() {
         });
     };
 
-    this.updatePhotos = function() {
-        //adds or reloads photo positions into Photolayer
-        if (this.photoLayer) {
-            // update source
-            this.photoLayer.setSource(
-                new ol.source.Vector({
-                    projection: 'EPSG:4326',
-                    url: this.server + '/photoserver/getphotos?' + new Date().getTime(), // File created in node
-                    format: new ol.format.GeoJSON()
-                })
-            );
-        }
-        else {
-            this.photoLayer = new ol.layer.Vector({
-                source: new ol.source.Vector({
-                    projection: 'EPSG:4326',
-                    url: this.server + '/photoserver/getphotos?0', // File created in node
-                    format: new ol.format.GeoJSON()
-                }),
-                style: new ol.style.Style({
-                    image: new ol.style.RegularShape({
-                            radius: 12,
-                            points: 4,
-                            angle: Math.PI / 4,
-                            fill: new ol.style.Fill({
-                                color: 'red'
-                            }),
-                            stroke: new ol.style.Stroke({
-                                color: "black",
-                                width: 1
-                            })
-                        })
-                        //image: new ol.style.Circle({ radius: 4, fill: new ol.style.Fill({color: 'red'}), stroke: new ol.style.Stroke({color: "black", width: 1})})
-
-                })
-            });
-        }
-    };
-
     this.dragStart = false;
     this.dragPrevPixel = null;
 
@@ -266,7 +301,6 @@ var OLMap = new function() {
     };
 };
 
-
 // main app object
 var App = new function() {
     // set self (geodan policy: use lowercase class name)
@@ -281,6 +315,9 @@ var App = new function() {
 
         this.featureInfoPopupInit();
         this.cameraPopupInit();
+        
+        // initialize photoServer object
+        PhotoServer.init(server);
 
         // setup handler hooks into OLMap
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
@@ -289,7 +326,7 @@ var App = new function() {
         OLMap.clickFeatureHandler = this.clickFeatureHandler;
         OLMap.panZoomHandler = this.panZoomHandler;
         // intialise OLMap
-        OLMap.init(server, mapId, 'filename');
+        OLMap.init(mapId, 'filename');
         this.buttonLocation = document.querySelector("#gapp_button_location");
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
 
@@ -563,8 +600,8 @@ var App = new function() {
             if (userLocation) {
                 distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
             }
-
-            var picture_url = this.server + '/uploads/' + feature.get('filename');
+            
+            var picture_url = PhotoServer.bigPhotoUrl(feature.get('filename'));
             var spinner = document.querySelector('#gapp_featureinfo_spinner');
             app.featureInfoPhoto = document.querySelector('#gapp_featureinfo_photo');
             app.featureInfoPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
