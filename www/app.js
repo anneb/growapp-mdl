@@ -7,6 +7,7 @@ Main objects in this module:
 
 _utils: general utility functions
 OLMap: openlayers, geolocation
+PhotoServer: communication with remote geographic photo server
 App: UI and handler hooks into OLMap
 
 */
@@ -58,6 +59,9 @@ var _utils = {
     }
 };
 
+var PhotoServer = new function() {
+  var photoServer = this;
+}
 
 var OLMap = new function() {
     var olMap = this;
@@ -335,7 +339,7 @@ var App = new function() {
 
         var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
         gappFeatureInfoFullScreenClose.addEventListener('click', app.fullscreenphotopopup.hide);
-        
+
         var buttonFeatureInfoAddPhoto = document.querySelector('#gapp_featureinfo_addphoto');
         buttonFeatureInfoAddPhoto.addEventListener('click', function(){
             var url = app.featureInfoPhoto.url;
@@ -345,7 +349,7 @@ var App = new function() {
             }
             app.cameraPopup.show(url);
         });
-        
+
     };
 
     /* camera window */
