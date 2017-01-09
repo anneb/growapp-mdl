@@ -308,6 +308,9 @@ var App = new function() {
         /* todo: zoomable fullscreen photo? http://ignitersworld.com/lab/imageViewer.html */
         this.fullscreenphotopopup = document.querySelector('#gapp_fullscreenphotopopup');
         this.fullscreenphotopopup.show = function() {
+            if (typeof StatusBar !== 'undefined') {
+                StatusBar.hide();
+            }
             app.fullscreenphoto = document.querySelector('#gapp_fullscreenphoto');
             var featureinfophoto = document.querySelector('#gapp_featureinfo_photo');
             app.fullscreenphoto.src = featureinfophoto.src;
@@ -316,6 +319,9 @@ var App = new function() {
             app.fullscreenphotopopup.classList.remove('hidden');
         };
         this.fullscreenphotopopup.hide = function() {
+            if (typeof StatusBar !== 'undefined') {
+                StatusBar.show();
+            }
             document.removeEventListener('backbutton', app.fullscreenphotopopup.hide);
             document.addEventListener('backbutton', app.featureInfoPopup.hide);
             app.fullscreenphotopopup.classList.add('hidden');
