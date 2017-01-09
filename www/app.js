@@ -62,17 +62,17 @@ var _utils = {
 // object for communicating with remote photoserver
 var PhotoServer = new function() {
   var photoServer = this;
-  
+
   this.init = function(serverURL)  {
       this.server = serverURL;
   };
-    
+
   // reset cache time
   this.resetCacheTime = function()
   {
       window.localStorage.cacheTime = new Date.now();
   }
-  
+
   // get cache time, updated to now if older then 10 minutes
   this.getCacheTime = function() {
     var now = Date.now();
@@ -86,10 +86,10 @@ var PhotoServer = new function() {
     } else {
         cacheTime = now;
         window.localStorage.cacheTime = cacheTime;
-    }    
+    }
     return cacheTime;
   };
-  
+
   this.photoLayer = null;
   this.updatePhotos = function() {
     //adds or reloads photo positions into Photolayer
@@ -129,20 +129,87 @@ var PhotoServer = new function() {
     }
     return photoServer.photoLayer;
   };
+
   // return url to large version of photo
   this.bigPhotoUrl = function(photoid) {
-    if (if (photoid.substr(-4, 4) == ".gif") {
+    if (photoid.substr(-4, 4) == ".gif") {
         /* todo: add cache update to url for gif, sequence number? */
         return photoServer.server + '/uploads/' + photoid;
-    } 
+    }
     return photoServer.server + '/uploads/' + photoid;
   }
-};
+
+  // ensure this device is registered with server
+  this.ensureDeviceRegistration = function(done)
+  {
+    if (window.localStorage) {
+        var email = localStorage.email;
+        var hash = localStorage.hash;
+        var deviceid = localStorage.deviceid;
+        var devicehash = localStorage.devicehash;
+        if ((!deviceid) || (deviceid=="undefined") || (!devicehash) || (devicehash=="undefined") ) {
+            var xhr = new XMLHttpRequest();
+            var formData = "username=" + email +  "&hash=" + hash;
+            xhr.open("POST", photoServer.server+"/photoserver/createdevice");
+            xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+            // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
+            xhr.onreadystatechange = function (event) {
+               if (xhr.readyState === 4) {
+                   if (xhr.status === 200) {
+                     var result = JSON.parse(xhr.responseText);
+                     window.localStorage.deviceid = result.deviceid;
+                     window.localStorage.devicehash = result.devicehash;
+                     if (done) {
+                        done(true);
+                     }
+                   } else {
+                     if (done) {
+                       done(false);
+                     }
+                     console.log ("Error registering device: " + xhr.statusText);
+                   }
+               }
+            };
+            xhr.send(formData);
+        } else {
+            // device already registered
+            if (done) {
+                done(true);
+            }
+        }
+    } else {
+        // cannot register without localStorage
+        if (done) {
+            done(false);
+        }
+    }
+  };
+
+
+  // upload picture contents (photodata) to photoserver
+  this.uploadPhotoData = function(imagedata, rootid, myLocation, accuracy, callback) {
+      var xhr = new XMLHttpRequest();
+      var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + "&username=" + localStorage.email +  "&hash=" + localStorage.hash + "&rootid=" + rootid + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
+      xhr.open("POST", photoServer.server + "/photoserver/sendphoto");
+      xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+      xhr.onreadystatechange = function (event) {
+         if (xhr.readyState === 4) {
+             if (xhr.status === 200) {
+               callback (null, xhr.responseText);
+             } else {
+                callback("Error", xhr.statusText);
+             }
+         }
+      };
+      xhr.send(formData);
+  };
+
+}; // PhotoServer
 
 var OLMap = new function() {
     var olMap = this;
 
-    this.init = function(mapId, featureFieldName) {        
+    this.init = function(mapId, featureFieldName) {
         olMap.initMap(mapId);
         olMap.initGeoLocation();
         olMap.initDragHandler();
@@ -150,7 +217,7 @@ var OLMap = new function() {
         olMap.initClickFeatureHandler(featureFieldName);
     };
 
-    this.initMap = function (mapId) {        
+    this.initMap = function (mapId) {
         this.photoLayer = PhotoServer.updatePhotos();
         this.openStreetMapLayer = new ol.layer.Tile({
             source: new ol.source.OSM({
@@ -315,7 +382,7 @@ var App = new function() {
 
         this.featureInfoPopupInit();
         this.cameraPopupInit();
-        
+
         // initialize photoServer object
         PhotoServer.init(server);
 
@@ -379,14 +446,20 @@ var App = new function() {
 
         var buttonFeatureInfoAddPhoto = document.querySelector('#gapp_featureinfo_addphoto');
         buttonFeatureInfoAddPhoto.addEventListener('click', function(){
-            var url = app.featureInfoPhoto.url;
-            if (url.substr(-4, 4) == ".gif") {
-                // overlay_pictue: replace animated picture with first picture
-                url = url.substr(0, url.length -4) + ".jpg"
-            }
-            app.cameraPopup.show(url);
+            PhotoServer.ensureDeviceRegistration(function(result) {
+                if (result) {
+                    var url = app.featureInfoPhoto.url;
+                    if (url.substr(-4, 4) == ".gif") {
+                    // overlay_pictue: replace animated picture with first picture
+                        url = url.substr(0, url.length -4) + ".jpg"
+                    }
+                    app.cameraPopup.show(url);
+                } else {
+                    // device could not be registered, offline? no localStorage?
+                    app.showMessage("device registration failed, try again later");
+                }
+            });
         });
-
     };
 
     /* camera window */
@@ -468,7 +541,14 @@ var App = new function() {
         };
         var cameraButton = document.querySelector('#gapp_button_camera');
         cameraButton.addEventListener('click', function() {
-            app.cameraPopup.show();
+            PhotoServer.ensureDeviceRegistration(function(result) {
+                if (result) {
+                    app.cameraPopup.show();
+                } else {
+                    // device could not be registered, offline? no localStorage?
+                    app.showMessage("device registration failed, try again later");
+                }
+            });
         });
 
         /* Preview Photo taken by camera */
@@ -516,9 +596,11 @@ var App = new function() {
     this.cordovaDeviceReady = function () {
         CameraPreview.setOnPictureTakenHandler(function(result){
             //uploadphotodata("data:image/jpeg;base64," + result);
-            var cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_preview_frame img');
-            cameraPreviewPhoto.src = "data:image/jpeg;base64," + result;
-            App.cameraPreviewPhotoFrame.show();
+            app.cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_preview_frame img');
+            app.cameraPreviewPhoto.rawdata = "data:image/jpeg;base64," + result;
+            result = null; // free memory
+            app.cameraPreviewPhoto.src = app.cameraPreviewPhoto.rawdata;
+            app.cameraPreviewPhotoFrame.show();
         });
     };
 
@@ -600,7 +682,7 @@ var App = new function() {
             if (userLocation) {
                 distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
             }
-            
+
             var picture_url = PhotoServer.bigPhotoUrl(feature.get('filename'));
             var spinner = document.querySelector('#gapp_featureinfo_spinner');
             app.featureInfoPhoto = document.querySelector('#gapp_featureinfo_photo');
