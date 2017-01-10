@@ -12,7 +12,7 @@ App: UI and handler hooks into OLMap
 
 */
 
-/* global document, ol, Image */
+/* global document, ol, Image, CameraPreview, StatusBar, localStorage */
 
 Number.prototype.toRad = function() { // helper
     return this * Math.PI / 180;
@@ -71,7 +71,7 @@ var PhotoServer = new function() {
   this.resetCacheTime = function()
   {
       window.localStorage.cacheTime = new Date.now();
-  }
+  };
 
   // get cache time, updated to now if older then 10 minutes
   this.getCacheTime = function() {
@@ -131,13 +131,13 @@ var PhotoServer = new function() {
   };
 
   // return url to large version of photo
-  this.bigPhotoUrl = function(photoid) {
-    if (photoid.substr(-4, 4) == ".gif") {
+  this.bigPhotoUrl = function(photofile) {
+    if (photofile.substr(-4, 4) == ".gif") {
         /* todo: add cache update to url for gif, sequence number? */
-        return photoServer.server + '/uploads/' + photoid;
+        return photoServer.server + '/uploads/' + photofile;
     }
-    return photoServer.server + '/uploads/' + photoid;
-  }
+    return photoServer.server + '/uploads/' + photofile;
+  };
 
   // ensure this device is registered with server
   this.ensureDeviceRegistration = function(done)
@@ -187,7 +187,7 @@ var PhotoServer = new function() {
 
 
   // upload picture contents (photodata) to photoserver
-  this.uploadPhotoData = function(imagedata, rootid, myLocation, accuracy, callback) {
+  this.uploadPhotoData = function(imagedata, rootid, location, accuracy, callback) {
       var xhr = new XMLHttpRequest();
       var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + "&username=" + localStorage.email +  "&hash=" + localStorage.hash + "&rootid=" + rootid + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
       xhr.open("POST", photoServer.server + "/photoserver/sendphoto");
@@ -449,11 +449,12 @@ var App = new function() {
             PhotoServer.ensureDeviceRegistration(function(result) {
                 if (result) {
                     var url = app.featureInfoPhoto.url;
+                    var photoid = app.featureInfoPhoto.photoid;
                     if (url.substr(-4, 4) == ".gif") {
                     // overlay_pictue: replace animated picture with first picture
-                        url = url.substr(0, url.length -4) + ".jpg"
+                        url = url.substr(0, url.length -4) + ".jpg";
                     }
-                    app.cameraPopup.show(url);
+                    app.cameraPopup.show(url, photoid);
                 } else {
                     // device could not be registered, offline? no localStorage?
                     app.showMessage("device registration failed, try again later");
@@ -465,10 +466,13 @@ var App = new function() {
     /* camera window */
     this.cameraPopupInit = function () {
         this.cameraPopup = document.querySelector('#gapp_camera_popup');
-        this.cameraPopup.show = function(overlayURL) {
+        this.cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_preview_frame img');
+        this.cameraPopup.show = function(overlayURL, photoid) {
             if (typeof overlayURL == 'undefined') {
                 overlayURL = null;
+                photoid = 0;
             }
+            app.cameraPreviewPhoto.photoid = photoid;
             var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
             if (overlayURL) {
                 var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay_picture');
@@ -570,6 +574,21 @@ var App = new function() {
             app.cameraPopup.resetCamera();
         });
 
+        this.buttonPreviewPhotoOk = document.querySelector('#gapp_camera_photo_ok');
+        this.buttonPreviewPhotoOk.addEventListener('click', function() {
+            app.showMessage('uploading photo...');
+            var p = app.cameraPreviewPhoto;
+            PhotoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, function(err, message) {
+                if (err) {
+                    app.showMessage('Upload failed: ' + message);
+                } else {
+                    // success!
+                    app.cameraPreviewPhotoFrame.hide();
+                    app.cameraPopup.hide();
+                }
+            });
+        });
+
         var buttonTakePhoto = document.querySelector('#gapp_camera_takephoto');
         buttonTakePhoto.addEventListener('touchstart', function() {
             buttonTakePhoto.classList.remove('mdl-color--white');
@@ -595,12 +614,19 @@ var App = new function() {
 
     this.cordovaDeviceReady = function () {
         CameraPreview.setOnPictureTakenHandler(function(result){
-            //uploadphotodata("data:image/jpeg;base64," + result);
-            app.cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_preview_frame img');
-            app.cameraPreviewPhoto.rawdata = "data:image/jpeg;base64," + result;
-            result = null; // free memory
-            app.cameraPreviewPhoto.src = app.cameraPreviewPhoto.rawdata;
-            app.cameraPreviewPhotoFrame.show();
+            var myLocation = OLMap.geoLocation.getPosition();
+            if (myLocation) {
+                app.cameraPreviewPhoto.rawdata = result;
+                result = null; // free memory
+                app.cameraPreviewPhoto.src = "data:image/jpeg;base64," + app.cameraPreviewPhoto.rawdata;
+                myLocation = ol.proj.transform(myLocation, 'EPSG:3857', 'EPSG:4326');
+                var accuracy = OLMap.geoLocation.getAccuracy();
+                app.cameraPreviewPhoto.myLocation = myLocation;
+                app.cameraPreviewPhoto.accuracy = accuracy;
+                app.cameraPreviewPhotoFrame.show();
+            } else {
+                app.showMessage("Required photo location unknown");
+            }
         });
     };
 
@@ -688,6 +714,7 @@ var App = new function() {
             app.featureInfoPhoto = document.querySelector('#gapp_featureinfo_photo');
             app.featureInfoPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
             app.featureInfoPhoto.url = picture_url;
+            app.featureInfoPhoto.photoid = feature.get('id');
             spinner.classList.add('is-active');
             var photo = new Image();
             photo.onload = function() {
