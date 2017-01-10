@@ -606,7 +606,12 @@ var App = new function() {
             case '#layertrend':
             case '#layertemperature':
                 this.toggleLayer(window.location.hash);
+                this.hideDrawer();
                 window.location.hash='';
+                break;
+            case '#account':
+                window.location.hash='';
+                window.location= 'account.html';
                 break;
         }
     };
@@ -794,7 +799,9 @@ var App = new function() {
                 if (err) {
                     app.showMessage('Upload failed: ' + message);
                 } else {
-                    // success!
+                    // success! Free memory and close dialog
+                    p.rawdata = null;
+                    cameraPreviewPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
                     app.cameraPreviewPhotoFrame.hide();
                     app.cameraPopup.hide();
                 }
