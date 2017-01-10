@@ -447,14 +447,14 @@ var App = new function() {
         this.buttonLocation = document.querySelector("#gapp_button_location");
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
 
-        window.addEventListener('hashchange', this.navigate);
+        window.addEventListener('hashchange', this.navigate.bind(this), false);
         this.showStoredMessage();
     };
 
     this.showStoredMessage = function () {
         if (window.localStorage.storedMessage && window.localStorage.storedMessage != '') {
             this.showMessage(window.localStorage.storedMessage);
-            window.localStorage.storedMessage = null;
+            localStorage.removeItem('storedMessage');
         }
     };
 
@@ -463,6 +463,31 @@ var App = new function() {
         if (drawer.classList.contains('is-visible')) {
             var layout = document.querySelector('.mdl-layout');
             layout.MaterialLayout.toggleDrawer();
+        }
+    };
+
+    this.toggleLayer = function(layerHash)
+    {
+        var layerElements = [];
+        var layerHashes = ['#layerseason', '#layertrend', '#layertemperature'];
+        var layerIds = ['#gapp_layer_season', '#gapp_layer_trend', '#gapp_layer_temperature']
+        var clickedLayer = 0;
+        var activeLayer = -1;
+        for (var i = 0; i < layerHashes.length; i++) {
+            layerElements.push(document.querySelector(layerIds[i]));
+            if (layerElements[i].classList.contains('mdl-navigation__link--current')) {
+                activeLayer = i;
+            }
+            if (layerHashes[i] == layerHash) {
+                clickedLayer = i;
+            }
+        }
+        if (activeLayer > -1) {
+            layerElements[activeLayer].classList.remove('mdl-navigation__link--current');
+        }
+
+        if (activeLayer != clickedLayer) {
+            layerElements[clickedLayer].classList.add('mdl-navigation__link--current');
         }
     };
 
@@ -479,6 +504,12 @@ var App = new function() {
                     }
                 }
                 window.location = "gallery.html";
+                break;
+            case '#layerseason':
+            case '#layertrend':
+            case '#layertemperature':
+                this.toggleLayer(window.location.hash);
+                window.location.hash='';
                 break;
         }
     };
