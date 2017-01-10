@@ -219,6 +219,75 @@
         background-color: #757575;
         background-color: rgba(112, 112, 112, 0.3);
       }
+      #gapp_legendhorizontal {
+          position: fixed;
+          /* width: 365px;
+          height: 34px; */
+          margin-left: -180px;
+          left: 50%;
+          bottom: 10px;
+          border: 1px white solid;
+      }
+      #gapp_legendvertical {
+          position: fixed;
+          /*
+          width: 35px;
+          height: 401px; */
+          left: 10px;
+          top: 50%;
+          margin-top: -201px;
+          border: 1px white solid;
+      }
+      .legendleft {
+          position: absolute;
+          left: 1px;
+          line-height: 34px;
+      }
+      .legendright {
+          position: absolute;
+          right: 1px;
+          line-height: 34px
+      }
+      .legendtop {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 34px;
+          text-align: center;
+      }
+      .legendtoprotated {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 34px;
+          width: auto;
+          text-align: auto;
+          line-height: 34px;
+          transform: rotate(90deg) translate(2px,-34px);
+          transform-origin: 0 0;
+      }
+      .legendbottom {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 34px;
+          text-align: center;
+      }
+      .legendbottomrotated {
+          position: absolute;
+          bottom: 0px;
+          left: auto;
+          width: auto;
+          right: 0px;
+          height: 34px;
+          line-height: 34px;
+          text-align: right;
+          transform: rotate(90deg) translate(-2px, 34px);
+          transform-origin: 100% 34px;
+      }
+      .legendwhite {
+          color: white;
+      }
     </style>
   </head>
   <body onload="App.init('https://phenology.geodan.nl', 'gapp_map', (typeof cordova !== 'undefined'))">
@@ -263,6 +332,14 @@
                   <button id="gapp_featureinfo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
                   <button id="gapp_featureinfo_fullscreen" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">fullscreen</i></button>
                   <div id="gapp_featureinfo_spinner" class="mdl-spinner mdl-js-spinner is-active"></div>
+                </div>
+                <div id="gapp_legendvertical" class="hidden">
+                  <span class="legendtop legendmin legendwhite"></span><span class="legendbottom legendmax legendwhite"></span>
+                  <img src="layertemperaturev.png" id="legendimagev" width="35" height="401">
+                </div>
+                <div id="gapp_legendhorizontal" class="hidden">
+                  <span class="legendleft legendmin legendwhite"></span><span class="legendright legendmax legendwhite"></span>
+                  <img src="layertemperatureh.png" id="legendimageh" width="365" height="34">
                 </div>
               </div>
           </main>

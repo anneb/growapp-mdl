@@ -466,6 +466,100 @@ var App = new function() {
         }
     };
 
+    /* remove any overlay layers and optionally add named layer */
+    this.updateLayers = function(layername) {
+        var legendvertical = document.querySelector("#gapp_legendvertical");
+        var legendhorizontal = document.querySelector("#gapp_legendhorizontal");
+        var legendmin = document.querySelectorAll(".legendmin");
+        var legendmax = document.querySelectorAll(".legendmax");
+        legendvertical.classList.add("hidden");
+        legendhorizontal.classList.add("hidden");
+        [].forEach.call(legendmin, function (element) {
+            element.innerHTML = "";
+        });
+        [].forEach.call(legendmax, function (element) {
+            element.innerHTML = "";
+        });
+        var layers = OLMap.olmap.getLayers();
+        if (layers.getLength() > 2) {
+            layers.removeAt(1);
+        }
+        var orientation = "h";
+        if (window.innerWidth < window.innerHeight) {
+            orientation = "v";
+        }
+
+        // prepare and show legend
+        if (layername != "") {
+            var image = document.querySelector("#legendimagev");
+            image.src = layername.substring(1) + "v.png";
+            image = document.querySelector("#legendimageh")
+            image.src = layername.substring(1) + "h.png";
+            if (orientation == 'v') {
+                var legendtop = document.querySelector(".legendtop");
+                var legendbottom = document.querySelector(".legendbottom");
+                if (layername == "#layerseason") {
+                    legendtop.classList.add("legendtoprotated");
+                    legendbottom.classList.add("legendbottomrotated");
+                } else {
+                    legendtop.classList.remove("legendtoprotated");
+                    legendbottom.classList.remove("legendbottomrotated");
+                }
+                legendvertical.classList.remove("hidden");
+            } else {
+                legendhorizontal.classList.remove("hidden");
+            }
+            if (layername == '#layertrend') {
+                [].forEach.call(legendmin, function (element) {
+                    element.innerHTML = "-0.3"
+                });
+                [].forEach.call(legendmax, function (element) {
+                    element.innerHTML = "+0.3"
+                });
+            } else if (layername == '#layerseason') {
+                [].forEach.call(legendmin, function (element) {
+                    element.innerHTML = "January"
+                });
+                [].forEach.call(legendmax, function (element) {
+                    element.innerHTML = "December"
+                });
+            }
+        }
+
+        var mapLayerName = {};
+        mapLayerName['#layerseason'] = 'startofseason';
+        mapLayerName['#layertrend'] = 'vegetationtrend';
+        mapLayerName['#layertemperature'] = 'temperature'
+
+        // add maplayer
+        switch(layername) {
+            case '#layerseason':
+            case '#layertrend':
+                var seasonlayer = new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        url: "http://saturnus.geodan.nl/mapproxy/myseasons/tiles/"+mapLayerName[layername]+"/EPSG900913/{z}/{x}/{y}.png?origin=nw"
+                    })
+                })
+                layers.insertAt(1, seasonlayer);
+                break;
+            case '#layertemperature':
+                var yd = new Date();
+                yd.setDate(yd.getDate() - 1);
+                var yesterdayString = yd.getFullYear() + '-' + ('0'+(yd.getMonth() + 1)).substr(-2) + '-' + ('0'+yd.getDate()).substr(-2);
+                var temperatureLayer = new ol.layer.Tile ({
+                    source: new ol.source.XYZ({
+                        //url: "//map1{a-c}.vis.earthdata.nasa.gov/wmts-webmerc/" +
+                        url: "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" +
+                        "MODIS_Aqua_Land_Surface_Temp_Day/default/"+yesterdayString+"/" +
+                        "GoogleMapsCompatible_Level7/{z}/{y}/{x}.png",
+                        maxZoom: 7
+                    })
+                });
+                layers.insertAt(1, temperatureLayer);
+                break;
+        }
+    };
+
     this.toggleLayer = function(layerHash)
     {
         var layerElements = [];
@@ -488,6 +582,9 @@ var App = new function() {
 
         if (activeLayer != clickedLayer) {
             layerElements[clickedLayer].classList.add('mdl-navigation__link--current');
+            this.updateLayers(layerHash);
+        } else {
+            this.updateLayers('');
         }
     };
 
