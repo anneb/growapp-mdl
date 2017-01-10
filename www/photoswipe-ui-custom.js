@@ -493,7 +493,7 @@ var PhotoSwipeUI_Default =
     {
       name: 'button--delete',
       option: 'deleteEl',
-      onTap: function() {deletephoto}
+      onTap: function() {deletephoto();}
     },
     {
       name: 'button--rotateleft',
@@ -654,6 +654,7 @@ var PhotoSwipeUI_Default =
 			framework.removeClass(_controls, 'pswp__ui--over-close');
 			framework.addClass( _controls, 'pswp__ui--hidden');
 			ui.setIdle(false);
+			window.location = "index.html";
 		});
 
 

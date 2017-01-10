@@ -221,6 +221,39 @@ var PhotoServer = new function() {
         xhr.send(formData);
   };
 
+    this.deletePhoto = function(photo, callback) {
+        var xhr = new XMLHttpRequest();
+        var formData = "username=" + localStorage.email +  "&hash=" + localStorage.hash + "&filename=" + photo.filename + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
+        xhr.open("POST", this.server+"/photoserver/deletemyphoto");
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.onreadystatechange = function (event) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    callback (null, xhr.responseText);
+                } else {
+                    callback("Error", xhr.statusText);
+                }
+            }
+        };
+        xhr.send(formData);
+    };
+
+    this.rotateMyPhoto = function(photo, degrees, callback) {
+        var xhr = new XMLHttpRequest();
+        var formData = "degrees=" + degrees + "&username=" + localStorage.email +  "&hash=" + localStorage.hash + "&filename=" + photo.filename + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
+        xhr.open("POST", this.server+"/photoserver/rotatemyphoto");
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.onreadystatechange = function (event) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    callback (null, xhr.responseText);
+                } else {
+                    callback("Error", xhr.statusText);
+                }
+            }
+        };
+        xhr.send(formData);
+    };
 }; // PhotoServer
 
 var OLMap = new function() {
@@ -385,59 +418,6 @@ var OLMap = new function() {
     };
 };
 
-/**
-* Class constructor for PhotoManager component.
-* @constructor
-* @param {HTMLElement} element The element that will be upgraded.
-*/
-var PhotoManager = function PhotoManager(element, isMobileDevice) {
-    this.element_ = element;
-    this.isMobileDevice_ = isMobileDevice;
-
-    // Initialize instance.
-    this.init();
-};
-window['PhotoManager'] = PhotoManager;
-
-PhotoManager.prototype.init = function ()
-{
-    this.element_.classList.add('pwsp');
-};
-
-PhotoManager.prototype.preparePhotoList = function(callback)
-{
-    PhotoServer.getMyPhotos(function(err, result){
-        if (err) {
-            callback(err, 'Error retrieving your photos: ' + result);
-        } else {
-            var photoList = JSON.parse(result);
-            callback(false, photoList.map(function(element){return {w: element.width, h: element.height, src: PhotoServer.server + '/uploads/' + element.filename + "?" + Date.now()}}));
-        }
-    })
-};
-
-PhotoManager.prototype.show = function (photoList) {
-
-    this.element_.classList.remove('hidden');
-    var options = {
-        // optionName: 'option value'
-        // for example:
-        deleteEl: true,
-        rotateLeftEl: true,
-        rotateRightEl: true,
-        index: 0 // start at first slide
-    };
-    if (photoList.length) {
-        this.gallery = new PhotoSwipe( this.element_, PhotoSwipeUI_Default, photoList, options);
-        this.gallery.init();
-    }
-};
-
-PhotoManager.prototype.hide = function () {
-    this.element_.classList.add('hidden');
-};
-
-
 // main app object
 var App = new function() {
     // set self (geodan policy: use lowercase class name)
@@ -456,9 +436,6 @@ var App = new function() {
         // initialize photoServer object
         PhotoServer.init(server);
 
-        // initialize PhotoManager object
-        this.photoManager = new PhotoManager(document.querySelector('#gapp_manage_photo_frame'), isMobileDevice);
-
         // setup handler hooks into OLMap
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
         OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
@@ -471,6 +448,14 @@ var App = new function() {
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
 
         window.addEventListener('hashchange', this.navigate);
+        this.showStoredMessage();
+    };
+
+    this.showStoredMessage = function () {
+        if (window.localStorage.storedMessage && window.localStorage.storedMessage != '') {
+            this.showMessage(window.localStorage.storedMessage);
+            window.localStorage.storedMessage = null;
+        }
     };
 
     this.hideDrawer = function() {
@@ -493,18 +478,7 @@ var App = new function() {
                         return;
                     }
                 }
-                app.photoManager.preparePhotoList(function(err, result){
-                    if (err) {
-                        app.showMessage(result);
-                    } else {
-                        if (result.length > 0) {
-                            app.photoManager.show(result);
-                        } else {
-                            app.showMessage("You have not yet uploaded any photo's");
-                        }
-                    }
-                })
-
+                window.location = "gallery.html";
                 break;
         }
     };
