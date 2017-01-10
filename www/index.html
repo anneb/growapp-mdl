@@ -20,6 +20,9 @@
     <link rel="stylesheet" href="./openlayers-3.11.2/ol.css">
     <script src="./openlayers-3.11.2/ol.js"></script>
     <script src="./node_modules/proj4/dist/proj4.js"></script>
+    <link rel="stylesheet" href="./node_modules/photoswipe/dist/photoswipe.css">
+    <script src="./node_modules/photoswipe/dist/photoswipe.js"></script>
+    <script src="./photoswipe-ui-custom.js"></script>
     <script src="./app.js"></script>
 
     <style>
@@ -31,10 +34,10 @@
       .page-content {
           position: absolute;
           display: block;
-          left: 0px;
-          top: 0px;
-          bottom: 0px;
-          right: 0px;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          right: 0;
           overflow: hidden;
       }
       #gapp_map {
@@ -44,7 +47,7 @@
         -moz-box-sizing: border-box;
         -webkit-box-sizing: border-box;
         border: 1px solid black;
-        right: 0px;
+        right: 0;
         width: 100%;
         height: 100%;
       }
@@ -155,7 +158,7 @@
         #gapp_camera_overlay_picture {
 			position: relative;
             right: -50%;
-            top: 0px;
+            top: 0;
             width: auto;
             height: 100%;
             opacity: 0.5;
@@ -209,9 +212,111 @@
         bottom: 20%;
         right: 25%;
       }
+      #gapp_manage_photo_frame {
+          position: absolute;
+          left: 0;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          /*width: 100%;
+          height: 100%;*/
+          background-color: black;
+          z-index: 10;
+      }
+      #gapp-snackbar {
+          z-index: 100 !important;
+      }
       .gapp_color_gray_transparent {
         background-color: #757575;
         background-color: rgba(112, 112, 112, 0.3);
+      }
+      .button {
+          width: 40px;
+          height: 40px;
+          background: #aaa;
+          border-radius: 100%;
+          box-sizing: border-box;
+          outline: none;
+          padding: 8px;
+          position: relative;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          -webkit-user-select: none;
+          user-select: none;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: center;
+          display: inline-block;
+          cursor: pointer;
+      }
+      #closebutton {
+          position: relative;
+          top: 20px !important;
+          right: 20px !important;
+      }
+      .buttonicon {
+          width: 20px;
+          height: 20px;
+          margin-bottom: -8px;
+          margin-left: -8px;
+          margin-right: 5px;
+          background: transparent;
+          fill: green;
+      }
+      .icon {
+          width: 24px;
+          height: 24px;
+          margin-bottom: -8px;
+          margin-left: -8px;
+          margin-right: 5px;
+          background: transparent;
+          fill: white;
+      }
+      .confirmdialog {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          width: 300px;
+          height: 120px;
+          margin: auto;
+          background: black;
+          border: 1px solid white;
+          border-radius: 5px;
+          outline: 1px solid black;
+          color: white;
+          padding: 20px;
+          z-index: 2000;
+      }
+      .modaldialog {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          background: transparent;
+          z-index: 1999;
+      }
+
+      .pswp__button--delete {
+          background: url(delete.svg) 12px 12px no-repeat !important;
+          background-size: 20px 20px;
+          width: 44px;
+          height: 44px;
+      }
+      .pswp__button--rotateleft {
+          background: url(rotateleft.svg) 12px 12px no-repeat !important;
+          background-size: 20px 20px;
+          width: 44px;
+          height: 44px;
+      }
+      .pswp__button--rotateright {
+          background: url(rotateright.svg) 12px 12px no-repeat !important;
+          background-size: 20px 20px;
+          width: 44px;
+          height: 44px;
       }
     </style>
   </head>
@@ -229,9 +334,9 @@
           <div class="mdl-layout__drawer">
               <img src="xxxhdpi.png" style="margin-top: 10px; width:239px; height:239px">
               <nav class="mdl-navigation">
-                  <div class="mdl-navigation__link" href=""><i class="material-icons">&#xE853;</i> Account</div>
+                  <a class="mdl-navigation__link" href="#account"><i class="material-icons">&#xE853;</i> Account</a>
                   <hr>
-                  <div class="mdl-navigation__link" href=""><i class="material-icons">collections</i> Manage photos</div>
+                  <a class="mdl-navigation__link" href="#managephoto"><i class="material-icons">collections</i> Manage photos</a>
                   <hr>
                   <div class="mdl-navigation__link mdl-navigation__link--current" href=""><i class="material-icons">&#xE545;<!-- local florist--></i> Start of season</div>
                   <div class="mdl-navigation__link" href=""><i class="material-icons">&#xE6E1;<!-- show-chart --></i> Vegetation trend</div>
@@ -286,6 +391,76 @@
                 <i class="material-icons">close</i>
             </button>
          </div>
+      </div>
+      <!-- PhotoSwipe -->
+      <div id="gapp_manage_photo_frame" class="pswp hidden" tabindex="-1" role="dialog" aria-hidden="true">
+
+          <!-- Background of PhotoSwipe.
+               It's a separate element as animating opacity is faster than rgba(). -->
+          <div class="pswp__bg"></div>
+
+          <!-- Slides wrapper with overflow:hidden. -->
+          <div class="pswp__scroll-wrap">
+
+              <!-- Container that holds slides.
+                  PhotoSwipe keeps only 3 of them in the DOM to save memory.
+                  Don't modify these 3 pswp__item elements, data is added later on. -->
+              <div class="pswp__container">
+                  <div class="pswp__item"></div>
+                  <div class="pswp__item"></div>
+                  <div class="pswp__item"></div>
+              </div>
+
+              <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+              <div class="pswp__ui pswp__ui--hidden">
+
+                  <div class="pswp__top-bar">
+
+                      <!--  Controls are self-explanatory. Order can be changed. -->
+
+                      <div class="pswp__counter"></div>
+
+                      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                      <button class="pswp__button pswp__button--delete" title="Delete"></button>
+                      <button class="pswp__button pswp__button--rotateleft" title="Rotate Left"></button>
+                      <button class="pswp__button pswp__button--rotateright" title="Rotate Right"></button>
+                      <!--
+                      <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+
+                      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                    -->
+
+                      <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                      <!-- element will get class pswp__preloader--active when preloader is running -->
+                      <div class="pswp__preloader">
+                          <div class="pswp__preloader__icn">
+                              <div class="pswp__preloader__cut">
+                                  <div class="pswp__preloader__donut"></div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                      <div class="pswp__share-tooltip"></div>
+                  </div>
+
+                  <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+                  </button>
+
+                  <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+                  </button>
+
+                  <div class="pswp__caption">
+                      <div class="pswp__caption__center"></div>
+                  </div>
+
+              </div>
+
+          </div>
       </div>
 
       <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">

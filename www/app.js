@@ -54,8 +54,7 @@ var _utils = {
             Math.cos(pos1[1].toRad()) * Math.cos(pos2[1].toRad()) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        var d = R * c;
-        return d;
+        return R * c;
     }
 };
 
@@ -202,6 +201,24 @@ var PhotoServer = new function() {
          }
       };
       xhr.send(formData);
+  };
+
+  // get all my photos and call callback(err, photoarray)
+  this.getMyPhotos = function(callback) {
+        var xhr = new XMLHttpRequest();
+        var formData = "username=" + localStorage.email +  "&hash=" + localStorage.hash + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
+        xhr.open("POST", photoServer.server+"/photoserver/getmyphotos");
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.onreadystatechange = function (event) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    callback (null, xhr.responseText);
+                } else {
+                    callback("Error", xhr.statusText);
+                }
+            }
+        };
+        xhr.send(formData);
   };
 
 }; // PhotoServer
@@ -368,6 +385,59 @@ var OLMap = new function() {
     };
 };
 
+/**
+* Class constructor for PhotoManager component.
+* @constructor
+* @param {HTMLElement} element The element that will be upgraded.
+*/
+var PhotoManager = function PhotoManager(element, isMobileDevice) {
+    this.element_ = element;
+    this.isMobileDevice_ = isMobileDevice;
+
+    // Initialize instance.
+    this.init();
+};
+window['PhotoManager'] = PhotoManager;
+
+PhotoManager.prototype.init = function ()
+{
+    this.element_.classList.add('pwsp');
+};
+
+PhotoManager.prototype.preparePhotoList = function(callback)
+{
+    PhotoServer.getMyPhotos(function(err, result){
+        if (err) {
+            callback(err, 'Error retrieving your photos: ' + result);
+        } else {
+            var photoList = JSON.parse(result);
+            callback(false, photoList.map(function(element){return {w: element.width, h: element.height, src: PhotoServer.server + '/uploads/' + element.filename + "?" + Date.now()}}));
+        }
+    })
+};
+
+PhotoManager.prototype.show = function (photoList) {
+
+    this.element_.classList.remove('hidden');
+    var options = {
+        // optionName: 'option value'
+        // for example:
+        deleteEl: true,
+        rotateLeftEl: true,
+        rotateRightEl: true,
+        index: 0 // start at first slide
+    };
+    if (photoList.length) {
+        this.gallery = new PhotoSwipe( this.element_, PhotoSwipeUI_Default, photoList, options);
+        this.gallery.init();
+    }
+};
+
+PhotoManager.prototype.hide = function () {
+    this.element_.classList.add('hidden');
+};
+
+
 // main app object
 var App = new function() {
     // set self (geodan policy: use lowercase class name)
@@ -386,6 +456,9 @@ var App = new function() {
         // initialize photoServer object
         PhotoServer.init(server);
 
+        // initialize PhotoManager object
+        this.photoManager = new PhotoManager(document.querySelector('#gapp_manage_photo_frame'), isMobileDevice);
+
         // setup handler hooks into OLMap
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
         OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
@@ -397,6 +470,43 @@ var App = new function() {
         this.buttonLocation = document.querySelector("#gapp_button_location");
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
 
+        window.addEventListener('hashchange', this.navigate);
+    };
+
+    this.hideDrawer = function() {
+        var drawer = document.querySelector('.mdl-layout__drawer');
+        if (drawer.classList.contains('is-visible')) {
+            var layout = document.querySelector('.mdl-layout');
+            layout.MaterialLayout.toggleDrawer();
+        }
+    };
+
+    this.navigate = function() {
+        switch (window.location.hash) {
+            case '#managephoto':
+                app.hideDrawer();
+                if (!app.isMobileDevice) {
+                    // web version
+                    if (!localStorage.email || localStorage.email=="" || !localStorage.hash || localStorage.hash=="") {
+                        app.showMessage('Web photo management requires user registration');
+                        window.location.hash='';
+                        return;
+                    }
+                }
+                app.photoManager.preparePhotoList(function(err, result){
+                    if (err) {
+                        app.showMessage(result);
+                    } else {
+                        if (result.length > 0) {
+                            app.photoManager.show(result);
+                        } else {
+                            app.showMessage("You have not yet uploaded any photo's");
+                        }
+                    }
+                })
+
+                break;
+        }
     };
 
     this.featureInfoPopupInit = function()
@@ -770,6 +880,6 @@ var App = new function() {
         };
         app.snackbarContainer.MaterialSnackbar.showSnackbar(data);
     };
-}();
+};
 
 document.addEventListener('deviceready', App.cordovaDeviceReady, false);
