@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>growapp-mdl</title>
+    <meta charset="utf-8">
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+    <meta http-equiv="content-type" content="text/html; charset=UTF8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" href="favicon.ico" type="image/ico">
+
+    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+
+    <link rel="stylesheet" href="./iconfont/material-icons.css">
+    <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
+
+    <script src="./app.js"></script>
+    <script>
+        function init() {
+            document.querySelector('#backbutton').addEventListener('click', function(){
+                window.location="index.html";
+            },false);
+            document.querySelector('#buttonemail').addEventListener('click', function(){
+                // send email
+                // update screen
+                document.querySelector('#accountemail').classList.add('hidden');
+                document.querySelector('#accountverify').classList.remove('hidden');
+            },false);
+            document.querySelector('#buttoncode').addEventListener('click', function(){
+                // check code
+                // update screen
+                document.querySelector('#accountverify').classList.add('hidden');
+                document.querySelector('#accountinfo').classList.remove('hidden');
+            },false);
+        }
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', 'Noto', sans-serif;
+            background-color: transparent;
+        }
+        .page-content {
+            width: 80%;
+            max-width: 512px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .account-card-wide.mdl-card {
+            width: 100%;
+        }
+        .account-card-wide > .mdl-card__title {
+            background: url('./trees.jpg') center / cover;
+            color: white;
+        }
+        .mdl-textfield {
+            width: 90%;
+        }
+        .mdl-textfield__label__icon {
+            position: absolute;
+            right: 0;
+            top: 20px;
+        }
+
+    </style>
+</head>
+<body onload="init();">
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header is-casting-shadow">
+        <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i></div>
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title"> GrowApp - Account</span>
+        </div>
+    </header>
+
+    <main class="mdl-layout__content">
+        <div class="page-content">
+            <div id="accountemail" class="account-card-wide mdl-card mdl-shadow--2dp">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">Associate device with email</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    <form action="#">
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input class="mdl-textfield__input" type="email" id="emailaddress">
+                            <label class="mdl-textfield__label" for="emailaddress">Email Address</label>
+                            <span class="mdl-textfield__error">Input is not a valid email address</span>
+                            <i class="material-icons mdl-textfield__label__icon">mail</i>
+                        </div>
+                    </form>
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <a id="buttonemail" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        Verify Email
+                    </a>
+                </div>
+            </div>
+
+            <div id="accountverify" class="account-card-wide mdl-card mdl-shadow--2dp hidden">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">Verify code</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    <form action="#">
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input class="mdl-textfield__input" type="password" id="verifycode" pattern="([0-9]){5}">
+                            <label class="mdl-textfield__label" for="verifycode">Verification code (check mail)</label>
+                            <span class="mdl-textfield__error">Input is not a valid code</span>
+                            <i class="material-icons mdl-textfield__label__icon">&#xE898;<!--lock_open--></i>
+                        </div>
+                    </form>
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <a id="buttoncode" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        Associate
+                    </a>
+                </div>
+            </div>
+
+            <div id="accountinfo" class="account-card-wide mdl-card mdl-shadow--2dp hidden">
+                <div class="mdl-card__title">
+                    <h2 class="mdl-card__title-text">Account info</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    <form action="#">
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input class="mdl-textfield__input" type="text" id="displayname">
+                            <label class="mdl-textfield__label" for="displayname">Display name</label>
+                            <i class="material-icons mdl-textfield__label__icon">&#xE853;</i>
+                        </div>
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input class="mdl-textfield__input" type="email" id="emailinfo" value="anne.blankert@geodan.nl" disabled>
+                            <label class="mdl-textfield__label" for="emailinfo">email address</label>
+                            <i class="material-icons mdl-textfield__label__icon">mail</i>
+                        </div>
+                    </form>
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                    <a id="buttoninfo" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        Done
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script type="text/javascript" src="./cordova.js"></script>
+</body>
+</html>
