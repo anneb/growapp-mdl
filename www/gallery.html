@@ -168,6 +168,13 @@ function gallerysetup()
       if (items.length) {
         gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
         gallery.init();
+        // override close
+        gallery.close = function() {
+            window.location = "index.html";
+        };
+        gallery.destroy = function() {
+            window.location = "index.html";
+        }
       } else {
           window.localStorage.storedMessage = "You have not yet uploaded any photos";
           window.location = "index.html";

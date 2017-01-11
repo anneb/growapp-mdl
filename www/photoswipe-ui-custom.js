@@ -752,6 +752,7 @@ var PhotoSwipeUI_Default =
 			// close gallery if clicked outside of the image
 			if(_hasCloseClass(target)) {
 				pswp.close();
+                window.location = "index.html";
 				return;
 			}
 
@@ -759,6 +760,7 @@ var PhotoSwipeUI_Default =
 				if(pswp.getZoomLevel() === 1 && pswp.getZoomLevel() <= pswp.currItem.fitRatio) {
 					if(_options.clickToCloseNonZoomable) {
 						pswp.close();
+						window.location = "index.html";
 					}
 				} else {
 					pswp.toggleDesktopZoom(e.detail.releasePoint);
@@ -779,6 +781,7 @@ var PhotoSwipeUI_Default =
 			// tap to close gallery
 			if(_options.tapToClose && (framework.hasClass(target, 'pswp__img') || _hasCloseClass(target)) ) {
 				pswp.close();
+                window.location = "index.html";
 				return;
 			}
 

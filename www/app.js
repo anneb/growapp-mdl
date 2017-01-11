@@ -12,7 +12,7 @@ App: UI and handler hooks into OLMap
 
 */
 
-/* global document, ol, Image, CameraPreview, StatusBar, localStorage */
+/* global document, ol, Image, CameraPreview, StatusBar, window.localStorage */
 
 Number.prototype.toRad = function() { // helper
     return this * Math.PI / 180;
@@ -142,10 +142,10 @@ var PhotoServer = new function() {
   this.ensureDeviceRegistration = function(done)
   {
     if (window.localStorage) {
-        var email = localStorage.email;
-        var hash = localStorage.hash;
-        var deviceid = localStorage.deviceid;
-        var devicehash = localStorage.devicehash;
+        var email = window.localStorage.email;
+        var hash = window.localStorage.hash;
+        var deviceid = window.localStorage.deviceid;
+        var devicehash = window.localStorage.devicehash;
         if ((!deviceid) || (deviceid=="undefined") || (!devicehash) || (devicehash=="undefined") ) {
             var xhr = new XMLHttpRequest();
             var formData = "username=" + email +  "&hash=" + hash;
@@ -177,7 +177,7 @@ var PhotoServer = new function() {
             }
         }
     } else {
-        // cannot register without localStorage
+        // cannot register without window.localStorage
         if (done) {
             done(false);
         }
@@ -188,7 +188,7 @@ var PhotoServer = new function() {
   // upload picture contents (photodata) to photoserver
   this.uploadPhotoData = function(imagedata, rootid, location, accuracy, callback) {
       var xhr = new XMLHttpRequest();
-      var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + "&username=" + localStorage.email +  "&hash=" + localStorage.hash + "&rootid=" + rootid + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
+      var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + "&username=" + window.localStorage.email +  "&hash=" + window.localStorage.hash + "&rootid=" + rootid + "&deviceid=" + window.localStorage.deviceid + "&devicehash=" + window.localStorage.devicehash;
       xhr.open("POST", photoServer.server + "/photoserver/sendphoto");
       xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
       xhr.onreadystatechange = function (event) {
@@ -206,7 +206,7 @@ var PhotoServer = new function() {
   // get all my photos and call callback(err, photoarray)
   this.getMyPhotos = function(callback) {
         var xhr = new XMLHttpRequest();
-        var formData = "username=" + localStorage.email +  "&hash=" + localStorage.hash + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
+        var formData = "username=" + window.localStorage.email +  "&hash=" + window.localStorage.hash + "&deviceid=" + window.localStorage.deviceid + "&devicehash=" + window.localStorage.devicehash;
         xhr.open("POST", photoServer.server+"/photoserver/getmyphotos");
         xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
         xhr.onreadystatechange = function (event) {
@@ -223,7 +223,7 @@ var PhotoServer = new function() {
 
     this.deletePhoto = function(photo, callback) {
         var xhr = new XMLHttpRequest();
-        var formData = "username=" + localStorage.email +  "&hash=" + localStorage.hash + "&filename=" + photo.filename + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
+        var formData = "username=" + window.localStorage.email +  "&hash=" + window.localStorage.hash + "&filename=" + photo.filename + "&deviceid=" + window.localStorage.deviceid + "&devicehash=" + window.localStorage.devicehash;
         xhr.open("POST", this.server+"/photoserver/deletemyphoto");
         xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
         xhr.onreadystatechange = function (event) {
@@ -240,7 +240,7 @@ var PhotoServer = new function() {
 
     this.rotateMyPhoto = function(photo, degrees, callback) {
         var xhr = new XMLHttpRequest();
-        var formData = "degrees=" + degrees + "&username=" + localStorage.email +  "&hash=" + localStorage.hash + "&filename=" + photo.filename + "&deviceid=" + localStorage.deviceid + "&devicehash=" + localStorage.devicehash;
+        var formData = "degrees=" + degrees + "&username=" + window.localStorage.email +  "&hash=" + window.localStorage.hash + "&filename=" + photo.filename + "&deviceid=" + window.localStorage.deviceid + "&devicehash=" + window.localStorage.devicehash;
         xhr.open("POST", this.server+"/photoserver/rotatemyphoto");
         xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
         xhr.onreadystatechange = function (event) {
@@ -254,6 +254,79 @@ var PhotoServer = new function() {
         };
         xhr.send(formData);
     };
+
+    this.emailValidationCode = function(email, callback)
+    {
+        var xhr = new XMLHttpRequest();
+        var formData = 'email=' + encodeURIComponent(email);
+        xhr.open("POST", photoServer.server+"/photoserver/validatemail");
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        var status = document.querySelector('#mailstatus');
+        xhr.onreadystatechange = function (event) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    callback(false, "mail sent, please check your email...");
+                } else {
+                    callback(true, "Error" + xhr.statusText);
+                }
+            }
+        };
+        xhr.send(formData);
+    }
+
+    this.validateuser = function(email, code, deviceid, devicehash, callback)
+    {
+        var xhr = new XMLHttpRequest();
+        var formData = 'email=' + encodeURIComponent(email) + '&validationcode=' + encodeURIComponent(code)  + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + "&devicehash=" + encodeURIComponent(localStorage.devicehash);
+        xhr.open("POST", photoServer.server+"/photoserver/validateuser");
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.onreadystatechange = function (event) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    if (xhr.responseText.length != 32) {
+                        callback (true, "Validation failed: " + xhr.responseText);
+                    } else {
+                        var hash = xhr.responseText;
+                        callback (false, hash);
+                    }
+                } else {
+                    callback (true, "Request error, http status: " + xhr.status + ", statusText: " + xhr.statusText);
+                }
+            }
+        };
+        xhr.send(formData);
+    }
+
+    this.checkuser = function(callback)
+    {
+        var xhr = new XMLHttpRequest();
+        if (localStorage.email) {
+            window.localStorage.email = window.localStorage.email.trim().toLowerCase();
+        }
+        var formData = 'email=' + encodeURIComponent(localStorage.email) + '&hash=' + encodeURIComponent(localStorage.hash) + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + "&devicehash=" + encodeURIComponent(localStorage.devicehash);
+        xhr.open("POST", photoServer.server+"/photoserver/checkuser");
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
+        xhr.onreadystatechange = function (event) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.error) {
+                        callback("Error", result.error);
+                    } else {
+                        if (result.knownuser) {
+                            callback(null, true);
+                        } else {
+                            callback(null, false);
+                        }
+                    }
+                } else {
+                    callback ("Request error, http status: " + xhr.status + ", statusText: " + xhr.statusText);
+                }
+            }
+        };
+        xhr.send(formData);
+    }
 }; // PhotoServer
 
 var OLMap = new function() {
@@ -423,9 +496,8 @@ var App = new function() {
     // set self (geodan policy: use lowercase class name)
     var app = this;
 
+
     this.init = function(server, mapId, isMobileDevice) {
-        // init message popups at bottom of screen
-        this.snackbarContainer = document.querySelector('#gapp-snackbar');
 
         // store setup for mobile device or web
         this.isMobileDevice = isMobileDevice;
@@ -454,7 +526,7 @@ var App = new function() {
     this.showStoredMessage = function () {
         if (window.localStorage.storedMessage && window.localStorage.storedMessage != '') {
             this.showMessage(window.localStorage.storedMessage);
-            localStorage.removeItem('storedMessage');
+            window.localStorage.removeItem('storedMessage');
         }
     };
 
@@ -594,7 +666,7 @@ var App = new function() {
                 app.hideDrawer();
                 if (!app.isMobileDevice) {
                     // web version
-                    if (!localStorage.email || localStorage.email=="" || !localStorage.hash || localStorage.hash=="") {
+                    if (!localStorage.email || window.localStorage.email=="" || !localStorage.hash || window.localStorage.hash=="") {
                         app.showMessage('Web photo management requires user registration');
                         window.location.hash='';
                         return;
@@ -673,7 +745,7 @@ var App = new function() {
                     }
                     app.cameraPopup.show(url, photoid);
                 } else {
-                    // device could not be registered, offline? no localStorage?
+                    // device could not be registered, offline? no window.localStorage?
                     app.showMessage("device registration failed, try again later");
                 }
             });
@@ -766,7 +838,7 @@ var App = new function() {
                 if (result) {
                     app.cameraPopup.show();
                 } else {
-                    // device could not be registered, offline? no localStorage?
+                    // device could not be registered, offline? no window.localStorage?
                     app.showMessage("device registration failed, try again later");
                 }
             });
@@ -987,7 +1059,9 @@ var App = new function() {
             message: message,
             timeout: timeout
         };
-        app.snackbarContainer.MaterialSnackbar.showSnackbar(data);
+        // init message popups at bottom of screen
+        var snackbarContainer = document.querySelector('#gapp-snackbar');
+        snackbarContainer.MaterialSnackbar.showSnackbar(data);
     };
 };
 

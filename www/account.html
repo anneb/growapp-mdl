@@ -19,22 +19,108 @@
 
     <script src="./app.js"></script>
     <script>
+        /* todo: change or remove email association? */
+        // set URL of photoserver
+        PhotoServer.init('https://phenology.geodan.nl');
+
+        function isValidEmail(email) {
+            var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(email.trim());
+        }
+
+        function isValidCode(code) {
+            var re = /^([0-9]{5})$/;
+            return re.test(code.trim());
+        }
+
+        function displayForm(hash) {
+            switch (hash) {
+                case '':
+                    document.querySelector('#accountverify').classList.add('hidden');
+                    document.querySelector('#accountinfo').classList.add('hidden');
+                    document.querySelector('#accountemail').classList.remove('hidden');
+                    break;
+                case '#verify':
+                    document.querySelector('#accountemail').classList.add('hidden');
+                    document.querySelector('#accountinfo').classList.add('hidden');
+                    document.querySelector('#accountverify').classList.remove('hidden');
+                    App.showMessage("mail sent, please check your email");
+                    break;
+                case '#info':
+                    showUserInfo();
+                    break;
+            }
+        }
+
+        function showUserInfo()
+        {
+            // see http://stackoverflow.com/questions/34077730/fetching-the-value-of-a-mdl-textfield/34122149
+            var mdlDisplayName = document.querySelector('#mdl-displayname'); // for setting
+            var displayName = document.querySelector('#displayname'); // for getting
+            if (window.localStorage.displayName) {
+                //displayName.value = window.localStorage.displayName;
+                mdlDisplayName.MaterialTextfield.change(window.localStorage.displayName);
+            } else {
+                mdlDisplayName.MaterialTextfield.change('');
+            }
+            //displayName.MaterialTextfield.checkDirty();
+            document.querySelector('#accountemail').classList.add('hidden');
+            document.querySelector('#accountverify').classList.add('hidden');
+            document.querySelector('#accountinfo').classList.remove('hidden');
+            document.querySelector('#buttoninfo').addEventListener('click', function() {
+                window.localStorage.displayName = displayName.value;
+                window.location.replace('index.html');
+            }, false);
+        }
+
         function init() {
             document.querySelector('#backbutton').addEventListener('click', function(){
-                window.location="index.html";
+                // warning: history keeps track of hashchanges
+                window.history.back();
             },false);
-            document.querySelector('#buttonemail').addEventListener('click', function(){
-                // send email
-                // update screen
-                document.querySelector('#accountemail').classList.add('hidden');
-                document.querySelector('#accountverify').classList.remove('hidden');
-            },false);
-            document.querySelector('#buttoncode').addEventListener('click', function(){
-                // check code
-                // update screen
-                document.querySelector('#accountverify').classList.add('hidden');
-                document.querySelector('#accountinfo').classList.remove('hidden');
-            },false);
+            window.addEventListener('hashchange', function() {displayForm(window.location.hash);}, false);
+            if (localStorage.email && localStorage.hash) {
+                // just show user info
+                showUserInfo();
+            } else {
+                displayForm('');
+                var emailaddress;
+                document.querySelector('#buttonemail').addEventListener('click', function(){
+                    emailaddress = document.querySelector('#emailaddress').value;
+                    if (isValidEmail(emailaddress)) {
+                        // send email
+                        PhotoServer.emailValidationCode(emailaddress, function(err, result) {
+                            if (err) {
+                                App.showMessage('Mail error: ' + result);
+                            } else {
+                                // update screen
+                                window.location='#verify';
+                                document.querySelector('#accountemail').classList.add('hidden');
+                                document.querySelector('#accountverify').classList.remove('hidden');
+                                App.showMessage("mail sent, please check your email");
+                            }
+                        })
+                    } else {
+                        App.showMessage("please provide a valid email address");
+                    }
+                },false);
+                document.querySelector('#buttoncode').addEventListener('click', function(){
+                    // check code
+                    var code = document.querySelector('#verifycode').value;
+                    if (isValidCode(code)) {
+                        PhotoServer.validateuser(emailaddress, code, localStorage.deviceid, localStorage.devicehash, function(err, result) {
+                            if (err) {
+                                App.showMessage(result);
+                            } else {
+                                localStorage.email = emailaddress;
+                                localStorage.hash = result;
+                                // update screen, skip history
+                                showUserInfo();
+                            }
+                        })
+                    }
+                },false);
+            }
         }
     </script>
 
@@ -65,7 +151,6 @@
             right: 0;
             top: 20px;
         }
-
     </style>
 </head>
 <body onload="init();">
@@ -81,7 +166,7 @@
 
     <main class="mdl-layout__content">
         <div class="page-content">
-            <div id="accountemail" class="account-card-wide mdl-card mdl-shadow--2dp">
+            <div id="accountemail" class="account-card-wide mdl-card mdl-shadow--2dp hidden">
                 <div class="mdl-card__title">
                     <h2 class="mdl-card__title-text">Associate device with email</h2>
                 </div>
@@ -129,8 +214,8 @@
                 </div>
                 <div class="mdl-card__supporting-text">
                     <form action="#">
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="text" id="displayname">
+                        <div id="mdl-displayname" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input id="displayname" class="mdl-textfield__input" type="text">
                             <label class="mdl-textfield__label" for="displayname">Display name</label>
                             <i class="material-icons mdl-textfield__label__icon">&#xE853;</i>
                         </div>
@@ -150,6 +235,10 @@
         </div>
     </main>
 </div>
-<script type="text/javascript" src="./cordova.js"></script>
+<div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
+    <div class="mdl-snackbar__text">hallo</div>
+    <button class="mdl-snackbar__action" type="button"></button>
+</div>
+<!--script type="text/javascript" src="./cordova.js"></script -->
 </body>
 </html>
