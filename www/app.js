@@ -783,7 +783,7 @@ var App = new function() {
                 cameraOverlayPictureFrame.classList.add('hidden');
             }
             document.addEventListener('backbutton', app.cameraPopup.hide);
-            window.addEventListener('orientationchange', app.cameraPopup.resetCamera);
+            document.addEventListener('orientationchange', app.cameraPopup.resetCamera);
             if (typeof StatusBar !== 'undefined') {
                 StatusBar.hide();
             }
