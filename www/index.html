@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <title>growapp-mdl</title>
     <meta charset="utf-8">
     <meta name="description" content="growapp-mdl create vegetation time-lapses">
     <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="icon" href="favicon.ico" type="image/ico">
 
     <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
@@ -17,360 +17,104 @@
     <link rel="stylesheet" href="./iconfont/material-icons.css">
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
 
-    <link rel="stylesheet" href="./openlayers-3.11.2/ol.css">
-    <script src="./openlayers-3.11.2/ol.js"></script>
-    <script src="./node_modules/proj4/dist/proj4.js"></script>
-    <script src="./app.js"></script>
 
     <style>
-      body {
-        margin: 0;
-        font-family: 'Roboto', 'Noto', sans-serif;
-        background-color: transparent;
-      }
-      .page-content {
-          position: absolute;
-          display: block;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          right: 0;
-          overflow: hidden;
-      }
-      #gapp_map {
-        position: relative;
-        display: block;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        border: 1px solid black;
-        right: 0;
-        width: 100%;
-        height: 100%;
-      }
-      #gapp_button_location {
-        position: absolute;
-        bottom: 80px;
-        right: 10px;
-      }
-      #gapp_button_location.inactive {
-        color: black !important;
-      }
-      #gapp_button_camera {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-      }
-      #gapp_featureinfo {
-        position: absolute;
-        border: 1px solid black;
-        background-color: white;
-        overflow: hidden;
-      }
-      #gapp_featureinfo_addphoto {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-      }
-      #gapp_featureinfo_spinner {
-        position: absolute;
-        top: 45%;
-        left: 45%;
-      }
-      #gapp_featureinfo_photo {
-        width: 100%;
-        height: 100%;
-      }
-      #gapp_featureinfo_close {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-      }
-      #gapp_featureinfo_fullscreen {
-        position: absolute;
-        top: 10px;
-        right: 50px;
-      }
-      #gapp_fullscreenphotopopup {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: black;
-        z-index: 10;
-      }
-      #gapp_fullscreenphoto {
-        max-height: 100%;
-        max-width: 100%;
-        width: auto;
-        height: auto;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-      }
-      #gapp_fullscreenphotopopup_close {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-      }
-      #gapp_camera_popup {
-        position: absolute;
-        max-height: 100%;
-        max-width: 100%;
-        width: auto;
-        height: auto;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-        background-color: transparent;        
-      }
-      #gapp_camera_takephoto {
-        position: absolute;
-        display: block;
-        bottom: 20%;
-        left: 50%;
-        margin-left: -15px;
-      }
-      #gapp_camera_close {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-      }
-      @media all and (orientation:portrait) {
-	    #gapp_camera_overlay_picture_frame {
-            position: relative;
-            float: right;
-            right: 50%;
-            height: 100%;
-            width: auto;
-            left: auto;
-        }
-        #gapp_camera_overlay_picture {
-			position: relative;
-            right: -50%;
-            top: 0;
-            width: auto;
-            height: 100%;
-            opacity: 0.5;
-        }
-      }
-      @media all and (orientation:landscape) {
-        #gapp_camera_overlay_picture_frame {
-            position: relative;
-            width: 100%;
-            top: 50%;
-        }
-		#gapp_camera_overlay_picture {
-            position: absolute;
-            width: 100%;
-            opacity: 0.5;
-            transform: translateY(-50%);
-        }
-      }
-      #gapp_camera_photo_preview_frame {
-        position: absolute;
-        max-height: 100%;
-        max-width: 100%;
-        width: auto;
-        height: auto;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-        background-color: black;
-      }
-      #gapp_camera_photo_preview_frame img {
-        max-height: 100%;
-        max-width: 100%;
-        width: auto;
-        height: auto;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-      }
-      #gapp_camera_photo_ok {
-        position: absolute;
-        bottom: 20%;
-        left: 25%
-      }
-      #gapp_camera_photo_close {
-        position: absolute;
-        bottom: 20%;
-        right: 25%;
-      }
-      #gapp-snackbar {
-          z-index: 100 !important;
-      }
-      .gapp_color_gray_transparent {
-        background-color: #757575;
-        background-color: rgba(112, 112, 112, 0.3);
-      }
-      #gapp_legendhorizontal {
-          position: fixed;
-          /* width: 365px;
-          height: 34px; */
-          margin-left: -180px;
-          left: 50%;
-          bottom: 10px;
-          border: 1px white solid;
-      }
-      #gapp_legendvertical {
-          position: fixed;
-          /*
-          width: 35px;
-          height: 401px; */
-          left: 10px;
-          top: 50%;
-          margin-top: -201px;
-          border: 1px white solid;
-      }
-      .legendleft {
-          position: absolute;
-          left: 1px;
-          line-height: 34px;
-      }
-      .legendright {
-          position: absolute;
-          right: 1px;
-          line-height: 34px
-      }
-      .legendtop {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 34px;
-          text-align: center;
-      }
-      .legendtoprotated {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 34px;
-          width: auto;
-          text-align: auto;
-          line-height: 34px;
-          transform: rotate(90deg) translate(2px,-34px);
-          transform-origin: 0 0;
-      }
-      .legendbottom {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 34px;
-          text-align: center;
-      }
-      .legendbottomrotated {
-          position: absolute;
-          bottom: 0;
-          left: auto;
-          width: auto;
-          right: 0;
-          height: 34px;
-          line-height: 34px;
-          text-align: right;
-          transform: rotate(90deg) translate(-2px, 34px);
-          transform-origin: 100% 34px;
-      }
-      .legendwhite {
-          color: white;
-      }
-    </style>
-  </head>
-  <body onload="App.init('https://phenology.geodan.nl', 'gapp_map', (typeof cordova !== 'undefined'))">
-      <!-- Always shows a header, even in smaller screens. -->
-      <div id="mainUI" class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-          <header class="mdl-layout__header">
-              <div class="mdl-layout__header-row">
-                  <!-- Title -->
-                  <span class="mdl-layout-title">GrowApp - Photo Locations</span>
-                  <!-- Add spacer, to align navigation to the right -->
-                  <div class="mdl-layout-spacer"></div>
-              </div>
-          </header>
-          <div class="mdl-layout__drawer">
-              <img src="xxxhdpi.png" style="margin-top: 10px; width:239px; height:239px">
-              <nav class="mdl-navigation">
-                  <a class="mdl-navigation__link" href="#account"><i class="material-icons">&#xE853;</i> Account</a>
-                  <hr>
-                  <a class="mdl-navigation__link" href="#managephoto"><i class="material-icons">collections</i> Manage photos</a>
-                  <hr>
-                  <a id="gapp_layer_season" class="mdl-navigation__link" href="#layerseason"><i class="material-icons">&#xE545;<!-- local florist--></i> Start of season</a>
-                  <a id="gapp_layer_trend" class="mdl-navigation__link" href="#layertrend"><i class="material-icons">&#xE6E1;<!-- show-chart --></i> Vegetation trend</a>
-                  <!--a id="gapp_layer_temperature" class="mdl-navigation__link" href="#layertemperature"><svg class="svg-24px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M17,3H21V5H17V3M17,7H21V9H17V7M17,11H21V13H17.75L17,12.1V11M21,15V17H19C19,16.31 18.9,15.63 18.71,15H21M17,17A5,5 0 0,1 12,22A5,5 0 0,1 7,17C7,15.36 7.79,13.91 9,13V5A3,3 0 0,1 12,2A3,3 0 0,1 15,5V13C16.21,13.91 17,15.36 17,17M11,8V14.17C9.83,14.58 9,15.69 9,17A3,3 0 0,0 12,20A3,3 0 0,0 15,17C15,15.69 14.17,14.58 13,14.17V8H11M7,3V5H3V3H7M7,7V9H3V7H7M7,11V12.1L6.25,13H3V11H7M3,15H5.29C5.1,15.63 5,16.31 5,17H3V15Z" /></svg> Yesterday's day temperature</a -->
-                  <a id="gapp_layer_temperature" class="mdl-navigation__link" href="#layertemperature"><i class="mdi mdi-thermometer-lines mdi-24px"></i> Yesterday's day temperature</a>
-                  <hr>
-                  <a class="mdl-navigation__link" href="#language"><i class="material-icons">language</i> Language</a>
-                  <a class="mdl-navigation__link" href="#help"><i class="material-icons">help</i> Help</a>
-                  <a class="mdl-navigation__link" href="#info"><i class="material-icons">info</i> About GrowApp</a>
-              </nav>
-          </div>
-          <main class="mdl-layout__content">
-              <div class="page-content">
-                <div id="gapp_map"></div>
-                <button id="gapp_button_location" class="mdl-button mdl-js-button mdl-button--fab" disabled>
-                      <i class="material-icons">&#xE55C;</i>
-                </button>
-                <button id="gapp_button_camera" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" disabled>
-                      <i class="material-icons">&#xE412;</i>
-                </button>
-                <div id="gapp_featureinfo" class="hidden">
-                  <img id="gapp_featureinfo_photo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-                  <button id="gapp_featureinfo_addphoto" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" disabled><i class="material-icons">&#xE439;</i></button>
-                  <button id="gapp_featureinfo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
-                  <button id="gapp_featureinfo_fullscreen" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">fullscreen</i></button>
-                  <div id="gapp_featureinfo_spinner" class="mdl-spinner mdl-js-spinner is-active"></div>
-                </div>
-                <div id="gapp_legendvertical" class="hidden">
-                  <span class="legendtop legendmin legendwhite"></span><span class="legendbottom legendmax legendwhite"></span>
-                  <img src="layertemperaturev.png" id="legendimagev" width="35" height="401">
-                </div>
-                <div id="gapp_legendhorizontal" class="hidden">
-                  <span class="legendleft legendmin legendwhite"></span><span class="legendright legendmax legendwhite"></span>
-                  <img src="layertemperatureh.png" id="legendimageh" width="365" height="34">
-                </div>
-              </div>
-          </main>
+		.container {
 
-      </div>
-      <div id="gapp_fullscreenphotopopup" class="hidden">
-        <img id="gapp_fullscreenphoto" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
-        <button id="gapp_fullscreenphotopopup_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
-      </div>
-      <div id="gapp_camera_popup" class="hidden">
-	     <div id="gapp_camera_overlay_picture_frame" class="hidden">
-            <img id="gapp_camera_overlay_picture" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-         </div>
-         <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab mdl-color--white">
-           <i class="material-icons">&#xE412;</i>
-         </button>
-         <button id="gapp_camera_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent">
-           <i class="material-icons">close</i>
-         </button>
+		}
+		.center {
+			text-align: center;
+		}
+		.demo-card-wide.mdl-card {
+		  width: 512px;
 
-         <div id="gapp_camera_photo_preview_frame" class="hidden">
-            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-            <button id="gapp_camera_photo_ok" class="mdl-button mdl-js-button mdl-button--fab mdl-color-text--primary-contrast gapp_color_gray_transparent">
-                <i class="material-icons">done</i>
-            </button>
-            <button id="gapp_camera_photo_close" class="mdl-button mdl-js-button mdl-button--fab mdl-color-text--primary-contrast gapp_color_gray_transparent">
-                <i class="material-icons">close</i>
-            </button>
-         </div>
-      </div>
-      <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
-            <div class="mdl-snackbar__text">hallo</div>
-            <button class="mdl-snackbar__action" type="button"></button>
-      </div>
-      <script type="text/javascript" src="./cordova.js"></script>
-  </body>
+		}
+		.demo-card-wide > .mdl-card__title {
+		  color: #fff;
+		  height: 320px;
+		  background: url('phenolgyicon.svg') center;
+		  background-repeat: no-repeat;
+		}
+		.demo-card-wide > .mdl-card__menu {
+		  color: #fff;
+		}
+	</style>
+    <script type="text/javascript" src="cordova.js"></script>
+
+    <script>
+    if (typeof cordova != "undefined") {
+      // cordova permissions available
+      document.addEventListener('deviceready', function() {
+        // device is ready, check if permissions are set
+		if (cordova.plugins && cordova.plugins.permissions) {
+			var permissions = cordova.plugins.permissions;
+
+			var errorCallback = function() {
+			  console.log('3');
+			  console.warn('Location permission is not turned on');
+			  setTimeout(function(){window.location= "main.html"}, 500);
+			}
+
+			var checkPermissionCoarseLocationCallback = function(status){
+			  if (!status.hasPermission) {
+				errorCallback();
+			  } else {
+				// all permissions granted
+				window.location = "main.html";
+				//setTimeout(function(){window.location= "main.html"}, 2000);
+			  }
+			}
+			var checkPermissionFineLocationCallback = function(status) {
+			  console.log('6');
+			  if(!status.hasPermission) {
+
+				permissions.requestPermission(
+				  permissions.ACCESS_FINE_LOCATION, function(status) {
+					if(!status.hasPermission) {
+					  errorCallback();
+					} else {
+					  permissions.requestPermission(permissions.ACCESS_COARSE_LOCATION, checkPermissionCoarseLocationCallback)
+					}
+				  },
+				  errorCallback);
+			  } else {
+				permissions.requestPermission(permissions.ACCESS_COARSE_LOCATION, checkPermissionCoarseLocationCallback)
+			  }
+			}
+			permissions.hasPermission(permissions.ACCESS_FINE_LOCATION, checkPermissionFineLocationCallback, null);
+		}
+      }, false);
+    } else {
+	  window.location="main.html";
+    }
+    function setup()
+    {
+    }
+
+    </script>
+    </head>
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta name="generator" content="HTML Tidy for Windows (vers 14 February 2006), see www.w3.org" />
+		<title>GrowApp</title>
+	</head>
+	<body style="" onload="setup()">
+		<div class="mdl-grid">
+		    <div class="mdl-layout-spacer"></div>
+			<div class="demo-card-wide mdl-card mdl-shadow--2dp">
+				<div class="mdl-card__title">
+					<h2 class="mdl-card__title-text"></h2>
+				</div>
+				<div class="center mdl-card__supporting-text"><h2>GrowApp</h2>
+					Animate Your Environment!
+				</div>
+				<div class="mdl-card__actions mdl-card--border">
+				Loading...
+				</div>
+			</div>
+		    <div class="mdl-layout-spacer"></div>
+		</div>
+</body>
 </html>
