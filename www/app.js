@@ -69,7 +69,7 @@ var PhotoServer = new function() {
   // reset cache time
   this.resetCacheTime = function()
   {
-      window.localStorage.cacheTime = new Date.now();
+      window.localStorage.cacheTime = Date.now();
   };
 
   // get cache time, updated to now if older then 10 minutes
@@ -78,7 +78,7 @@ var PhotoServer = new function() {
     var cacheTime;
     if (window.localStorage.cacheTime) {
         cacheTime = window.localStorage.cacheTime;
-        if (now - cacheTime > 10 * 60 * 1000) {
+        if (now - cacheTime > 10 * 60 * 1000 /* 10 minutes */) {
             cacheTime = now;
             window.localStorage.cacheTime = cacheTime;
         }
@@ -886,8 +886,11 @@ var App = new function() {
                     // success! Free memory and close dialog
                     p.rawdata = null;
                     app.cameraPreviewPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+                    PhotoServer.resetCacheTime(); // reset cache
+                    app.photoLayer = PhotoServer.updatePhotos();
                     app.cameraPreviewPhotoFrame.hide();
                     app.cameraPopup.hide();
+                    
                 }
             });
         });
@@ -1014,6 +1017,8 @@ var App = new function() {
 
             var picture_url = PhotoServer.bigPhotoUrl(feature.get('filename'));
             var spinner = document.querySelector('#gapp_featureinfo_spinner');
+            var errorInfo = document.querySelector('#gapp_featureinfo_error');
+            errorInfo.classList.add('hidden');
             app.featureInfoPhoto = document.querySelector('#gapp_featureinfo_photo');
             app.featureInfoPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
             app.featureInfoPhoto.url = picture_url;
@@ -1024,6 +1029,10 @@ var App = new function() {
                 spinner.classList.remove('is-active');
                 app.featureInfoPhoto.src = app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
             };
+            photo.onerror = function() {
+                spinner.classList.remove('is-active');
+                errorInfo.classList.remove('hidden');
+            }
 
             photo.src = picture_url;
             var picture_width = feature.get('width');

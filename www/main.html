@@ -77,6 +77,12 @@
         top: 45%;
         left: 45%;
       }
+	  #gapp_featureinfo_error {
+        position: absolute;
+        top: 45%;
+        left: 10%;
+		color: red;
+      }
       #gapp_featureinfo_photo {
         width: 100%;
         height: 100%;
@@ -329,6 +335,7 @@
                   <button id="gapp_featureinfo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
                   <button id="gapp_featureinfo_fullscreen" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">fullscreen</i></button>
                   <div id="gapp_featureinfo_spinner" class="mdl-spinner mdl-js-spinner is-active"></div>
+				  <div id="gapp_featureinfo_error" class="hidden"><i class="material-icons">&#xE888;</i> Error loading picture</div>
                 </div>
                 <div id="gapp_legendvertical" class="hidden">
                   <span class="legendtop legendmin legendwhite"></span><span class="legendbottom legendmax legendwhite"></span>
