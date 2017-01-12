@@ -685,6 +685,18 @@ var App = new function() {
                 window.location.hash='';
                 window.location= 'account.html';
                 break;
+            case '#language':
+                window.location.hash='';
+                window.location = 'language.html';
+                break;
+            case '#help':
+                window.location.hash='';
+                window.location = 'help.html';
+                break;
+            case '#info':
+                window.location.hash='';
+                window.location = 'info.html';
+                break;
         }
     };
 

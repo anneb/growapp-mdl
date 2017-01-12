@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Locophoto</title>
+    <meta name="description" content="Locophoto and timelapse app">
+    <meta http-equiv="content-type" content="text/html; charset=UTF8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" href="favicon.ico" type="image/ico">
+    <!-- link rel="stylesheet" href="http://openlayers.org/en/v3.11.2/css/ol.css" type="text/css"> -->
+    <link rel="stylesheet" href="openlayers/v3.11.2/css/ol.css" type="text/css">
+    <link rel="stylesheet" href="bootstrap.min.css" type="text/css">
+    <link href="jumbotron-narrow.css" rel="stylesheet">
+    <style>
+    .button {
+        width: 40px;
+        height: 40px;
+        background: #aaa;
+        border-radius: 100%;
+        box-sizing: border-box;
+        outline: none;
+        padding: 8px;
+        position: relative;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+        display: inline-block;
+        cursor: pointer;
+    }
+    .icon {
+        width: 24px;
+        height: 24px;
+        background: transparent;
+        fill: white;
+    }
+    .active {
+        background: orange;
+    }
+
+    </style>
+</head>
+<body>
+<svg style="display: none;">
+  <symbol id="my-location" viewBox="0 0 24 24">
+      <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+  </symbol>
+  <symbol id="layers">
+    <path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/>
+  </symbol>
+  <symbol id="menu">
+    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+  </symbol>
+  <symbol id="camera-alt" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
+  </symbol>
+  <symbol id="add-a-photo" viewBox="0 0 24 24">
+      <path d="M3 4V1h2v3h3v2H5v3H3V6H0V4h3zm3 6V7h3V4h7l1.83 2H21c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V10h3zm7 9c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-3.2-5c0 1.77 1.43 3.2 3.2 3.2s3.2-1.43 3.2-3.2-1.43-3.2-3.2-3.2-3.2 1.43-3.2 3.2z" />
+  </symbol>
+
+<div class="container">
+  <div class="jumbotron">
+    <h1>Help</h1>
+    <p class="lead">Phenology App</p>
+  </div>
+
+  <div class="row marketing">
+    <div class="col-xs-12">
+      <h4>Purpose</h4>
+      <p>This app helps you track and visualize changes in the appearance - the '<i>phenology</i>' - of trees and other vegetation. The phenology of a particular tree at a certain location and a certain moment
+        in time is stored in the phenology database by adding a photo taken with this app. The app presents a geographic map with the locations of all photos taken by all users.
+        A photo can be viewed by tapping the corresponding photo location. If the photo location happens to be near your current location, you can add new photos of the same subject.
+        The app then shows a semi-transparent version of the previous photo on top of the camera view so that camera and photo can be visually aligned. Once more than one photo of the same
+        subject at the same location has been taken, the app automatically constructs time-lapsed versions of these photos. If enough photos are taken over sufficiently large intervals,
+          the resulting animations should clearly show all aspects of the changing vegetation phenology over time.
+    </div>
+  </div>
+  <div class="row marketing">
+    <div class="col-xs-12">
+      <h4>User Interface</h4>
+      <dl class="dl-horizontal">
+
+        <dt><img src="help-map.png"></dt><dd><h4>Map</h4>Use pinch to zoom in and out, swipe to pan. Red rectangles indicate photo locations, tap to show photo. Tap photo to enlarge photo</dd>
+        <dt><span id="menubutton" class="button active" title="menu">
+<svg class="icon"><use xlink:href="#menu" /></svg>
+</span></dt><dd><h4>Menu</h4>Toggles popup-menu for additional features</dd>
+        <dt><span id="layersbutton" class="button active" title="map layers">
+<svg class="icon"><use xlink:href="#layers" /></svg>
+</span></dt><dd><h4>Map layers</h4>Toggles list of additional map layers. <i>Start of Season</i> layer shows when the vegetation season begins, <i>Vegetation trend</i> layer shows how much vegetation has changed since last year. <i>Yesterday's temperature</i> displays the surface temperature (not air temperature) for yesterday where available</dd>
+        <dt><span id="my-locationbutton" class="button active" title="show your location in center of map">
+<svg class="icon"><use xlink:href="#my-location" /></svg>
+</span></dt><dd><h4>Location tracking</h4>When activated, the map stays automatically centered at the currently tracked location until users manually pans to a different location</dd>
+<dt><span id="camerabutton" class="button active" title="take photo">
+<svg class="icon"><use xlink:href="#camera-alt" /></svg>
+</span></dt><dd><h4>Take picture</h4>Starts the camera view to take a picture. Not available in the web-site version (app only)</dd>
+<dt><span class="button active" title="add additional photo">
+<svg class="icon"><use xlink:href="#add-a-photo" /></svg>
+</span></dt><dd><h4>Add an additional photo</h4>Only available in previously taken photos at or near your current location. Click to add a new picture of the same subject. Added photos are inserted into an automatically created time lapse animation</dd>
+
+      </dl>
+    </div>
+  </div>
+  <div class="row marketing">
+    <div class="col-xs-12">
+      <h4>Requirements</h4>
+      Currently this app should work well with newer Android (version 4.4+) devices with GPS and camera enabled. The app requires an available mobile internet connection.
+    </div>
+  </div>
+
+</div> <!-- /container -->
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>growapp-mdl</title>
+    <meta charset="utf-8">
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+    <meta http-equiv="content-type" content="text/html; charset=UTF8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+
+    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+
+    <link rel="stylesheet" href="./iconfont/material-icons.css">
+    <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', 'Noto', sans-serif;
+        }
+        .content {
+            padding: 10px;
+        }
+        .page-content {
+            width: 80%;
+            max-width: 512px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .gapp-main {
+            -webkit-flex-shrink: 0;
+            -ms-flex-negative: 0;
+            flex-shrink: 0;
+        }
+
+        .gapp-header .mdl-layout__header-row {
+            padding-left: 40px;
+        }
+
+        .gapp-container {
+            max-width: 1600px;
+            width: calc(100% - 16px);
+            margin: 0 auto;
+        }
+
+        .gapp-content {
+            border-radius: 2px;
+            padding: 80px 56px;
+            margin-bottom: 80px;
+        }
+
+        .gapp-layout.is-small-screen .gapp-content {
+            padding: 40px 28px;
+        }
+
+        .gapp-content h3 {
+            margin-top: 48px;
+        }
+
+        .gapp-footer {
+            padding-left: 40px;
+        }
+
+        .gapp-footer .mdl-mini-footer--link-list a {
+            font-size: 13px;
+        }
+    </style>
+    <script>
+        function init() {
+            document.querySelector('#backbutton').addEventListener('click', function () {
+                // warning: history keeps track of hashchanges
+                window.history.back();
+            }, false);
+        }
+    </script>
+</head>
+<body onload="init();">
+<div class="mdl-layout__container">
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header is-casting-shadow">
+        <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i>
+        </div>
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title"> GrowApp - About</span>
+        </div>
+    </header>
+
+    <main class="gapp-main mdl-layout__content">
+        <div class="gapp-container mdl-grid">
+            <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+            <div class="gapp-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+                <div id="content" class="mdl-color-text--grey-500">
+                    <h1>GrowApp</h1>
+                    <p>This application has been developed within the MyGEOSS project, which has received funding from
+                        the European Union‘s Horizon 2020 research and innovation program.</p>
+
+
+                    <h4>MyGEOSS</h4>
+                    <p><img src="logo-mygeoss.png"/></p>
+
+
+                    <h4>European Union</h4>
+                    <p><img src="logo-eu.png"/></p>
+
+
+                    <div>
+                        <h4>Attributions</h4>
+                        <dl class="dl-horizontal">
+                            <dt>Map client software</dt>
+                            <dd><a href="http://openlayers.org">OpenLayers 3.0</a>, <a
+                                    href="http://proj4js.org">proj4</a></dd>
+                            <dt>Map server software</dt>
+                            <dd><a href="https://mapproxy.org/">Mapproxy</a></dd>
+                            <dt>Background Map</dt>
+                            <dd><a href="http://www.openstreetmap.org">Openstreetmap</a></dd>
+                            <dt>Image processing and animation</dt>
+                            <dd><a href="http://www.graphicsmagick.org/">GraphicsMagic</a> and <a
+                                    href="http://aheckmann.github.io/gm/">GM for nodejs</a></dd>
+                            <dt>Photo browsing</dt>
+                            <dd><a href="http://photoswipe.com">Photoswipe</a></dd>
+                            <dt>Extra map layers</dt>
+                            <dd><a href="https://worldview.earthdata.nasa.gov">Nasa worldview</a></dd>
+                            <dt>Layout and icons</dt>
+                            <dd><a href="https://getmdl.io/">Material Design Lite</a></dd>
+                            <dt>Native app framework</dt>
+                            <dd><a href="https://cordova.apache.org/">Apache cordova</a> and <a
+                                    href="https://developer.android.com">Android SDK</a> and <a
+                                    href="https://github.com/westonganger/cordova-plugin-camera-preview">community
+                                camera plugin</a></dd>
+                            <dt>Database</dt>
+                            <dd><a href="https://www.postgresql.org/">Postgres</a> and <a href="http://www.postgis.org">PostGIS</a>
+                            </dd>
+                            <dt>Custom Server</dt>
+                            <dd><a href="https://nodejs.org">NodeJs</a></dd>
+                            <dt>Logo</dt>
+                            <dd>Based on <a href="http://www.freevector.com/tree-world">this design</a></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <footer class="gapp-footer mdl-mini-footer">
+                <div class="mdl-mini-footer--left-section">
+                    <ul class="mdl-mini-footer--link-list">
+                        <li>&copy; 2016 Globe, NatureToday, Geodan</li>
+                    </ul>
+                </div>
+            </footer>
+        </div>
+    </main>
+</div>
+</div>
+</body>
+</html>
