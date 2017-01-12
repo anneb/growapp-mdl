@@ -885,7 +885,7 @@ var App = new function() {
                 } else {
                     // success! Free memory and close dialog
                     p.rawdata = null;
-                    cameraPreviewPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+                    app.cameraPreviewPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
                     app.cameraPreviewPhotoFrame.hide();
                     app.cameraPopup.hide();
                 }

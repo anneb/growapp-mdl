@@ -57,11 +57,17 @@
             // see http://stackoverflow.com/questions/34077730/fetching-the-value-of-a-mdl-textfield/34122149
             var mdlDisplayName = document.querySelector('#mdl-displayname'); // for setting
             var displayName = document.querySelector('#displayname'); // for getting
+            var mdlEmailInfo = document.querySelector('#mdl-emailinfo');
             if (window.localStorage.displayName) {
                 //displayName.value = window.localStorage.displayName;
                 mdlDisplayName.MaterialTextfield.change(window.localStorage.displayName);
             } else {
                 mdlDisplayName.MaterialTextfield.change('');
+            }
+            if (window.localStorage.email) {
+              mdlEmailInfo.MaterialTextfield.change(window.localStorage.email);
+            } else {
+              mdlEmailInfo.MaterialTextfield.change('undefined')
             }
             //displayName.MaterialTextfield.checkDirty();
             document.querySelector('#accountemail').classList.add('hidden');
@@ -138,7 +144,7 @@
             width: 80%;
             max-width: 512px;
             margin-left: auto;
-            margin-right: auto;			
+            margin-right: auto;
         }
         .account-card-wide.mdl-card {
             width: 100%;
@@ -223,8 +229,8 @@
                             <label class="mdl-textfield__label" for="displayname">Display name</label>
                             <i class="material-icons mdl-textfield__label__icon">&#xE853;</i>
                         </div>
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="email" id="emailinfo" value="anne.blankert@geodan.nl" disabled>
+                        <div id="mdl-emailinfo" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input class="mdl-textfield__input" type="email" id="emailinfo" disabled>
                             <label class="mdl-textfield__label" for="emailinfo">email address</label>
                             <i class="material-icons mdl-textfield__label__icon">mail</i>
                         </div>
