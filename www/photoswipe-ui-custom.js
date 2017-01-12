@@ -654,7 +654,7 @@ var PhotoSwipeUI_Default =
 			framework.removeClass(_controls, 'pswp__ui--over-close');
 			framework.addClass( _controls, 'pswp__ui--hidden');
 			ui.setIdle(false);
-			window.location = "index.html";
+			window.location = "main.html";
 		});
 
 
@@ -752,7 +752,7 @@ var PhotoSwipeUI_Default =
 			// close gallery if clicked outside of the image
 			if(_hasCloseClass(target)) {
 				pswp.close();
-                window.location = "index.html";
+                window.location = "main.html";
 				return;
 			}
 
@@ -760,7 +760,7 @@ var PhotoSwipeUI_Default =
 				if(pswp.getZoomLevel() === 1 && pswp.getZoomLevel() <= pswp.currItem.fitRatio) {
 					if(_options.clickToCloseNonZoomable) {
 						pswp.close();
-						window.location = "index.html";
+						window.location = "main.html";
 					}
 				} else {
 					pswp.toggleDesktopZoom(e.detail.releasePoint);
@@ -781,7 +781,7 @@ var PhotoSwipeUI_Default =
 			// tap to close gallery
 			if(_options.tapToClose && (framework.hasClass(target, 'pswp__img') || _hasCloseClass(target)) ) {
 				pswp.close();
-                window.location = "index.html";
+                window.location = "main.html";
 				return;
 			}
 
