@@ -787,9 +787,9 @@ var App = new function() {
             if (typeof StatusBar !== 'undefined') {
                 StatusBar.hide();
             }
-            this.startCamera();
             document.querySelector('#mainUI').classList.add('hidden');
             app.cameraPopup.classList.remove('hidden');
+            this.startCamera();
         };
         this.cameraPopup.hide = function() {
             document.removeEventListener('backbutton', app.cameraPopup.hide);
@@ -890,7 +890,7 @@ var App = new function() {
                     app.photoLayer = PhotoServer.updatePhotos();
                     app.cameraPreviewPhotoFrame.hide();
                     app.cameraPopup.hide();
-                    
+
                 }
             });
         });
