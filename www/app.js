@@ -783,7 +783,7 @@ var App = new function() {
                 cameraOverlayPictureFrame.classList.add('hidden');
             }
             document.addEventListener('backbutton', app.cameraPopup.hide);
-            document.addEventListener('orientationchange', app.cameraPopup.resetCamera);
+            window.addEventListener('orientationchange', app.cameraPopup.resetCamera);
             if (typeof StatusBar !== 'undefined') {
                 StatusBar.hide();
             }
@@ -793,7 +793,7 @@ var App = new function() {
         };
         this.cameraPopup.hide = function() {
             document.removeEventListener('backbutton', app.cameraPopup.hide);
-            document.removeEventListener('orientationchange', app.cameraPopup.resetCamera);
+            window.removeEventListener('orientationchange', app.cameraPopup.resetCamera);
             app.cameraPopup.stopCamera();
             if (typeof StatusBar !== 'undefined') {
                 StatusBar.show();
