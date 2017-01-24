@@ -29,6 +29,7 @@ app.use(bodyParser.urlencoded({extended: true, limit: '50mb'}));
 app.use(bodyParser.json());
 
 app.get('/photoserver/version', cors(), function(req, res){
+  console.log('GET /photoserver/version');
   res.json({major: 1, minor: 0, revision: 0});
 });
 
