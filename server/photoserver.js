@@ -5,7 +5,7 @@ var multer = require('multer'); // for  enctype="multipart/form-data"
 //var im = require('imagemagick');
 //var im = require('gm'); // graphicsMagic
 var crypto = require('crypto');
-var pg = require('pg'); //postgres
+//var pg = require('pg'); //postgres
 var Path = require('path');
 var cors = require('cors');
 var nodemailer = require('nodemailer');
@@ -28,8 +28,12 @@ var dbPool = new Pool({
 app.use(bodyParser.urlencoded({extended: true, limit: '50mb'}));
 app.use(bodyParser.json());
 
-// get method, explain user to use post methode
-app.get('/photoserver/sendphoto', function(req, res){
+app.get('/photoserver/version', cors(), function(req, res){
+  res.json({major: 1, minor: 0, revision: 0});
+});
+
+// get method, explain user to use post method
+app.get('/photoserver/sendphoto', cors(), function(req, res){
     //console.log('GET /photoserver/sendphoto');
     //var html = '<html><body><form method="post" action="http://localhost:3100">Name: <input type="text" name="name" /><input type="submit" value="Submit" /></form></body>';
     var html = fs.readFileSync('sendphoto.html');
@@ -90,7 +94,7 @@ app.get('/photoserver/getphotos', cors(), function(req, res) {
 app.post('/photoserver/getphotoset', cors(), function(req, res) {
   console.log('POST /photoserver/getphotoset');
   var photoid = req.body.photoid;
-  sql = "select id, ST_AsGeoJSON(location) geom, accuracy, filename, time, width, height from photo where rootid=$1 or id=$1 order by time";
+  var sql = "select id, ST_AsGeoJSON(location) geom, accuracy, filename, time, width, height from photo where rootid=$1 or id=$1 order by time";
   dbPool.query(sql, [photoid])
     .then(function(result){
       res.json(createCollection(result.rows, null, null));
@@ -142,7 +146,7 @@ app.post('/photoserver/getmyphotos', cors(), function(req, res) {
           res.writeHead(500, {'Content-Type': 'text/html'});
           res.end('error: ' + reason);
         });
-    })
+    });
 });
 
 app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
@@ -184,8 +188,8 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
             gm(filename).rotate("white", d).write(filename, function(err){
               if (err) {
                 res.writeHead(500, {'Content-Type' : 'text/html'});
-                res.end('unable to rotate image')
-                return
+                res.end('unable to rotate image');
+                return;
               }
               var width = result.rows[0].height;
               var height = result.rows[0].width;
@@ -193,7 +197,7 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
               dbPool.query(sql, [width, height, result.rows[0].id])
                 .then(function (result){
                   res.end('image rotated');
-                })
+                });
             });
           } else {
             // photo not found
@@ -223,7 +227,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
         if (userid > 0) {
           // user known
           sql = "select p.id, p.animationfilename, p.rootid from photo p, device d where p.filename=$1 and p.deviceid=d.id and d.userid=$2";
-          parameters = [filename, userid]
+          parameters = [filename, userid];
         } else {
           // user not known, check if device is known
           if (!deviceid || deviceid == '' || !devicehash || devicehash == '') {
@@ -253,12 +257,12 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                     console.log("failed to delete file " + __dirname + '/uploads/' + filename);
                                     res.writeHead(500, {
                                         'Content-Type': 'text/html'
-                                    })
+                                    });
                                     res.end("Error deleting " + filename + " from disk");
                                 } else {
                                     res.writeHead(200, {
                                         'Content-Type': 'text/html'
-                                    })
+                                    });
                                     res.end('photo removed: ' + filename);
                                     // check if this photo was part of an animation
                                     if (animationfilename) {
@@ -286,7 +290,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                                 });
                                               });
                                           }
-                                        })
+                                        });
                                     } else if (rootid) {
                                       // this photo was somewhere in animation
                                       sql = "select id, filename, animationfilename from photo where id=$1 or rootid=$1 order by time";
@@ -306,7 +310,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                                       console.log("failed to delete animation file " + animationfilename);
                                                     }
                                                   });
-                                                })
+                                                });
                                             }
                                           }
                                         });
@@ -326,7 +330,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                     // photo not found
                     res.writeHead(403, {
                         'Content-Type': 'text/html'
-                    })
+                    });
                     res.end('photo not found or invalid credentials');
                 }
             })
@@ -334,10 +338,10 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                 console.log(reason);
                 res.writeHead(500, {
                     'Content-Type': 'text/html'
-                })
+                });
                 res.end('Internal Error: ' + reason);
             });
-      })
+      });
 }); // app.post
 
 // helper to prefix number with zero's
@@ -376,7 +380,7 @@ function getValidationCode(email, callback) {
                                 // insert new user failed
                                 callback(reason);
                             });
-                    };
+                    }
                 }); // crypto
             }
         })
@@ -438,16 +442,16 @@ app.post('/photoserver/validatemail', cors(), multer().array(), function (req, r
           res.writeHead(200, {'Content-Type': 'text/html'});
           res.end('validation code sent by email');
         }
-      })
+      });
     }
-  })
-})
+  });
+});
 
 function linkUserToDevice(username, deviceid, devicehash)
 {
     // store user with device if user is on known device
     if (deviceid && deviceid != '' && devicehash && devicehash != '') {
-      sql = "update device set userid=(select id from photouser where email=$1 limit 1) where deviceid=$2 and devicehash=$3";
+      var sql = "update device set userid=(select id from photouser where email=$1 limit 1) where deviceid=$2 and devicehash=$3";
       dbPool.query(sql, [username, deviceid, devicehash]);
     }
 }
@@ -546,7 +550,7 @@ function getFilename (directory, extension, retrycount, cb) {
           cb(err, err ? undefined : filename);
           return;
         }
-      })
+      });
     } else {
       // callback with error
       cb ("file exists", undefined);
@@ -563,7 +567,7 @@ function updateAnimation(rootid, path)
           .then(function (result){
             if (result.rows.length > 1) {
               // at least two photos found, create animation
-              var outputfilename = Path.parse(result.rows[0].filename).name + ".gif"
+              var outputfilename = Path.parse(result.rows[0].filename).name + ".gif";
               var graphicsMagic = gm();
               for (var i = 0; i < result.rows.length; i++) {
                 console.log(result.rows[i].filename);
@@ -641,7 +645,7 @@ app.post('/photoserver/checkuser', cors(), function(req, res) {
         var deviceid = req.body.deviceid;
         var devicehash = req.body.devicehash;
         if (deviceid && deviceid != '' && devicehash && devicehash != '') {
-          sql = "update device set userid=$1 where deviceid=$2 and devicehash=$3";
+          var sql = "update device set userid=$1 where deviceid=$2 and devicehash=$3";
           dbPool.query(sql, [id, deviceid, devicehash]);
         }
       } else {
@@ -701,13 +705,13 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                 .then(function(result) {
                                     if (result > 0) {
                                         var deviceid = result;
-                                        sql = "insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7)";
+                                        var sql = "insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7)";
                                         dbPool.query(sql, [shortfilename, imageinfo.width, imageinfo.height, location, accuracy, rootid, deviceid])
                                             .catch(function(reason) {
                                                 console.log(reason);
                                                 res.writeHead(500, {
                                                     'Content-Type': 'text/html'
-                                                })
+                                                });
                                                 res.end('Internal Error: ' + reason);
                                             })
                                             .then(function(result) {
@@ -737,7 +741,7 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                         // user not valid?
                                         res.writeHead(403, {
                                             'Content-Type': 'text/html'
-                                        })
+                                        });
                                         res.end('Access denied: device not known or invalid credentials');
                                     }
                                 }); // checkDevice
@@ -746,7 +750,7 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                     }
                 }); // fs.writeFile
             } else {
-                console.log('GetFilename error: ' + err)
+                console.log('GetFilename error: ' + err);
                 res.writeHead(500, {
                     'Content-Type': 'text/html'
                 });
@@ -762,7 +766,7 @@ app.post('/photoserver/createdevice', cors(), function (req, res){
   var hash = req.body.hash;
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   if (ip.substr(0, 7) == "::ffff:") {
-    ip = ip.substr(7)
+    ip = ip.substr(7);
   }
   getUserid(username, hash)
     .then(function(userid){
@@ -797,11 +801,10 @@ app.post('/photoserver/createdevice', cors(), function (req, res){
         });
     })
     .catch(function(err){
-
+      // handle error
     });
-
 }); // createdevice
 
-port = 3100;
+var port = 3100;
 app.listen(port);
-console.log('Listening at http://localhost:' + port)
+console.log('Listening at http://localhost:' + port);

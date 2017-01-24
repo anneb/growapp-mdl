@@ -48,8 +48,7 @@
     
     function checkServerVersion(callback) {
       var xhr = new XMLHttpRequest();
-      var url = serverURL + "/myTutorials.txt";
-      url = 'http://bestaat.niet.nl/toch';
+      var url = serverURL + "/photoserver/version";
 
       xhr.onreadystatechange = function() {
         if (this.readyState == 4 && xhr.status == 200) {
