@@ -67,15 +67,16 @@
     
     function setup() {
       checkServerVersion(function(err, result) {
+        var message = document.querySelector('#message');
         if (err) {
-          var message = document.querySelector('#message');
-          message.classList.add('errormessage')
-          message.innerHTML = result;
+          message.classList.add('errormessage');
+          message.innerHTML = result+'<p><a href="index.html">Try again</a> later or update the app if the problem persists</p>';
         }
         else {
-          if (result.major && result.major < clientVersion.major) {
+          if (result.major && result.major > clientVersion.major) {
             // this client is too old
-            alert("client too old, please update!");
+            message.classList.add('errormessage');
+            message.innerHTML = "App is no longer compatible, please update";
             return;
           }
           if (typeof cordova != "undefined") {
