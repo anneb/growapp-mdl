@@ -17,11 +17,9 @@
     <link rel="stylesheet" href="./iconfont/material-icons.css">
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
 
+    <script src="./config.js"></script>
 
     <style>
-		.container {
-
-		}
 		.center {
 			text-align: center;
 		}
@@ -38,59 +36,104 @@
 		.demo-card-wide > .mdl-card__menu {
 		  color: #fff;
 		}
+		.errormessage {
+		  color: red;
+		  font-weight: bold;
+		}
 	</style>
     <script type="text/javascript" src="cordova.js"></script>
 
     <script>
-    if (typeof cordova != "undefined") {
-      // cordova permissions available
-      document.addEventListener('deviceready', function() {
-        // device is ready, check if permissions are set
-		if (cordova.plugins && cordova.plugins.permissions) {
-			var permissions = cordova.plugins.permissions;
+    /* global cordova, serverURL, clientVersion */
+    
+    function checkServerVersion(callback) {
+      var xhr = new XMLHttpRequest();
+      var url = serverURL + "/myTutorials.txt";
+      url = 'http://bestaat.niet.nl/toch';
 
-			var errorCallback = function() {
-			  console.log('3');
-			  console.warn('Location permission is not turned on');
-			  setTimeout(function(){window.location= "main.html"}, 500);
-			}
-
-			var checkPermissionCoarseLocationCallback = function(status){
-			  if (!status.hasPermission) {
-				errorCallback();
-			  } else {
-				// all permissions granted
-				window.location = "main.html";
-				//setTimeout(function(){window.location= "main.html"}, 2000);
-			  }
-			}
-			var checkPermissionFineLocationCallback = function(status) {
-			  console.log('6');
-			  if(!status.hasPermission) {
-
-				permissions.requestPermission(
-				  permissions.ACCESS_FINE_LOCATION, function(status) {
-					if(!status.hasPermission) {
-					  errorCallback();
-					} else {
-					  permissions.requestPermission(permissions.ACCESS_COARSE_LOCATION, checkPermissionCoarseLocationCallback)
-					}
-				  },
-				  errorCallback);
-			  } else {
-				permissions.requestPermission(permissions.ACCESS_COARSE_LOCATION, checkPermissionCoarseLocationCallback)
-			  }
-			}
-			permissions.hasPermission(permissions.ACCESS_FINE_LOCATION, checkPermissionFineLocationCallback, null);
-		}
-      }, false);
-    } else {
-	  window.location="main.html";
+      xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && xhr.status == 200) {
+          var myArr = JSON.parse(this.responseText);
+          callback(false, myArr);
+        }
+      };
+      
+      xhr.onerror = function () {
+        callback(true, 'failed to connect to ' + url);
+      };
+      
+      xhr.open("GET", url, true);
+      xhr.send();
     }
-    function setup()
-    {
-    }
+    
+    function setup() {
+      checkServerVersion(function(err, result) {
+        if (err) {
+          var message = document.querySelector('#message');
+          message.classList.add('errormessage')
+          message.innerHTML = result;
+        }
+        else {
+          if (result.major && result.major < clientVersion.major) {
+            // this client is too old
+            alert("client too old, please update!");
+            return;
+          }
+          if (typeof cordova != "undefined") {
+            // cordova permissions available
+            document.addEventListener('deviceready', function() {
+              // device is ready, check if permissions are set
+              if (cordova.plugins && cordova.plugins.permissions) {
+                var permissions = cordova.plugins.permissions;
 
+                var errorCallback = function() {
+                  console.log('3');
+                  console.warn('Location permission is not turned on');
+                  setTimeout(function() {
+                    window.location = "main.html";
+                  }, 500);
+                };
+
+                var checkPermissionCoarseLocationCallback = function(status) {
+                  if (!status.hasPermission) {
+                    errorCallback();
+                  }
+                  else {
+                    // all permissions granted
+                    window.location = "main.html";
+                    //setTimeout(function(){window.location= "main.html"}, 2000);
+                  }
+                };
+                var checkPermissionFineLocationCallback = function(status) {
+                  console.log('6');
+                  if (!status.hasPermission) {
+
+                    permissions.requestPermission(
+                      permissions.ACCESS_FINE_LOCATION,
+                      function(status) {
+                        if (!status.hasPermission) {
+                          errorCallback();
+                        }
+                        else {
+                          permissions.requestPermission(permissions.ACCESS_COARSE_LOCATION, checkPermissionCoarseLocationCallback);
+                        }
+                      },
+                      errorCallback);
+                  }
+                  else {
+                    permissions.requestPermission(permissions.ACCESS_COARSE_LOCATION, checkPermissionCoarseLocationCallback);
+                  }
+                };
+                permissions.hasPermission(permissions.ACCESS_FINE_LOCATION, checkPermissionFineLocationCallback, null);
+              }
+            }, false);
+          }
+          else {
+            window.location = "main.html";
+          }
+        }
+      });
+      }
     </script>
     </head>
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -102,19 +145,19 @@
 	</head>
 	<body style="" onload="setup()">
 		<div class="mdl-grid">
-		    <div class="mdl-layout-spacer"></div>
-			<div class="demo-card-wide mdl-card mdl-shadow--2dp">
-				<div class="mdl-card__title">
-					<h2 class="mdl-card__title-text"></h2>
-				</div>
-				<div class="center mdl-card__supporting-text"><h2>GrowApp</h2>
-					Animate Your Environment!
-				</div>
-				<div class="mdl-card__actions mdl-card--border">
-				Loading...
-				</div>
-			</div>
-		    <div class="mdl-layout-spacer"></div>
+		  <div class="mdl-layout-spacer"></div>
+		    <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+			    <div class="mdl-card__title">
+				    <h2 class="mdl-card__title-text"></h2>
+			    </div>
+			    <div class="center mdl-card__supporting-text"><h2>GrowApp</h2>
+					    Animate Your Environment!
+			    </div>
+			    <div id="message" class="mdl-card__actions mdl-card--border">
+			      Loading...
+			    </div>
+			   </div>
+		     <div class="mdl-layout-spacer"></div>
 		</div>
 </body>
 </html>

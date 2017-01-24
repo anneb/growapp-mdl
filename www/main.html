@@ -21,6 +21,7 @@
     <script src="./openlayers-3.11.2/ol.js"></script>
     <script src="./node_modules/proj4/dist/proj4.js"></script>
     <script src="./app.js"></script>
+    <script src="./config.js"></script>
 
     <style>
       body {
@@ -292,7 +293,7 @@
       }
     </style>
   </head>
-  <body onload="App.init('https://phenology.geodan.nl', 'gapp_map', (typeof cordova !== 'undefined'))">
+  <body onload="App.init(serverURL, 'gapp_map', (typeof cordova !== 'undefined'))">
       <!-- Always shows a header, even in smaller screens. -->
       <div id="mainUI" class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
           <header class="mdl-layout__header">
