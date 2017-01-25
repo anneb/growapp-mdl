@@ -12,7 +12,7 @@ App: UI and handler hooks into OLMap
 
 */
 
-/* global document, ol, Image, CameraPreview, StatusBar, window.localStorage */
+/* global document, ol, Image, CameraPreview, StatusBar, localStorage */
 
 Number.prototype.toRad = function() { // helper
     return this * Math.PI / 180;
@@ -261,7 +261,6 @@ var PhotoServer = new function() {
         var formData = 'email=' + encodeURIComponent(email);
         xhr.open("POST", photoServer.server+"/photoserver/validatemail");
         xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
-        var status = document.querySelector('#mailstatus');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
@@ -272,7 +271,7 @@ var PhotoServer = new function() {
             }
         };
         xhr.send(formData);
-    }
+    };
 
     this.validateuser = function(email, code, deviceid, devicehash, callback)
     {
@@ -295,7 +294,7 @@ var PhotoServer = new function() {
             }
         };
         xhr.send(formData);
-    }
+    };
 
     this.checkuser = function(callback)
     {
@@ -326,7 +325,7 @@ var PhotoServer = new function() {
             }
         };
         xhr.send(formData);
-    }
+    };
 }; // PhotoServer
 
 var OLMap = new function() {
@@ -565,7 +564,7 @@ var App = new function() {
         if (layername != "") {
             var image = document.querySelector("#legendimagev");
             image.src = layername.substring(1) + "v.png";
-            image = document.querySelector("#legendimageh")
+            image = document.querySelector("#legendimageh");
             image.src = layername.substring(1) + "h.png";
             if (orientation == 'v') {
                 var legendtop = document.querySelector(".legendtop");
@@ -583,17 +582,17 @@ var App = new function() {
             }
             if (layername == '#layertrend') {
                 [].forEach.call(legendmin, function (element) {
-                    element.innerHTML = "-0.3"
+                    element.innerHTML = "-0.3";
                 });
                 [].forEach.call(legendmax, function (element) {
-                    element.innerHTML = "+0.3"
+                    element.innerHTML = "+0.3";
                 });
             } else if (layername == '#layerseason') {
                 [].forEach.call(legendmin, function (element) {
-                    element.innerHTML = "January"
+                    element.innerHTML = "January";
                 });
                 [].forEach.call(legendmax, function (element) {
-                    element.innerHTML = "December"
+                    element.innerHTML = "December";
                 });
             }
         }
@@ -601,7 +600,7 @@ var App = new function() {
         var mapLayerName = {};
         mapLayerName['#layerseason'] = 'startofseason';
         mapLayerName['#layertrend'] = 'vegetationtrend';
-        mapLayerName['#layertemperature'] = 'temperature'
+        mapLayerName['#layertemperature'] = 'temperature';
 
         // add maplayer
         switch(layername) {
@@ -611,7 +610,7 @@ var App = new function() {
                     source: new ol.source.XYZ({
                         url: "http://saturnus.geodan.nl/mapproxy/myseasons/tiles/"+mapLayerName[layername]+"/EPSG900913/{z}/{x}/{y}.png?origin=nw"
                     })
-                })
+                });
                 layers.insertAt(1, seasonlayer);
                 break;
             case '#layertemperature':
@@ -636,7 +635,7 @@ var App = new function() {
     {
         var layerElements = [];
         var layerHashes = ['#layerseason', '#layertrend', '#layertemperature'];
-        var layerIds = ['#gapp_layer_season', '#gapp_layer_trend', '#gapp_layer_temperature']
+        var layerIds = ['#gapp_layer_season', '#gapp_layer_trend', '#gapp_layer_temperature'];
         var clickedLayer = 0;
         var activeLayer = -1;
         for (var i = 0; i < layerHashes.length; i++) {
@@ -1032,7 +1031,7 @@ var App = new function() {
             photo.onerror = function() {
                 spinner.classList.remove('is-active');
                 errorInfo.classList.remove('hidden');
-            }
+            };
 
             photo.src = picture_url;
             var picture_width = feature.get('width');
@@ -1067,6 +1066,7 @@ var App = new function() {
         switch (status) {
             case 'zoom':
                 app.featureInfoPopup.hide();
+                app.setMapTracking(false);
                 break;
         }
     };
