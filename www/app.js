@@ -1052,7 +1052,7 @@ var App = new function() {
             }
 
             var addphotobutton = document.querySelector('#gapp_featureinfo_addphoto');
-            if (distance < 0.08) {
+            if (app.isMobileDevice && distance < 0.08) {
                 addphotobutton.removeAttribute('disabled');
             }
             else {
