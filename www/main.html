@@ -170,14 +170,16 @@
       }
       @media all and (orientation:landscape) {
         #gapp_camera_overlay_picture_frame {
-            position: relative;
-			top: 50%;
+            position: absolute;
+			      top: 50%;
             width: 100%;
         }
 		#gapp_camera_overlay_picture {
             position: absolute;
             width: 100%;
             opacity: 0.5;
+            -ms-transform: translateY(-50%);
+            -webkit-transform: translateY(-50%);
             transform: translateY(-50%);
         }
       }
