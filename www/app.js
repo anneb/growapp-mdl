@@ -146,7 +146,7 @@ var PhotoServer = new function() {
         var hash = window.localStorage.hash;
         var deviceid = window.localStorage.deviceid;
         var devicehash = window.localStorage.devicehash;
-        if ((!deviceid) || (deviceid=="undefined") || (!devicehash) || (devicehash=="undefined") ) {
+        if ((!deviceid) || (deviceid==="undefined") || (!devicehash) || (devicehash==="undefined") ) {
             var xhr = new XMLHttpRequest();
             var formData = "username=" + email +  "&hash=" + hash;
             xhr.open("POST", photoServer.server+"/photoserver/createdevice");
@@ -908,8 +908,25 @@ var App = new function() {
                 buttonTakePhoto.classList.remove('mdl-button--colored');
                 buttonTakePhoto.classList.add('mdl-color--white');
                 // todo: photo shutter animation
-                // fires cordova.plugins.camerapreview.setOnPictureTakenHandler
-                CameraPreview.takePicture();//({maxWidth: 640, maxHeight: 640});
+                // check if photo orientation is same as overlay-picture orientation
+                var orientationOk = true;
+                var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+                if (!cameraOverlayPictureFrame.classList.contains('hidden')) {
+                  var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay_picture');
+                  if (window.innerWidth > window.innerHeight) {
+                    if (cameraOverlayPicture.width < cameraOverlayPicture.height) {
+                      orientationOk = false;
+                    }
+                  } else if (cameraOverlayPicture.width > cameraOverlayPicture.height) {
+                    orientationOk = false;
+                  }
+                }
+                if (orientationOk) {
+                  // takePicture fires cordova.plugins.camerapreview.setOnPictureTakenHandler
+                  CameraPreview.takePicture();//({maxWidth: 640, maxHeight: 640});
+                } else {
+                  alert ('Camera orientation wrong, please adjust orientation');
+                }
             }
         });
 
