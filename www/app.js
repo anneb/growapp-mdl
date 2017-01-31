@@ -768,27 +768,29 @@ var App = new function() {
         this.cameraPopup = document.querySelector('#gapp_camera_popup');
         this.cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_preview_frame img');
         this.cameraPopup.show = function(overlayURL, photoid) {
-            if (typeof overlayURL == 'undefined') {
-                overlayURL = null;
-                photoid = 0;
-            }
-            app.cameraPreviewPhoto.photoid = photoid;
-            var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
-            if (overlayURL) {
-                var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay_picture');
-                cameraOverlayPicture.src = overlayURL;
-                cameraOverlayPictureFrame.classList.remove('hidden');
-            } else {
-                cameraOverlayPictureFrame.classList.add('hidden');
-            }
-            document.addEventListener('backbutton', app.cameraPopup.hide);
-            window.addEventListener('orientationchange', app.cameraPopup.resetCamera);
             if (typeof StatusBar !== 'undefined') {
-                StatusBar.hide();
+               StatusBar.hide();
             }
-            document.querySelector('#mainUI').classList.add('hidden');
-            app.cameraPopup.classList.remove('hidden');
-            this.startCamera();
+            setTimeout(function() {
+              if (typeof overlayURL == 'undefined') {
+                  overlayURL = null;
+                  photoid = 0;
+              }
+              app.cameraPreviewPhoto.photoid = photoid;
+              var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+              if (overlayURL) {
+                  var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay_picture');
+                  cameraOverlayPicture.src = overlayURL;
+                  cameraOverlayPictureFrame.classList.remove('hidden');
+              } else {
+                  cameraOverlayPictureFrame.classList.add('hidden');
+              }
+              document.addEventListener('backbutton', app.cameraPopup.hide);
+              window.addEventListener('orientationchange', app.cameraPopup.resetCamera);
+              document.querySelector('#mainUI').classList.add('hidden');
+              app.cameraPopup.classList.remove('hidden');
+              app.cameraPopup.startCamera();
+            }, 100);
         };
         this.cameraPopup.hide = function() {
             document.removeEventListener('backbutton', app.cameraPopup.hide);
