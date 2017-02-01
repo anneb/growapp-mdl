@@ -45,7 +45,7 @@
 
     <script>
     /* global cordova, serverURL, clientVersion */
-    
+
     function checkServerVersion(callback) {
       var xhr = new XMLHttpRequest();
       var url = serverURL + "/photoserver/version";
@@ -56,15 +56,15 @@
           callback(false, myArr);
         }
       };
-      
+
       xhr.onerror = function () {
         callback(true, 'failed to connect to ' + url);
       };
-      
+
       xhr.open("GET", url, true);
       xhr.send();
     }
-    
+
     function setup() {
       checkServerVersion(function(err, result) {
         var message = document.querySelector('#message');

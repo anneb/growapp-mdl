@@ -497,6 +497,15 @@ var App = new function() {
 
 
     this.init = function(server, mapId, isMobileDevice) {
+        // update account info in drawer if available
+        if (window.localStorage.email && window.localStorage.email !== '') {
+          var accountinfo = document.querySelector('#gapp_account_info');
+          if (window.localStorage.displayName && window.localStorage.displayName !== '') {
+            accountinfo.innerHTML = window.localStorage.displayName;
+          } else {
+            accountinfo.innerHTML = window.localStorage.email;
+          }
+        }
 
         // store setup for mobile device or web
         this.isMobileDevice = isMobileDevice;

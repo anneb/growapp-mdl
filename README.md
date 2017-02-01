@@ -1,7 +1,7 @@
 # growapp-mdl
 GrowApp cordova/web-client creates time-lapse animations of vegetation
 
-using [material design lite](https://getmdl.io/)
+using [material design lite](https://getmdl.io/) (mdl)
 
 ## Overview
 ![overview](overview.png)
@@ -33,13 +33,13 @@ cordova prepare
 ## Setup device or emulator
 **Device**
 
-Connect your device to USB 
+Connect your device to USB
 
 **Android device emulator preparation**
 
 * start->Android Studio-> new empty project
 * menu tools-> Android -> AVD manager->create virtual device
-* 
+*
 
 # Deploy to device or emulator
 ```
@@ -49,7 +49,7 @@ cordova run
 
 ## bug? in cordova 6.4.0?
 For some reason, cordova 6.4.0 copies the android app icons to the wrong directory.
-After the first build, cordova created new directories:<br> 
+After the first build, cordova created new directories:<br>
 ```res/mipmap-* ```
 
 Manually copy or move:<br>
@@ -57,4 +57,3 @@ Manually copy or move:<br>
 to:<br>
 ```platforms/android/res/```<br>
 and rebuild the app.
-
