@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /*
 app.js
 assumes openlayers.js and proj4.js are loaded
@@ -12,7 +12,7 @@ App: UI and handler hooks into OLMap
 
 */
 
-/* global document, ol, Image, CameraPreview, StatusBar, localStorage */
+/* global document, console, ol, Image, CameraPreview, StatusBar, localStorage */
 
 Number.prototype.toRad = function() { // helper
     return this * Math.PI / 180;
@@ -22,26 +22,26 @@ var _utils = {
     hideElement: function (selector) {
         var element = document.querySelector(selector);
         if (element) {
-            element.classList.add("hidden");
+            element.classList.add('hidden');
         }
     },
     showElement: function(selector) {
         var element = document.querySelector(selector);
         if (element) {
-            element.classList.remove("hidden");
+            element.classList.remove('hidden');
         }
     },
     disableElement: function(selector) {
         var element = document.querySelector(selector);
         if (element) {
-            element.setAttribute("disabled", "");
+            element.setAttribute('disabled', '');
             // componentHandler.upgradeElement(element);
         }
     },
     enableElement: function(selector) {
         var element = document.querySelector(selector);
         if (element) {
-            element.removeAttribute("disabled");
+            element.removeAttribute('disabled');
             // componentHandler.upgradeElement(element);
         }
     },
@@ -117,11 +117,11 @@ var PhotoServer = new function() {
                             color: 'red'
                         }),
                         stroke: new ol.style.Stroke({
-                            color: "black",
+                            color: 'black',
                             width: 1
                         })
                     })
-                    //image: new ol.style.Circle({ radius: 4, fill: new ol.style.Fill({color: 'red'}), stroke: new ol.style.Stroke({color: "black", width: 1})})
+                    //image: new ol.style.Circle({ radius: 4, fill: new ol.style.Fill({color: 'red'}), stroke: new ol.style.Stroke({color: 'black', width: 1})})
 
             })
         });
@@ -131,7 +131,7 @@ var PhotoServer = new function() {
 
   // return url to large version of photo
   this.bigPhotoUrl = function(photofile) {
-    if (photofile.substr(-4, 4) == ".gif") {
+    if (photofile.substr(-4, 4) === '.gif') {
         /* todo: add cache update to url for gif, sequence number? */
         return photoServer.server + '/uploads/' + photofile;
     }
@@ -146,11 +146,11 @@ var PhotoServer = new function() {
         var hash = window.localStorage.hash;
         var deviceid = window.localStorage.deviceid;
         var devicehash = window.localStorage.devicehash;
-        if ((!deviceid) || (deviceid==="undefined") || (!devicehash) || (devicehash==="undefined") ) {
+        if ((!deviceid) || (deviceid==='undefined') || (!devicehash) || (devicehash==='undefined') ) {
             var xhr = new XMLHttpRequest();
-            var formData = "username=" + email +  "&hash=" + hash;
-            xhr.open("POST", photoServer.server+"/photoserver/createdevice");
-            xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+            var formData = 'username=' + email +  '&hash=' + hash;
+            xhr.open('POST', photoServer.server+'/photoserver/createdevice');
+            xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
             // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
             xhr.onreadystatechange = function (event) {
                if (xhr.readyState === 4) {
@@ -165,7 +165,7 @@ var PhotoServer = new function() {
                      if (done) {
                        done(false);
                      }
-                     console.log ("Error registering device: " + xhr.statusText);
+                     console.log ('Error registering device: ' + xhr.statusText);
                    }
                }
             };
@@ -188,15 +188,15 @@ var PhotoServer = new function() {
   // upload picture contents (photodata) to photoserver
   this.uploadPhotoData = function(imagedata, rootid, location, accuracy, callback) {
       var xhr = new XMLHttpRequest();
-      var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + "&username=" + window.localStorage.email +  "&hash=" + window.localStorage.hash + "&rootid=" + rootid + "&deviceid=" + window.localStorage.deviceid + "&devicehash=" + window.localStorage.devicehash;
-      xhr.open("POST", photoServer.server + "/photoserver/sendphoto");
-      xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+      var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + '&username=' + window.localStorage.email +  '&hash=' + window.localStorage.hash + '&rootid=' + rootid + '&deviceid=' + window.localStorage.deviceid + '&devicehash=' + window.localStorage.devicehash;
+      xhr.open('POST', photoServer.server + '/photoserver/sendphoto');
+      xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
       xhr.onreadystatechange = function (event) {
          if (xhr.readyState === 4) {
              if (xhr.status === 200) {
                callback (null, xhr.responseText);
              } else {
-                callback("Error", xhr.statusText);
+                callback('Error', xhr.statusText);
              }
          }
       };
@@ -206,15 +206,15 @@ var PhotoServer = new function() {
   // get all my photos and call callback(err, photoarray)
   this.getMyPhotos = function(callback) {
         var xhr = new XMLHttpRequest();
-        var formData = "username=" + window.localStorage.email +  "&hash=" + window.localStorage.hash + "&deviceid=" + window.localStorage.deviceid + "&devicehash=" + window.localStorage.devicehash;
-        xhr.open("POST", photoServer.server+"/photoserver/getmyphotos");
-        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        var formData = 'username=' + window.localStorage.email +  '&hash=' + window.localStorage.hash + '&deviceid=' + window.localStorage.deviceid + '&devicehash=' + window.localStorage.devicehash;
+        xhr.open('POST', photoServer.server+'/photoserver/getmyphotos');
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     callback (null, xhr.responseText);
                 } else {
-                    callback("Error", xhr.statusText);
+                    callback('Error', xhr.statusText);
                 }
             }
         };
@@ -223,15 +223,15 @@ var PhotoServer = new function() {
 
     this.deletePhoto = function(photo, callback) {
         var xhr = new XMLHttpRequest();
-        var formData = "username=" + window.localStorage.email +  "&hash=" + window.localStorage.hash + "&filename=" + photo.filename + "&deviceid=" + window.localStorage.deviceid + "&devicehash=" + window.localStorage.devicehash;
-        xhr.open("POST", this.server+"/photoserver/deletemyphoto");
-        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        var formData = 'username=' + window.localStorage.email +  '&hash=' + window.localStorage.hash + '&filename=' + photo.filename + '&deviceid=' + window.localStorage.deviceid + '&devicehash=' + window.localStorage.devicehash;
+        xhr.open('POST', this.server+'/photoserver/deletemyphoto');
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     callback (null, xhr.responseText);
                 } else {
-                    callback("Error", xhr.statusText);
+                    callback('Error', xhr.statusText);
                 }
             }
         };
@@ -240,15 +240,15 @@ var PhotoServer = new function() {
 
     this.rotateMyPhoto = function(photo, degrees, callback) {
         var xhr = new XMLHttpRequest();
-        var formData = "degrees=" + degrees + "&username=" + window.localStorage.email +  "&hash=" + window.localStorage.hash + "&filename=" + photo.filename + "&deviceid=" + window.localStorage.deviceid + "&devicehash=" + window.localStorage.devicehash;
-        xhr.open("POST", this.server+"/photoserver/rotatemyphoto");
-        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        var formData = 'degrees=' + degrees + '&username=' + window.localStorage.email +  '&hash=' + window.localStorage.hash + '&filename=' + photo.filename + '&deviceid=' + window.localStorage.deviceid + '&devicehash=' + window.localStorage.devicehash;
+        xhr.open('POST', this.server+'/photoserver/rotatemyphoto');
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     callback (null, xhr.responseText);
                 } else {
-                    callback("Error", xhr.statusText);
+                    callback('Error', xhr.statusText);
                 }
             }
         };
@@ -259,14 +259,14 @@ var PhotoServer = new function() {
     {
         var xhr = new XMLHttpRequest();
         var formData = 'email=' + encodeURIComponent(email);
-        xhr.open("POST", photoServer.server+"/photoserver/validatemail");
-        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.open('POST', photoServer.server+'/photoserver/validatemail');
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    callback(false, "mail sent, please check your email...");
+                    callback(false, 'mail sent, please check your email...');
                 } else {
-                    callback(true, "Error" + xhr.statusText);
+                    callback(true, 'Error' + xhr.statusText);
                 }
             }
         };
@@ -276,20 +276,20 @@ var PhotoServer = new function() {
     this.validateuser = function(email, code, deviceid, devicehash, callback)
     {
         var xhr = new XMLHttpRequest();
-        var formData = 'email=' + encodeURIComponent(email) + '&validationcode=' + encodeURIComponent(code)  + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + "&devicehash=" + encodeURIComponent(localStorage.devicehash);
-        xhr.open("POST", photoServer.server+"/photoserver/validateuser");
-        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        var formData = 'email=' + encodeURIComponent(email) + '&validationcode=' + encodeURIComponent(code)  + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + '&devicehash=' + encodeURIComponent(localStorage.devicehash);
+        xhr.open('POST', photoServer.server+'/photoserver/validateuser');
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    if (xhr.responseText.length != 32) {
-                        callback (true, "Validation failed: " + xhr.responseText);
+                    if (xhr.responseText.length !== 32) {
+                        callback (true, 'Validation failed: ' + xhr.responseText);
                     } else {
                         var hash = xhr.responseText;
                         callback (false, hash);
                     }
                 } else {
-                    callback (true, "Request error, http status: " + xhr.status + ", statusText: " + xhr.statusText);
+                    callback (true, 'Request error, http status: ' + xhr.status + ', statusText: ' + xhr.statusText);
                 }
             }
         };
@@ -302,16 +302,16 @@ var PhotoServer = new function() {
         if (localStorage.email) {
             window.localStorage.email = window.localStorage.email.trim().toLowerCase();
         }
-        var formData = 'email=' + encodeURIComponent(localStorage.email) + '&hash=' + encodeURIComponent(localStorage.hash) + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + "&devicehash=" + encodeURIComponent(localStorage.devicehash);
-        xhr.open("POST", photoServer.server+"/photoserver/checkuser");
-        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        var formData = 'email=' + encodeURIComponent(localStorage.email) + '&hash=' + encodeURIComponent(localStorage.hash) + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + '&devicehash=' + encodeURIComponent(localStorage.devicehash);
+        xhr.open('POST', photoServer.server+'/photoserver/checkuser');
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     var result = JSON.parse(xhr.responseText);
                     if (result.error) {
-                        callback("Error", result.error);
+                        callback('Error', result.error);
                     } else {
                         if (result.knownuser) {
                             callback(null, true);
@@ -320,13 +320,13 @@ var PhotoServer = new function() {
                         }
                     }
                 } else {
-                    callback ("Request error, http status: " + xhr.status + ", statusText: " + xhr.statusText);
+                    callback ('Request error, http status: ' + xhr.status + ', statusText: ' + xhr.statusText);
                 }
             }
         };
         xhr.send(formData);
     };
-}; // PhotoServer
+}(); // PhotoServer
 
 var OLMap = new function() {
     var olMap = this;
@@ -343,7 +343,7 @@ var OLMap = new function() {
         this.photoLayer = PhotoServer.updatePhotos();
         this.openStreetMapLayer = new ol.layer.Tile({
             source: new ol.source.OSM({
-                url: "https://saturnus.geodan.nl/mapproxy/osm/tiles/osmgrayscale_EPSG900913/{z}/{x}/{y}.png?origin=nw"
+                url: 'https://saturnus.geodan.nl/mapproxy/osm/tiles/osmgrayscale_EPSG900913/{z}/{x}/{y}.png?origin=nw'
             })
         });
         this.layers = [
@@ -429,7 +429,7 @@ var OLMap = new function() {
     this.dragPrevPixel = null;
 
     this.dragHandler = function (status, pixel, prevpixel) {
-        console.log ("dragging: " + status + ", current: " + JSON.stringify(pixel) + ", prevpoint: " + JSON.stringify(prevpixel));
+        console.log ('dragging: ' + status + ', current: ' + JSON.stringify(pixel) + ', prevpoint: ' + JSON.stringify(prevpixel));
     };
 
     this.initDragHandler = function() {
@@ -515,7 +515,7 @@ var App = new function() {
         OLMap.panZoomHandler = this.panZoomHandler;
         // intialise OLMap
         OLMap.init(mapId, 'filename');
-        this.buttonLocation = document.querySelector("#gapp_button_location");
+        this.buttonLocation = document.querySelector('#gapp_button_location');
         this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
 
         window.addEventListener('hashchange', this.navigate.bind(this), false);
@@ -523,7 +523,7 @@ var App = new function() {
     };
 
     this.showStoredMessage = function () {
-        if (window.localStorage.storedMessage && window.localStorage.storedMessage != '') {
+        if (window.localStorage.storedMessage && window.localStorage.storedMessage !== '') {
             this.showMessage(window.localStorage.storedMessage);
             window.localStorage.removeItem('storedMessage');
         }
@@ -539,60 +539,60 @@ var App = new function() {
 
     /* remove any overlay layers and optionally add named layer */
     this.updateLayers = function(layername) {
-        var legendvertical = document.querySelector("#gapp_legendvertical");
-        var legendhorizontal = document.querySelector("#gapp_legendhorizontal");
-        var legendmin = document.querySelectorAll(".legendmin");
-        var legendmax = document.querySelectorAll(".legendmax");
-        legendvertical.classList.add("hidden");
-        legendhorizontal.classList.add("hidden");
+        var legendvertical = document.querySelector('#gapp_legendvertical');
+        var legendhorizontal = document.querySelector('#gapp_legendhorizontal');
+        var legendmin = document.querySelectorAll('.legendmin');
+        var legendmax = document.querySelectorAll('.legendmax');
+        legendvertical.classList.add('hidden');
+        legendhorizontal.classList.add('hidden');
         [].forEach.call(legendmin, function (element) {
-            element.innerHTML = "";
+            element.innerHTML = '';
         });
         [].forEach.call(legendmax, function (element) {
-            element.innerHTML = "";
+            element.innerHTML = '';
         });
         var layers = OLMap.olmap.getLayers();
         if (layers.getLength() > 2) {
             layers.removeAt(1);
         }
-        var orientation = "h";
+        var orientation = 'h';
         if (window.innerWidth < window.innerHeight) {
-            orientation = "v";
+            orientation = 'v';
         }
 
         // prepare and show legend
-        if (layername != "") {
-            var image = document.querySelector("#legendimagev");
-            image.src = layername.substring(1) + "v.png";
-            image = document.querySelector("#legendimageh");
-            image.src = layername.substring(1) + "h.png";
-            if (orientation == 'v') {
-                var legendtop = document.querySelector(".legendtop");
-                var legendbottom = document.querySelector(".legendbottom");
-                if (layername == "#layerseason") {
-                    legendtop.classList.add("legendtoprotated");
-                    legendbottom.classList.add("legendbottomrotated");
+        if (layername !== '') {
+            var image = document.querySelector('#legendimagev');
+            image.src = layername.substring(1) + 'v.png';
+            image = document.querySelector('#legendimageh');
+            image.src = layername.substring(1) + 'h.png';
+            if (orientation === 'v') {
+                var legendtop = document.querySelector('.legendtop');
+                var legendbottom = document.querySelector('.legendbottom');
+                if (layername === '#layerseason') {
+                    legendtop.classList.add('legendtoprotated');
+                    legendbottom.classList.add('legendbottomrotated');
                 } else {
-                    legendtop.classList.remove("legendtoprotated");
-                    legendbottom.classList.remove("legendbottomrotated");
+                    legendtop.classList.remove('legendtoprotated');
+                    legendbottom.classList.remove('legendbottomrotated');
                 }
-                legendvertical.classList.remove("hidden");
+                legendvertical.classList.remove('hidden');
             } else {
-                legendhorizontal.classList.remove("hidden");
+                legendhorizontal.classList.remove('hidden');
             }
-            if (layername == '#layertrend') {
+            if (layername === '#layertrend') {
                 [].forEach.call(legendmin, function (element) {
-                    element.innerHTML = "-0.3";
+                    element.innerHTML = '-0.3';
                 });
                 [].forEach.call(legendmax, function (element) {
-                    element.innerHTML = "+0.3";
+                    element.innerHTML = '+0.3';
                 });
-            } else if (layername == '#layerseason') {
+            } else if (layername === '#layerseason') {
                 [].forEach.call(legendmin, function (element) {
-                    element.innerHTML = "January";
+                    element.innerHTML = 'January';
                 });
                 [].forEach.call(legendmax, function (element) {
-                    element.innerHTML = "December";
+                    element.innerHTML = 'December';
                 });
             }
         }
@@ -608,7 +608,7 @@ var App = new function() {
             case '#layertrend':
                 var seasonlayer = new ol.layer.Tile({
                     source: new ol.source.XYZ({
-                        url: "http://saturnus.geodan.nl/mapproxy/myseasons/tiles/"+mapLayerName[layername]+"/EPSG900913/{z}/{x}/{y}.png?origin=nw"
+                        url: 'http://saturnus.geodan.nl/mapproxy/myseasons/tiles/'+mapLayerName[layername]+'/EPSG900913/{z}/{x}/{y}.png?origin=nw'
                     })
                 });
                 layers.insertAt(1, seasonlayer);
@@ -619,10 +619,10 @@ var App = new function() {
                 var yesterdayString = yd.getFullYear() + '-' + ('0'+(yd.getMonth() + 1)).substr(-2) + '-' + ('0'+yd.getDate()).substr(-2);
                 var temperatureLayer = new ol.layer.Tile ({
                     source: new ol.source.XYZ({
-                        //url: "//map1{a-c}.vis.earthdata.nasa.gov/wmts-webmerc/" +
-                        url: "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" +
-                        "MODIS_Aqua_Land_Surface_Temp_Day/default/"+yesterdayString+"/" +
-                        "GoogleMapsCompatible_Level7/{z}/{y}/{x}.png",
+                        //url: '//map1{a-c}.vis.earthdata.nasa.gov/wmts-webmerc/' +
+                        url: 'http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/' +
+                        'MODIS_Aqua_Land_Surface_Temp_Day/default/'+yesterdayString+'/' +
+                        'GoogleMapsCompatible_Level7/{z}/{y}/{x}.png',
                         maxZoom: 7
                     })
                 });
@@ -643,7 +643,7 @@ var App = new function() {
             if (layerElements[i].classList.contains('mdl-navigation__link--current')) {
                 activeLayer = i;
             }
-            if (layerHashes[i] == layerHash) {
+            if (layerHashes[i] === layerHash) {
                 clickedLayer = i;
             }
         }
@@ -651,7 +651,7 @@ var App = new function() {
             layerElements[activeLayer].classList.remove('mdl-navigation__link--current');
         }
 
-        if (activeLayer != clickedLayer) {
+        if (activeLayer !== clickedLayer) {
             layerElements[clickedLayer].classList.add('mdl-navigation__link--current');
             this.updateLayers(layerHash);
         } else {
@@ -665,13 +665,13 @@ var App = new function() {
                 app.hideDrawer();
                 if (!app.isMobileDevice) {
                     // web version
-                    if (!localStorage.email || window.localStorage.email=="" || !localStorage.hash || window.localStorage.hash=="") {
+                    if (!localStorage.email || window.localStorage.email==='' || !localStorage.hash || window.localStorage.hash==='') {
                         app.showMessage('Web photo management requires user registration');
                         window.location.hash='';
                         return;
                     }
                 }
-                window.location = "gallery.html";
+                window.location = 'gallery.html';
                 break;
             case '#layerseason':
             case '#layertrend':
@@ -735,7 +735,7 @@ var App = new function() {
             app.fullscreenphotopopup.classList.add('hidden');
         };
 
-        var gappFeatureInfoClose = document.querySelector("#gapp_featureinfo_close");
+        var gappFeatureInfoClose = document.querySelector('#gapp_featureinfo_close');
         gappFeatureInfoClose.addEventListener('click', app.featureInfoPopup.hide);
 
         var gappFeatureInfoFullScreen = document.querySelector('#gapp_featureinfo_fullscreen');
@@ -750,14 +750,14 @@ var App = new function() {
                 if (result) {
                     var url = app.featureInfoPhoto.url;
                     var photoid = app.featureInfoPhoto.photoid;
-                    if (url.substr(-4, 4) == ".gif") {
+                    if (url.substr(-4, 4) === '.gif') {
                     // overlay_pictue: replace animated picture with first picture
-                        url = url.substr(0, url.length -4) + ".jpg";
+                        url = url.substr(0, url.length -4) + '.jpg';
                     }
                     app.cameraPopup.show(url, photoid);
                 } else {
                     // device could not be registered, offline? no window.localStorage?
-                    app.showMessage("device registration failed, try again later");
+                    app.showMessage('device registration failed, try again later');
                 }
             });
         });
@@ -772,7 +772,7 @@ var App = new function() {
                StatusBar.hide();
             }
             setTimeout(function() {
-              if (typeof overlayURL == 'undefined') {
+              if (typeof overlayURL === 'undefined') {
                   overlayURL = null;
                   photoid = 0;
               }
@@ -828,7 +828,7 @@ var App = new function() {
                 var tapEnabled = true;
                 var dragEnabled = true;
                 var toBack = true; // camera z-value can either be completely at the back or completey on top
-                CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: "back", tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
+                CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
                 CameraPreview.setZoom(0);
                 window.plugins.insomnia.keepAwake();
             }
@@ -852,7 +852,7 @@ var App = new function() {
                     app.cameraPopup.show();
                 } else {
                     // device could not be registered, offline? no window.localStorage?
-                    app.showMessage("device registration failed, try again later");
+                    app.showMessage('device registration failed, try again later');
                 }
             });
         });
@@ -886,7 +886,7 @@ var App = new function() {
                 } else {
                     // success! Free memory and close dialog
                     p.rawdata = null;
-                    app.cameraPreviewPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+                    app.cameraPreviewPhoto.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
                     PhotoServer.resetCacheTime(); // reset cache
                     app.photoLayer = PhotoServer.updatePhotos();
                     app.cameraPreviewPhotoFrame.hide();
@@ -942,14 +942,14 @@ var App = new function() {
             if (myLocation) {
                 app.cameraPreviewPhoto.rawdata = result;
                 result = null; // free memory
-                app.cameraPreviewPhoto.src = "data:image/jpeg;base64," + app.cameraPreviewPhoto.rawdata;
+                app.cameraPreviewPhoto.src = 'data:image/jpeg;base64,' + app.cameraPreviewPhoto.rawdata;
                 myLocation = ol.proj.transform(myLocation, 'EPSG:3857', 'EPSG:4326');
                 var accuracy = OLMap.geoLocation.getAccuracy();
                 app.cameraPreviewPhoto.myLocation = myLocation;
                 app.cameraPreviewPhoto.accuracy = accuracy;
                 app.cameraPreviewPhotoFrame.show();
             } else {
-                app.showMessage("Required photo location unknown");
+                app.showMessage('Required photo location unknown');
             }
         });
     };
@@ -978,13 +978,13 @@ var App = new function() {
     this.setMapTracking = function(enabled) {
         OLMap.mapTracking = enabled;
         if (enabled) {
-            app.buttonLocation.classList.remove("inactive");
+            app.buttonLocation.classList.remove('inactive');
             var coordinates = OLMap.geoLocation.getPosition();
             if (coordinates) {
                 OLMap.olmap.getView().setCenter(coordinates);
             }
         } else {
-            app.buttonLocation.classList.add("inactive");
+            app.buttonLocation.classList.add('inactive');
         }
     };
 
@@ -1038,7 +1038,7 @@ var App = new function() {
             var errorInfo = document.querySelector('#gapp_featureinfo_error');
             errorInfo.classList.add('hidden');
             app.featureInfoPhoto = document.querySelector('#gapp_featureinfo_photo');
-            app.featureInfoPhoto.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+            app.featureInfoPhoto.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
             app.featureInfoPhoto.url = picture_url;
             app.featureInfoPhoto.photoid = feature.get('id');
             spinner.classList.add('is-active');
@@ -1061,13 +1061,13 @@ var App = new function() {
             }
             if (aspectratio >= 1) {
                 // landscape
-                app.featureInfoPopup.style.width = Math.floor(200 * aspectratio) + "px";
-                app.featureInfoPopup.style.height = "200px";
+                app.featureInfoPopup.style.width = Math.floor(200 * aspectratio) + 'px';
+                app.featureInfoPopup.style.height = '200px';
             }
             else {
                 // portrait
-                app.featureInfoPopup.style.width = "200px";
-                app.featureInfoPopup.style.height = Math.floor(200 / aspectratio) + "px";
+                app.featureInfoPopup.style.width = '200px';
+                app.featureInfoPopup.style.height = Math.floor(200 / aspectratio) + 'px';
             }
 
             var addphotobutton = document.querySelector('#gapp_featureinfo_addphoto');
@@ -1092,7 +1092,7 @@ var App = new function() {
 
     this.showMessage = function(message, timeout)
     {
-        if (typeof timeout == 'undefined') {
+        if (typeof timeout === 'undefined') {
             timeout = 2000;
         }
         var data = {
