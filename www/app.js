@@ -903,7 +903,9 @@ var App = new function() {
                     app.photoLayer = PhotoServer.updatePhotos();
                     app.cameraPreviewPhotoFrame.hide();
                     app.cameraPopup.hide();
-
+                    setTimeout (function() {
+                      app.clickFeatureHandler(app.activeFeature); // reload feature
+                    }, 3000);
                 }
             });
         });
