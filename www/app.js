@@ -831,6 +831,9 @@ var App = new function() {
                 CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
                 CameraPreview.setZoom(0);
                 window.plugins.insomnia.keepAwake();
+                // force css recalculation
+                document.body.style.zoom=1.00001;
+                setTimeout(function(){document.body.style.zoom=1;}, 50);
             }
         };
         this.cameraPopup.stopCamera = function() {
@@ -927,7 +930,7 @@ var App = new function() {
                   // takePicture fires cordova.plugins.camerapreview.setOnPictureTakenHandler
                   CameraPreview.takePicture();//({maxWidth: 640, maxHeight: 640});
                 } else {
-                  alert ('Camera orientation wrong, please adjust orientation');
+                  app.showMessage ('Wrong camera orientation, please adjust');
                 }
             }
         });
