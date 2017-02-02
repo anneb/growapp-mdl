@@ -795,6 +795,7 @@ var App = new function() {
                   cameraOverlayPictureFrame.classList.add('hidden');
               }
               document.addEventListener('backbutton', app.cameraPopup.hide);
+              // todo: do not reset camera when preview picture active
               window.addEventListener('orientationchange', app.cameraPopup.resetCamera);
               document.querySelector('#mainUI').classList.add('hidden');
               app.cameraPopup.classList.remove('hidden');
@@ -908,6 +909,11 @@ var App = new function() {
                     }, 3000);
                 }
             });
+        });
+
+        this.buttonPreviewPhotoAddDescription = document.querySelector('#gapp_camera_photo_button_adddescription');
+        this.buttonPreviewPhotoAddDescription.addEventListener('click', function() {
+            ;
         });
 
         var buttonTakePhoto = document.querySelector('#gapp_camera_takephoto');
