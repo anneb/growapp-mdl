@@ -208,15 +208,38 @@
         right: 0;
         margin: auto;
       }
+      #gapp_camera_photo_bar_top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 40px;
+        width: 100%;
+        background-color: black;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      #gapp_camera_photo_bar_bottom {
+        position: absolute;
+        bottom: 0;
+        height: 40px;
+        width: 100%;
+        background-color: black;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
       #gapp_camera_photo_ok {
         position: absolute;
-        bottom: 20%;
-        left: 25%
+        bottom: 20px;
+        right: 20px;
       }
       #gapp_camera_photo_close {
         position: absolute;
-        bottom: 20%;
-        right: 25%;
+        bottom: 0px;
+        right: 10px;
+      }
+      #gapp_camera_photo_button_adddescription {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        color: white;
       }
       #gapp-snackbar {
           z-index: 100 !important;
@@ -370,12 +393,17 @@
 
          <div id="gapp_camera_photo_preview_frame" class="hidden">
             <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-            <button id="gapp_camera_photo_ok" class="mdl-button mdl-js-button mdl-button--fab mdl-color-text--primary-contrast gapp_color_gray_transparent">
-                <i class="material-icons">done</i>
-            </button>
-            <button id="gapp_camera_photo_close" class="mdl-button mdl-js-button mdl-button--fab mdl-color-text--primary-contrast gapp_color_gray_transparent">
-                <i class="material-icons">close</i>
-            </button>
+            <div id="gapp_camera_photo_bar_bottom">
+              <div id="gapp_camera_photo_button_adddescription"><i class="material-icons">description</i> Add description...</div>
+              <button id="gapp_camera_photo_ok" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                  <i class="material-icons">send</i>
+              </button>
+            </div>
+            <div id="gapp_camera_photo_bar_top">
+              <button id="gapp_camera_photo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast">
+                  <i class="material-icons">close</i>
+              </button>
+            </div>
          </div>
       </div>
       <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
