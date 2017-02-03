@@ -260,7 +260,13 @@
           right: 0;
           top: 20px;
       }
+      #gapp_camera_photo_form_tag_label {
+        position: absolute;
+        right: 14%;
+        text-align: right;
+      }
       #gapp_camera_photo_form_input {
+          position: relative;
           overflow-y: auto;
           height: calc(100% - 100px);
       }
@@ -437,17 +443,17 @@
                   <i class="material-icons">close</i>
               </button>
               <div class="mdl-card__title">
-                <h2 class="mdl-card__title-text">Photo tags</h2>
+                <h2 class="mdl-card__title-text">Photo info</h2>
               </div>
               <div id="gapp_camera_photo_form_input" class="mdl-card__supporting-text">
                 <form action="#">
-                    <div id="gapp_camera_photo_form_taglist">
-                    </div>
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                        <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_tag" pattern="([0-9|a-z|A-Z])*">
-                        <label class="mdl-textfield__label" for="gapp_camera_photo_tag">Tag</label>
-                        <span class="mdl-textfield__error">Input is not a valid tag</span>
-                        <i class="material-icons mdl-textfield__label__icon">&#xE54E;<!--local_offer--></i>
+                        <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_tag">
+                        <label class="mdl-textfield__label" for="gapp_camera_photo_tag">Description (optional)</label>
+                        <span class="mdl-textfield__error">Input is not a valid description</span>
+                        <i class="material-icons mdl-textfield__label__icon">description<!--local_offer--></i>
+                    </div>
+                    <div id="gapp_camera_photo_form_taglist">
                     </div>
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                         <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_circumference" pattern="([0-9|.|,])*">

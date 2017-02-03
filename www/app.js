@@ -914,7 +914,7 @@ var App = new function() {
         this.cameraPreviewPhotoFrame.resetTagList = function(list) {
           // redraws all available tags and resets check to defaults
           var listContainer = document.querySelector('#gapp_camera_photo_form_taglist');
-          var html = '';
+          var html = '<div id="gapp_camera_photo_form_tag_label">Tags <i class="material-icons">&#xE54E;<!--local_offer--></i></div>\n';
           for (var i = 0; i < list.length; i++) {
             html += '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-' + i + '">\n' +
                '<input type="checkbox" id="checkbox-' + i + '" class="mdl-checkbox__input" name="tag" value="'+list[i].tagid+'">\n' +
@@ -936,7 +936,7 @@ var App = new function() {
               });
             } else {
               // add tags to form
-              app.cameraPreviewPhotoFrame.resetTagList(list);
+              app.cameraPreviewPhotoFrame.resetTagList(app.cameraPreviewPhotoTagList.list);
             }
         };
         this.cameraPreviewPhotoFrame.show = function () {
