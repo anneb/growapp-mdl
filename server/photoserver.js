@@ -812,11 +812,13 @@ app.post('/photoserver/createdevice', cors(), function (req, res){
 
 app.get('/photoserver/taglist', cors(), function(req, res){
   console.log('/photoserver/taglist');
-  var langcode = req.params.langcode;
+  var langcode = req.query.langcode;
     var sql = 'select tagid, tagtext from tags where langcode=$1';
     dbPool.query(sql, [langcode])
-      .then (function (result){
-          res.json(result);
+      .then (function (result){ 
+          if (result.rows) {
+              res.json(result.rows);
+          }
       })
       .catch(function(err){
          res.end(err.message);
