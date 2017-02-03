@@ -347,7 +347,7 @@ var PhotoServer = new function() {
           }
       };
       xhr.send(formData);
-    }
+    };
 
 }(); // PhotoServer
 
@@ -907,6 +907,23 @@ var App = new function() {
         this.cameraPreviewPhotoTagList = document.querySelector('#gapp_camera_photo_form_taglist');
         this.cameraPreviewPhotoTagList.langcode = '';
         this.cameraPreviewPhotoTagList.list = null;
+        this.cameraPreviewPhotoTagList.addEventListener('change', function() {
+          // this handler is triggered for every changed tag checkbox
+          var boxes = document.querySelectorAll('.tagbox');
+          for (var i = 0; i < boxes.length; i++) {
+            if (boxes[i].value == 5) {
+              // tagid for tree circumference
+              var textInput = document.querySelector('#gapp_camera_photo_form_circumference');
+              if (boxes[i].checked) {
+                // show tree circumference input
+                textInput.classList.remove('hidden');
+              } else {
+                // hide tree circumference input
+                textInput.classList.add('hidden');
+              }
+            }
+          }
+        });
         /* Preview Photo taken by camera */
         /* todo: add toggle to show/hide overlay-picture with preview */
         this.cameraPreviewPhotoFrame = document.querySelector('#gapp_camera_photo_preview_frame');
@@ -917,7 +934,7 @@ var App = new function() {
           var html = '<div id="gapp_camera_photo_form_tag_label">Tags <i class="material-icons">&#xE54E;<!--local_offer--></i></div>\n';
           for (var i = 0; i < list.length; i++) {
             html += '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-' + i + '">\n' +
-               '<input type="checkbox" id="checkbox-' + i + '" class="mdl-checkbox__input" name="tag" value="'+list[i].tagid+'">\n' +
+               '<input type="checkbox" id="checkbox-' + i + '" class="tagbox mdl-checkbox__input" value="'+list[i].tagid+'">\n' +
                '<span class="mdl-checkbox__label">'+list[i].tagtext+'</span>\n' +
                '</label>';
           }
@@ -925,7 +942,20 @@ var App = new function() {
         };
 
         this.cameraPreviewPhotoFrame.resetPhotoForm = function () {
-            // reset the photo description form
+            // reset text fields
+            // see http://stackoverflow.com/questions/34077730/fetching-the-value-of-a-mdl-textfield/34122149
+            var materialTextField = document.querySelector('#gapp_camera_photo_form_description').MaterialTextfield;
+            if (materialTextField) {
+              materialTextField.change('');
+            }
+            materialTextField = document.querySelector('#gapp_camera_photo_form_circumference').MaterialTextfield;
+            if (materialTextField) {
+              materialTextField.change('');
+            }
+            // document.querySelector('#gapp_camera_photo_form_input_description').value = null;
+            // document.querySelector('#gapp_camera_photo_form_input_circumference').value = null;
+
+            // reset the tag list
             if (app.cameraPreviewPhotoTagList.list === null || app.cameraPreviewPhotoTagList.langcode !== app.langcode) {
               // get new tag list
               PhotoServer.getTagList(app.langcode, function(err, list) {
@@ -956,11 +986,11 @@ var App = new function() {
             app.cameraPopup.resetCamera();
         });
         var buttonAddDescription = document.querySelector('#gapp_camera_photo_button_adddescription');
-        var descriptionForm = document.querySelector('#gapp_camera_photo_form_description');
+        var descriptionForm = document.querySelector('#gapp_camera_photo_form');
         buttonAddDescription.addEventListener('click', function() {
               descriptionForm.classList.remove('hidden');
         });
-        var buttonCloseDescription = document.querySelector('#gapp_camera_photo_form_description_close');
+        var buttonCloseDescription = document.querySelector('#gapp_camera_photo_form_close');
         buttonCloseDescription.addEventListener('click', function() {
             descriptionForm.classList.add('hidden');
         });
