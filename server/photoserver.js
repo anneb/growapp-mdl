@@ -1,3 +1,5 @@
+"use strict";
+/* global require, console, __dirname, Promise, Buffer */
 var express = require('express');
 var fs = require('fs');
 var bodyParser = require('body-parser');
@@ -9,7 +11,7 @@ var crypto = require('crypto');
 var Path = require('path');
 var cors = require('cors');
 var nodemailer = require('nodemailer');
-var gm = require("gm");
+var gm = require('gm');
 
 var app = express();
 
@@ -50,11 +52,13 @@ app.get('/photoserver/logposition', cors(), function(req, res) {
 
 function FeatureCollection(message, errno){
     this.type = 'FeatureCollection';
-    this.features = new Array();
-        if (message)
+    this.features = [];
+        if (message) {
                 this.message = message;
-        if (errno)
+        }
+        if (errno) {
                 this.errorcode = errno;
+        }
 }
 
 function createCollection(features, message, errno) {
@@ -62,9 +66,9 @@ function createCollection(features, message, errno) {
 
         for (var i = 0; i < features.length; i++)
         {
-            featureCollection.features.push({ "type": "Feature",
-              "geometry": JSON.parse(features[i].geom),
-              "properties": {
+            featureCollection.features.push({ 'type': 'Feature',
+              'geometry': JSON.parse(features[i].geom),
+              'properties': {
                       id: features[i].id,
                       filename: features[i].filename,
                       accuracy: features[i].accuracy,
@@ -79,7 +83,7 @@ function createCollection(features, message, errno) {
 
 app.get('/photoserver/getphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getphotos');
-  var sql = "select id, ST_AsGeoJSON(location) geom, accuracy, case when animationfilename is null then filename else animationfilename end filename, time, width, height from photo where visible=true and rootid=0";
+  var sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, case when animationfilename is null then filename else animationfilename end filename, time, width, height from photo where visible=true and rootid=0';
   dbPool.query(sql)
     .then(function(result) {
       res.json(createCollection (result.rows, null, null));
@@ -95,7 +99,7 @@ app.get('/photoserver/getphotos', cors(), function(req, res) {
 app.post('/photoserver/getphotoset', cors(), function(req, res) {
   console.log('POST /photoserver/getphotoset');
   var photoid = req.body.photoid;
-  var sql = "select id, ST_AsGeoJSON(location) geom, accuracy, filename, time, width, height from photo where rootid=$1 or id=$1 order by time";
+  var sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, filename, time, width, height from photo where rootid=$1 or id=$1 order by time';
   dbPool.query(sql, [photoid])
     .then(function(result){
       res.json(createCollection(result.rows, null, null));
@@ -116,25 +120,25 @@ app.post('/photoserver/getmyphotos', cors(), function(req, res) {
   var deviceid = req.body.deviceid;
   var devicehash = req.body.devicehash;
 
-  username = username.toLowerCase().trim().replace("'", "");
-  hash = hash.trim().replace("'", "");
+  username = username.toLowerCase().trim().replace("'", '');
+  hash = hash.trim().replace("'", '');
 
   getUserid(username, hash)
     .then(function(userid){
       var sql;
       var params;
-      if (userid == 0) {
+      if (userid === 0) {
         // user not registered on device
-        if (!deviceid || deviceid == '' || !devicehash || devicehash == '') {
+        if (!deviceid || deviceid === '' || !devicehash || devicehash === '') {
           res.writeHead(403, {'Content-Type': 'text/html'});
           res.end('error: missing parameters');
           return;
         }
-        sql = "select p.id, p.filename, p.time, p.width, p.height from photo p, device d where p.deviceid=d.id and d.deviceid=$1 and d.devicehash=$2 order by time";
+        sql = 'select p.id, p.filename, p.time, p.width, p.height from photo p, device d where p.deviceid=d.id and d.deviceid=$1 and d.devicehash=$2 order by time';
         params = [deviceid, devicehash];
       } else {
         // user registerd on device
-        sql = "select p.id, p.filename, p.time, p.width, p.height from photo p, device d, photouser u where p.deviceid=d.id and d.userid=u.id and u.email=$1 and u.hash=$2 order by time";
+        sql = 'select p.id, p.filename, p.time, p.width, p.height from photo p, device d, photouser u where p.deviceid=d.id and d.userid=u.id and u.email=$1 and u.hash=$2 order by time';
         params = [username, hash];
       }
       dbPool.query(sql, params)
@@ -159,7 +163,7 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
   var filename = req.body.filename;
   var degrees = req.body.degrees;
 
-  username = username.toLowerCase().trim().replace("'", "");
+  username = username.toLowerCase().trim().replace("'", '');
   hash = hash.trim().replace("'", "");
 
   getUserid(username, hash)
@@ -167,26 +171,26 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
       var sql, parameters;
       if (userid > 0) {
         // user known
-        sql = "select p.id, p.filename, p.width, p.height from photo p, device d where p.filename=$1 and p.deviceid=d.id and d.userid=$2";
+        sql = 'select p.id, p.filename, p.width, p.height from photo p, device d where p.filename=$1 and p.deviceid=d.id and d.userid=$2';
         parameters = [filename, userid];
       } else {
         // user not known, check if device is known
-        if (!deviceid || deviceid == '' || !devicehash || devicehash == '') {
+        if (!deviceid || deviceid === '' || !devicehash || devicehash === '') {
             res.writeHead(403, {
                 'Content-Type': 'text/html'
             });
             res.end('error: missing parameters');
             return;
         }
-        sql = "select p.id, p.filename, p.width, p.height from device d, photo p where d.deviceid=$1 and d.devicehash=$2 and p.deviceid=d.id and p.filename=$3";
+        sql = 'select p.id, p.filename, p.width, p.height from device d, photo p where d.deviceid=$1 and d.devicehash=$2 and p.deviceid=d.id and p.filename=$3';
         parameters = [deviceid, devicehash, filename];
       }
       dbPool.query(sql, parameters)
         .then(function(result){
-          if (result.rows.length == 1)  {
-            var d = (degrees == "90") ? 90 : -90;
+          if (result.rows.length === 1)  {
+            var d = (degrees == '90') ? 90 : -90;
             var filename = './uploads/' + result.rows[0].filename;
-            gm(filename).rotate("white", d).write(filename, function(err){
+            gm(filename).rotate('white', d).write(filename, function(err){
               if (err) {
                 res.writeHead(500, {'Content-Type' : 'text/html'});
                 res.end('unable to rotate image');
@@ -194,7 +198,7 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
               }
               var width = result.rows[0].height;
               var height = result.rows[0].width;
-              sql = "update photo set width=$1, height=$2 where id=$3";
+              sql = 'update photo set width=$1, height=$2 where id=$3';
               dbPool.query(sql, [width, height, result.rows[0].id])
                 .then(function (result){
                   res.end('image rotated');
@@ -219,8 +223,8 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
     var devicehash = req.body.devicehash;
     var filename = req.body.filename;
 
-    username = username.toLowerCase().trim().replace("'", "");
-    hash = hash.trim().replace("'", "");
+    username = username.toLowerCase().trim().replace("'", '');
+    hash = hash.trim().replace("'", '');
 
     getUserid(username, hash)
       .then(function(userid) {
@@ -231,7 +235,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
           parameters = [filename, userid];
         } else {
           // user not known, check if device is known
-          if (!deviceid || deviceid == '' || !devicehash || devicehash == '') {
+          if (!deviceid || deviceid === '' || !devicehash || devicehash === '') {
               res.writeHead(403, {
                   'Content-Type': 'text/html'
               });
@@ -249,7 +253,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                     var photoid = result.rows[0].id;
                     var animationfilename = result.rows[0].animationfilename;
                     var rootid = result.rows[0].rootid;
-                    var sql = "delete from photo where id=$1";
+                    var sql = 'delete from photo where id=$1';
                     dbPool.query(sql, [photoid])
                         .then(function(result) {
                             // photo deleted from table, now delete from disk
@@ -451,7 +455,7 @@ app.post('/photoserver/validatemail', cors(), multer().array(), function (req, r
 function linkUserToDevice(username, deviceid, devicehash)
 {
     // store user with device if user is on known device
-    if (deviceid && deviceid != '' && devicehash && devicehash != '') {
+    if (deviceid && deviceid !== '' && devicehash && devicehash !== '') {
       var sql = "update device set userid=(select id from photouser where email=$1 limit 1) where deviceid=$2 and devicehash=$3";
       dbPool.query(sql, [username, deviceid, devicehash]);
     }
@@ -463,7 +467,7 @@ app.post('/photoserver/validateuser', cors(), multer().array(), function(req, re
     var username = req.body.email;
     var validationcode = req.body.validationcode;
 
-    if (!username || username == '' || !validationcode || validationcode == '') {
+    if (!username || username === '' || !validationcode || validationcode === '') {
         res.writeHead(500, {
             'Content-Type': 'text/html'
         });
@@ -477,7 +481,7 @@ app.post('/photoserver/validateuser', cors(), multer().array(), function(req, re
     var sql = "select email, validationcode, retrycount, hash from photouser where email=$1";
     dbPool.query(sql, [username])
         .then(function(result) {
-            if (result.rows.length == 0) {
+            if (result.rows.length === 0) {
                 // user not found
                 res.writeHead(500, {
                     'Content-Type': 'text/html'
@@ -494,7 +498,7 @@ app.post('/photoserver/validateuser', cors(), multer().array(), function(req, re
                 } else {
                     // check validationcode
                     if (validationcode == result.rows[0].validationcode) {
-                        if (result.rows[0].hash && result.rows[0].hash != '') {
+                        if (result.rows[0].hash && result.rows[0].hash !== '') {
                           // hash already created
                           res.end(result.rows[0].hash);
                           linkUserToDevice(username, req.body.deviceid, req.body.devicehash);
@@ -595,7 +599,7 @@ function updateAnimation(rootid, path)
 
 function getUserid (email, hash) {
   return new Promise(function (fulfill, reject){
-    if ((!email) || (!hash) || (email=="") || (hash=="")) {
+    if ((!email) || (!hash) || (email==="") || (hash==="")) {
       fulfill(0);
     } else {
       var sql = "select id from photouser where email=$1 and hash=$2";
@@ -645,7 +649,7 @@ app.post('/photoserver/checkuser', cors(), function(req, res) {
         /* temporary ? side effect: store user with device */
         var deviceid = req.body.deviceid;
         var devicehash = req.body.devicehash;
-        if (deviceid && deviceid != '' && devicehash && devicehash != '') {
+        if (deviceid && deviceid != '' && devicehash && devicehash !== '') {
           var sql = "update device set userid=$1 where deviceid=$2 and devicehash=$3";
           dbPool.query(sql, [id, deviceid, devicehash]);
         }
@@ -805,6 +809,19 @@ app.post('/photoserver/createdevice', cors(), function (req, res){
       // handle error
     });
 }); // createdevice
+
+app.get('/photoserver/taglist', cors(), function(req, res){
+  console.log('/photoserver/taglist');
+  var langcode = req.params.langcode;
+    var sql = 'select tagid, tagtext from tags where langcode=$1';
+    dbPool.query(sql, [langcode])
+      .then (function (result){
+          res.json(result);
+      })
+      .catch(function(err){
+         res.end(err.message);
+      });
+});
 
 var port = 3100;
 app.listen(port);
