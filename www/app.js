@@ -12,7 +12,8 @@ App: UI and handler hooks into OLMap
 
 */
 
-/* global document, console, ol, Image, CameraPreview, StatusBar, localStorage */
+/* global window, document, console, ol, Image, CameraPreview, StatusBar,
+   localStorage, XMLHttpRequest, setTimeout, screen */
 
 Number.prototype.toRad = function() { // helper
     return this * Math.PI / 180;
@@ -326,6 +327,28 @@ var PhotoServer = new function() {
         };
         xhr.send(formData);
     };
+
+    this.getTagList = function (langcode, callback) {
+      var xhr = new XMLHttpRequest();
+      var formData = 'langcode=' + encodeURIComponent(langcode);
+      xhr.open('GET', photoServer.server+'/photoserver/taglist?'+ formData);
+      xhr.onreadystatechange = function (event) {
+          if (xhr.readyState === 4) {
+              if (xhr.status === 200) {
+                  var result = JSON.parse(xhr.responseText);
+                  if (result.error) {
+                      callback('Error', result.error);
+                  } else {
+                      callback(null, result);
+                  }
+              } else {
+                  callback ('Request error, http status: ' + xhr.status + ', statusText: ' + xhr.statusText);
+              }
+          }
+      };
+      xhr.send(formData);
+    }
+
 }(); // PhotoServer
 
 var OLMap = new function() {
@@ -505,6 +528,17 @@ var App = new function() {
           } else {
             accountinfo.innerHTML = window.localStorage.email;
           }
+        }
+        if (window.localStorage) {
+          if (window.localStorage.langcode && window.localStorage.langcode !== '') {
+            this.langcode = window.localStorage.langcode;
+          } else {
+            /* todo: get preferred language from device, find best app match */
+            this.langcode = 'en';
+            window.localStorage.langcode = this.langcode;
+          }
+        } else {
+          this.langcode = 'en';
         }
 
         // store setup for mobile device or web
@@ -870,12 +904,45 @@ var App = new function() {
             });
         });
 
+        this.cameraPreviewPhotoTagList = document.querySelector('#gapp_camera_photo_form_taglist');
+        this.cameraPreviewPhotoTagList.langcode = '';
+        this.cameraPreviewPhotoTagList.list = null;
         /* Preview Photo taken by camera */
         /* todo: add toggle to show/hide overlay-picture with preview */
         this.cameraPreviewPhotoFrame = document.querySelector('#gapp_camera_photo_preview_frame');
+
+        this.cameraPreviewPhotoFrame.resetTagList = function(list) {
+          // redraws all available tags and resets check to defaults
+          var listContainer = document.querySelector('#gapp_camera_photo_form_taglist');
+          var html = '';
+          for (var i = 0; i < list.length; i++) {
+            html += '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-' + i + '">\n' +
+               '<input type="checkbox" id="checkbox-' + i + '" class="mdl-checkbox__input" name="tag" value="'+list[i].tagid+'">\n' +
+               '<span class="mdl-checkbox__label">'+list[i].tagtext+'</span>\n' +
+               '</label>';
+          }
+          listContainer.innerHTML = html;
+        };
+
+        this.cameraPreviewPhotoFrame.resetPhotoForm = function () {
+            // reset the photo description form
+            if (app.cameraPreviewPhotoTagList.list === null || app.cameraPreviewPhotoTagList.langcode !== app.langcode) {
+              // get new tag list
+              PhotoServer.getTagList(app.langcode, function(err, list) {
+                app.cameraPreviewPhotoTagList.list = list;
+                app.cameraPreviewPhotoTagList.langcode = app.langcode;
+                // add tags to form
+                app.cameraPreviewPhotoFrame.resetTagList(list);
+              });
+            } else {
+              // add tags to form
+              app.cameraPreviewPhotoFrame.resetTagList(list);
+            }
+        };
         this.cameraPreviewPhotoFrame.show = function () {
             document.removeEventListener('backbutton', app.cameraPopup.hide);
             document.addEventListener('backbutton', app.cameraPreviewPhotoFrame.hide);
+            app.cameraPreviewPhotoFrame.resetPhotoForm();
             app.cameraPreviewPhotoFrame.classList.remove('hidden');
         };
         this.cameraPreviewPhotoFrame.hide = function () {
@@ -918,11 +985,6 @@ var App = new function() {
                     }, 3000);
                 }
             });
-        });
-
-        this.buttonPreviewPhotoAddDescription = document.querySelector('#gapp_camera_photo_button_adddescription');
-        this.buttonPreviewPhotoAddDescription.addEventListener('click', function() {
-            ;
         });
 
         var buttonTakePhoto = document.querySelector('#gapp_camera_takephoto');

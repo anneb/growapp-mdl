@@ -810,12 +810,14 @@ app.post('/photoserver/createdevice', cors(), function (req, res){
     });
 }); // createdevice
 
+
+// get list of tagids and tagtext for the given langcode
 app.get('/photoserver/taglist', cors(), function(req, res){
-  console.log('/photoserver/taglist');
-  var langcode = req.query.langcode;
-    var sql = 'select tagid, tagtext from tags where langcode=$1';
+    console.log('/photoserver/taglist');
+    var langcode = req.query.langcode;
+    var sql = 'select tagid, tagtext from tags where langcode=$1 and active=TRUE';
     dbPool.query(sql, [langcode])
-      .then (function (result){ 
+      .then (function (result){
           if (result.rows) {
               res.json(result.rows);
           }

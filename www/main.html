@@ -250,6 +250,7 @@
         background-color: white;
         padding: 10px;
         overflow:auto;
+        border-radius: 2px;
       }
       #gapp_camera_photo_form_description .mdl-textfield {
           width: 90%;
@@ -258,6 +259,10 @@
           position: absolute;
           right: 0;
           top: 20px;
+      }
+      #gapp_camera_photo_form_input {
+          overflow-y: auto;
+          height: calc(100% - 100px);
       }
       #gapp_camera_photo_form_description_close {
         position: absolute;
@@ -404,7 +409,7 @@
         <button id="gapp_fullscreenphotopopup_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
       </div>
       <div id="gapp_camera_popup" class="hidden">
-	     <div id="gapp_camera_overlay_picture_frame" class="hidden">
+	       <div id="gapp_camera_overlay_picture_frame" class="hidden">
             <img id="gapp_camera_overlay_picture" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
          </div>
          <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab mdl-color--white">
@@ -427,15 +432,17 @@
                   <i class="material-icons">close</i>
               </button>
             </div>
-            <div id="gapp_camera_photo_form_description" class="mdl-card mdl-shadow--2dp hidden">
+            <div id="gapp_camera_photo_form_description" class="mdl-shadow--2dp hidden">
               <button id="gapp_camera_photo_form_description_close" class="mdl-button mdl-js-button mdl-button--icon">
                   <i class="material-icons">close</i>
               </button>
               <div class="mdl-card__title">
                 <h2 class="mdl-card__title-text">Photo tags</h2>
               </div>
-              <div class="mdl-card__supporting-text">
+              <div id="gapp_camera_photo_form_input" class="mdl-card__supporting-text">
                 <form action="#">
+                    <div id="gapp_camera_photo_form_taglist">
+                    </div>
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                         <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_tag" pattern="([0-9|a-z|A-Z])*">
                         <label class="mdl-textfield__label" for="gapp_camera_photo_tag">Tag</label>
@@ -449,6 +456,13 @@
                         <i class="material-icons mdl-textfield__label__icon">&#xE40C;<!--panorama_fish_eye--></i>
                     </div>
                 </form>
+                <p>1</p>
+                <p>2</p>
+                <p>3</p>
+                <p>4</p>
+                <p>5</p>
+                <p>6</p>
+                <p>hallo</p>
               </div>
             </div>
          </div>
