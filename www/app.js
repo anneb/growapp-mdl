@@ -904,6 +904,10 @@ var App = new function() {
             });
         });
 
+        /* Preview Photo taken by camera */
+        /* todo: add toggle to show/hide overlay-picture with preview */
+        this.cameraPreviewPhotoFrame = document.querySelector('#gapp_camera_photo_preview_frame');
+
         this.cameraPreviewPhotoTagList = document.querySelector('#gapp_camera_photo_form_taglist');
         this.cameraPreviewPhotoTagList.langcode = '';
         this.cameraPreviewPhotoTagList.list = null;
@@ -924,9 +928,15 @@ var App = new function() {
             }
           }
         });
-        /* Preview Photo taken by camera */
-        /* todo: add toggle to show/hide overlay-picture with preview */
-        this.cameraPreviewPhotoFrame = document.querySelector('#gapp_camera_photo_preview_frame');
+
+        // on change: update label on 'add description' button
+        var descriptionText = document.querySelector('#gapp_camera_photo_button_adddescription_text');
+        var inputDescription = document.querySelector('#gapp_camera_photo_form_input_description');
+        inputDescription.addEventListener('change', function() {
+          if (this.value != '') {
+            descriptionText.innerHTML = this.value;
+          }
+        });
 
         this.cameraPreviewPhotoFrame.resetTagList = function(list) {
           // redraws all available tags and resets check to defaults
@@ -972,6 +982,7 @@ var App = new function() {
         this.cameraPreviewPhotoFrame.show = function () {
             document.removeEventListener('backbutton', app.cameraPopup.hide);
             document.addEventListener('backbutton', app.cameraPreviewPhotoFrame.hide);
+            document.querySelector('#gapp_camera_photo_button_adddescription_text').innerHTML = 'Add description...';
             app.cameraPreviewPhotoFrame.resetPhotoForm();
             app.cameraPreviewPhotoFrame.classList.remove('hidden');
         };

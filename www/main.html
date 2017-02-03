@@ -282,8 +282,15 @@
       }
       #gapp_camera_photo_form_spacer {
         position: relative;
-        height: 100px;
-        border: 1px solid black;
+        height: 80px;
+      }
+      #gapp_scroll_down {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        margin-top: 10px;
+        margin-left: -10px;
+        color: rgba(0,0,0,.54)
       }
       #gapp-snackbar {
           z-index: 100 !important;
@@ -438,7 +445,7 @@
          <div id="gapp_camera_photo_preview_frame" class="hidden">
             <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
             <div id="gapp_camera_photo_bar_bottom">
-              <div id="gapp_camera_photo_button_adddescription"><i class="material-icons">description</i> Add description...</div>
+              <div id="gapp_camera_photo_button_adddescription"><i class="material-icons">description</i><span id="gapp_camera_photo_button_adddescription_text"> Add description...</span></div>
               <button id="gapp_camera_photo_ok" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
                   <i class="material-icons">send</i>
               </button>
@@ -474,6 +481,7 @@
                     <div id="gapp_camera_photo_form_spacer"></div>
                 </form>
               </div>
+              <div id="gapp_scroll_down"><i class="material-icons">&#xE5CF;<!--expand_more--></i></div>
             </div>
          </div>
       </div>
