@@ -888,6 +888,15 @@ var App = new function() {
             app.cameraPreviewPhotoFrame.hide();
             app.cameraPopup.resetCamera();
         });
+        var buttonAddDescription = document.querySelector('#gapp_camera_photo_button_adddescription');
+        var descriptionForm = document.querySelector('#gapp_camera_photo_form_description');
+        buttonAddDescription.addEventListener('click', function() {
+              descriptionForm.classList.remove('hidden');
+        });
+        var buttonCloseDescription = document.querySelector('#gapp_camera_photo_form_description_close');
+        buttonCloseDescription.addEventListener('click', function() {
+            descriptionForm.classList.add('hidden');
+        });
 
         this.buttonPreviewPhotoOk = document.querySelector('#gapp_camera_photo_ok');
         this.buttonPreviewPhotoOk.addEventListener('click', function() {

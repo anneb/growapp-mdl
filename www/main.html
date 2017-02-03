@@ -251,6 +251,14 @@
         padding: 10px;
         overflow:auto;
       }
+      #gapp_camera_photo_form_description .mdl-textfield {
+          width: 90%;
+      }
+      #gapp_camera_photo_form_description .mdl-textfield__label__icon {
+          position: absolute;
+          right: 0;
+          top: 20px;
+      }
       #gapp_camera_photo_form_description_close {
         position: absolute;
         top: 10px;
@@ -419,11 +427,30 @@
                   <i class="material-icons">close</i>
               </button>
             </div>
-            <div id="gapp_camera_photo_form_description">
+            <div id="gapp_camera_photo_form_description" class="mdl-card mdl-shadow--2dp hidden">
               <button id="gapp_camera_photo_form_description_close" class="mdl-button mdl-js-button mdl-button--icon">
                   <i class="material-icons">close</i>
               </button>
-              <div>Add Description</div></div>
+              <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Photo tags</h2>
+              </div>
+              <div class="mdl-card__supporting-text">
+                <form action="#">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_tag" pattern="([0-9|a-z|A-Z])*">
+                        <label class="mdl-textfield__label" for="gapp_camera_photo_tag">Tag</label>
+                        <span class="mdl-textfield__error">Input is not a valid tag</span>
+                        <i class="material-icons mdl-textfield__label__icon">&#xE54E;<!--local_offer--></i>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_circumference" pattern="([0-9|.|,])*">
+                        <label class="mdl-textfield__label" for="gapp_camera_photo_circumference">Tree circumference (cm)</label>
+                        <span class="mdl-textfield__error">Input is not a valid circumference</span>
+                        <i class="material-icons mdl-textfield__label__icon">&#xE40C;<!--panorama_fish_eye--></i>
+                    </div>
+                </form>
+              </div>
+            </div>
          </div>
       </div>
       <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
