@@ -702,6 +702,19 @@ var App = new function() {
         }
     };
 
+    // always display legend on longest side of screen
+    window.addEventListener("orientationchange", function() {
+      var legendvertical = document.querySelector("#gapp_legendvertical");
+      var legendhorizontal = document.querySelector("#gapp_legendhorizontal");
+      if (!legendvertical.classList.contains("hidden")) {
+        legendvertical.classList.add("hidden");
+        legendhorizontal.classList.remove("hidden");
+      } else if (!legendhorizontal.classList.contains("hidden")) {
+        legendhorizontal.classList.add("hidden");
+        legendvertical.classList.remove("hidden");
+      }
+    });
+
     this.navigate = function() {
         switch (window.location.hash) {
             case '#managephoto':
