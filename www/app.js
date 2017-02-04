@@ -187,9 +187,9 @@ var PhotoServer = new function() {
 
 
   // upload picture contents (photodata) to photoserver
-  this.uploadPhotoData = function(imagedata, rootid, location, accuracy, callback) {
+  this.uploadPhotoData = function(imagedata, rootid, location, accuracy, description, callback) {
       var xhr = new XMLHttpRequest();
-      var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + '&username=' + window.localStorage.email +  '&hash=' + window.localStorage.hash + '&rootid=' + rootid + '&deviceid=' + window.localStorage.deviceid + '&devicehash=' + window.localStorage.devicehash;
+      var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + '&description='+encodeURIComponent(description.description)+'&tags='+encodeURIComponent(description.tags.join(','))+'&circumference='+encodeURIComponent(description.circumference)+'&username=' + window.localStorage.email +  '&hash=' + window.localStorage.hash + '&rootid=' + rootid + '&deviceid=' + window.localStorage.deviceid + '&devicehash=' + window.localStorage.devicehash;
       xhr.open('POST', photoServer.server + '/photoserver/sendphoto');
       xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
       xhr.onreadystatechange = function (event) {
@@ -952,6 +952,10 @@ var App = new function() {
         };
 
         this.cameraPreviewPhotoFrame.resetPhotoForm = function () {
+            // hide the form
+            document.querySelector('#gapp_camera_photo_form').classList.add('hidden');
+            // scroll back to top
+            document.querySelector('#gapp_camera_photo_form_fields').scrollTop = 0;
             // reset text fields
             // see http://stackoverflow.com/questions/34077730/fetching-the-value-of-a-mdl-textfield/34122149
             var materialTextField = document.querySelector('#gapp_camera_photo_form_description').MaterialTextfield;
@@ -1006,11 +1010,19 @@ var App = new function() {
             descriptionForm.classList.add('hidden');
         });
 
+        this.getFullPhotoDescription = function() {
+          return {
+              description: document.querySelector('#gapp_camera_photo_form_input_description').value,
+              circumference: document.querySelector('#gapp_camera_photo_form_input_circumference').value.replace(',', '.'),
+              tags: [].slice.call(document.querySelectorAll('.tagbox:checked')).map(function(box){return box.value;})
+          };
+        };
+
         this.buttonPreviewPhotoOk = document.querySelector('#gapp_camera_photo_ok');
         this.buttonPreviewPhotoOk.addEventListener('click', function() {
             app.showMessage('uploading photo...');
             var p = app.cameraPreviewPhoto;
-            PhotoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, function(err, message) {
+            PhotoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, app.getFullPhotoDescription(), function(err, message) {
                 if (err) {
                     app.showMessage('Upload failed: ' + message);
                 } else {
