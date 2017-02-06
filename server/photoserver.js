@@ -74,7 +74,9 @@ function createCollection(features, message, errno) {
                       accuracy: features[i].accuracy,
                       time: features[i].time,
                       width: features[i].width,
-                      height: features[i].height
+                      height: features[i].height,
+		      description: features[i].description,
+                      tags: features[i].tags
               }
             });
         }
@@ -83,7 +85,7 @@ function createCollection(features, message, errno) {
 
 app.get('/photoserver/getphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getphotos');
-  var sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, case when animationfilename is null then filename else animationfilename end filename, time, width, height from photo where visible=true and rootid=0';
+  var sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo where visible=true and rootid=0';
   dbPool.query(sql)
     .then(function(result) {
       res.json(createCollection (result.rows, null, null));
