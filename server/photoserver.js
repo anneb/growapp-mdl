@@ -693,6 +693,8 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                         var accuracy = parseInt(req.body.accuracy, 10);
                         var location = 'SRID=4326;POINT(' + longitude + ' ' + latitude + ')';
                         var rootid = req.body.rootid;
+                        var description = req.body.description.substring(0,400);
+                        var tags = JSON.parse(req.body.tags);
                         if (typeof rootid == 'undefined') {
                             rootid = 0;
                         }
@@ -710,8 +712,18 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                 .then(function(result) {
                                     if (result > 0) {
                                         var deviceid = result;
-                                        var sql = "insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7)";
-                                        dbPool.query(sql, [shortfilename, imageinfo.width, imageinfo.height, location, accuracy, rootid, deviceid])
+                                        var tagstring = '';
+                                        for (var i = 0; i < tags.length; i++) {
+                                          var tag = tags[i];
+                                          for (var name in tag) {
+                                            if (tagstring !== '') {
+                                              tagstring += ',';
+                                            }
+                                            tagstring += '"' + name.replace('"', '') + '" => "' + tag[name].replace('"', '') +  '"';
+                                          }
+                                        }
+                                        var sql = "insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid, description, tags) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7, $8, $9)";
+                                        dbPool.query(sql, [shortfilename, imageinfo.width, imageinfo.height, location, accuracy, rootid, deviceid, description, tagstring])
                                             .catch(function(reason) {
                                                 console.log(reason);
                                                 res.writeHead(500, {
