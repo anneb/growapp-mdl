@@ -695,8 +695,22 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                         var accuracy = parseInt(req.body.accuracy, 10);
                         var location = 'SRID=4326;POINT(' + longitude + ' ' + latitude + ')';
                         var rootid = req.body.rootid;
-                        var description = req.body.description.substring(0,400);
-                        var tags = JSON.parse(req.body.tags);
+                        var description = '';
+                        if (req.body.description) {
+                            try {
+                              description = req.body.description.substring(0,400);
+                            } catch(e) {
+                              ;
+                            }
+                        }
+                        var tags=[];
+                        if (req.body.tags) {
+                          try {
+                            tags = JSON.parse(req.body.tags);
+                          } catch(e) {
+                            ;
+                          }
+                        }
                         if (typeof rootid == 'undefined') {
                             rootid = 0;
                         }
