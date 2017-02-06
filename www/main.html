@@ -98,6 +98,23 @@
         top: 10px;
         right: 50px;
       }
+      #gapp_featureinfo_info {
+        position: absolute;
+        top: 10px;
+        right: 90px;
+      }
+      #gapp_featureinfo_infotext {
+        position: absolute;
+        top: 50px;
+        left: 0px;
+        width: 90%;
+        width: calc(100% - 20px);
+        color: white;
+        padding: 10px;
+        text-shadow: 0 1px gray;
+        background: #333;
+        background: rgba(0,0,0,0.18);
+      }
       #gapp_fullscreenphotopopup {
         position: absolute;
         left: 0;
@@ -409,9 +426,11 @@
                 </button>
                 <div id="gapp_featureinfo" class="hidden">
                   <img id="gapp_featureinfo_photo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                  <div id="gapp_featureinfo_infotext" class="hidden">Dit is zomaar een stuk tekst en het moet wel een beetje lang zijn om over te lopen naar de volgende regel. <br>Dit is een nieuwe regel...</div>
                   <button id="gapp_featureinfo_addphoto" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" disabled><i class="material-icons">&#xE439;</i></button>
                   <button id="gapp_featureinfo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
                   <button id="gapp_featureinfo_fullscreen" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">fullscreen</i></button>
+                  <button id="gapp_featureinfo_info" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE88F;<!--info_outline--></i></button>
                   <div id="gapp_featureinfo_spinner" class="mdl-spinner mdl-js-spinner is-active"></div>
 				  <div id="gapp_featureinfo_error" class="hidden"><i class="material-icons">&#xE888;</i> Error loading picture</div>
                 </div>

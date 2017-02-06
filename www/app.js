@@ -56,6 +56,24 @@ var _utils = {
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    },
+    escapeHTML: function(str) {
+     str = str + "";
+     var out = "";
+     for(var i=0; i<str.length; i++) {
+         if(str[i] === '<') {
+             out += '&lt;';
+         } else if(str[i] === '>') {
+             out += '&gt;';
+         } else if(str[i] === "'") {
+             out += '&#39;';
+         } else if(str[i] === '"') {
+             out += '&quot;';
+         } else {
+             out += str[i];
+         }
+     }
+     return out;
     }
 };
 
@@ -524,7 +542,7 @@ var App = new function() {
         if (window.localStorage.email && window.localStorage.email !== '') {
           var accountinfo = document.querySelector('#gapp_account_info');
           if (window.localStorage.displayName && window.localStorage.displayName !== '') {
-            accountinfo.innerHTML = window.localStorage.displayName;
+            accountinfo.innerHTML = _utils.escapeHTML(window.localStorage.displayName);
           } else {
             accountinfo.innerHTML = window.localStorage.email;
           }
@@ -769,6 +787,15 @@ var App = new function() {
             app.activeFeature = null;
         };
 
+        this.featureInfoPopup.toggleInfo = function() {
+          var infoText = document.querySelector('#gapp_featureinfo_infotext');
+          if (infoText.classList.contains('hidden')) {
+            infoText.classList.remove('hidden');
+          } else {
+            infoText.classList.add('hidden');
+          }
+        };
+
         /* todo: zoomable fullscreen photo? http://ignitersworld.com/lab/imageViewer.html */
         this.fullscreenphotopopup = document.querySelector('#gapp_fullscreenphotopopup');
         this.fullscreenphotopopup.show = function() {
@@ -796,6 +823,9 @@ var App = new function() {
 
         var gappFeatureInfoFullScreen = document.querySelector('#gapp_featureinfo_fullscreen');
         gappFeatureInfoFullScreen.addEventListener('click', app.fullscreenphotopopup.show);
+
+        var gappFeatureInfo = document.querySelector('#gapp_featureinfo_info');
+        gappFeatureInfo.addEventListener('click', app.featureInfoPopup.toggleInfo);
 
         var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
         gappFeatureInfoFullScreenClose.addEventListener('click', app.fullscreenphotopopup.hide);
@@ -947,7 +977,7 @@ var App = new function() {
         var inputDescription = document.querySelector('#gapp_camera_photo_form_input_description');
         inputDescription.addEventListener('change', function() {
           if (this.value != '') {
-            descriptionText.innerHTML = this.value;
+            descriptionText.innerHTML = _utils.escapeHTML(this.value);
           }
         });
 
@@ -1208,6 +1238,18 @@ var App = new function() {
             app.featureInfoPhoto.url = picture_url;
             app.featureInfoPhoto.photoid = feature.get('id');
             spinner.classList.add('is-active');
+            var infoText = document.querySelector('#gapp_featureinfo_infotext');
+            var description = feature.get('description');
+            if (!description) {
+              description = 'No description';
+            }
+            var tags = feature.get('tags');
+            if (!tags) {
+              tags = 'No tags';
+            }
+            var time = feature.get('time');
+            infoText.innerHTML = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tags) + '<br>' + feature.get('time');
+
             var photo = new Image();
             photo.onload = function() {
                 spinner.classList.remove('is-active');
