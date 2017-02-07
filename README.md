@@ -41,11 +41,18 @@ Connect your device to USB
 * menu tools-> Android -> AVD manager->create virtual device
 *
 
-# Deploy to device or emulator
+## Deploy to emulator
 ```
 cd growapp-mdl
-cordova run
+cordova run --emulator
 ```
+## Deploy to device
+```
+cd growapp-mdl
+cordova run --device
+```
+
+
 
 ## bug? in cordova 6.4.0?
 For some reason, cordova 6.4.0 copies the android app icons to the wrong directory.
@@ -53,7 +60,7 @@ After the first build, cordova created new directories:<br>
 ```res/mipmap-* ```
 
 Manually copy or move:<br>
-```res/mipmap-*```<br>
-to:<br>
-```platforms/android/res/```<br>
-and rebuild the app.
+```res/mipmap-* ```
+<br>to:<br>
+```platforms/android/res/```
+<br>and rebuild the app.

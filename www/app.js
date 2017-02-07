@@ -982,7 +982,7 @@ var App = new function() {
         var descriptionText = document.querySelector('#gapp_camera_photo_button_adddescription_text');
         var inputDescription = document.querySelector('#gapp_camera_photo_form_input_description');
         inputDescription.addEventListener('change', function() {
-          if (this.value != '') {
+          if (this.value !== '') {
             descriptionText.innerHTML = _utils.escapeHTML(this.value);
           }
         });
@@ -998,6 +998,23 @@ var App = new function() {
                '</label>';
           }
           listContainer.innerHTML = html;
+        };
+
+        this.getTagList = function(callback) {
+          if (app.cameraPreviewPhotoTagList.list === null || app.cameraPreviewPhotoTagList.langcode !== app.langcode) {
+            // get new tag list
+            PhotoServer.getTagList(app.langcode, function(err, list) {
+              if (err) {
+                callback(err, list);
+              } else {
+                app.cameraPreviewPhotoTagList.list = list;
+                app.cameraPreviewPhotoTagList.langcode = app.langcode;
+                callback(false, list);
+              }
+            });
+          } else {
+            callback(false, app.cameraPreviewPhotoTagList.list);
+          }
         };
 
         this.cameraPreviewPhotoFrame.resetPhotoForm = function () {
@@ -1017,20 +1034,12 @@ var App = new function() {
             }
             // document.querySelector('#gapp_camera_photo_form_input_description').value = null;
             // document.querySelector('#gapp_camera_photo_form_input_circumference').value = null;
-
-            // reset the tag list
-            if (app.cameraPreviewPhotoTagList.list === null || app.cameraPreviewPhotoTagList.langcode !== app.langcode) {
-              // get new tag list
-              PhotoServer.getTagList(app.langcode, function(err, list) {
-                app.cameraPreviewPhotoTagList.list = list;
-                app.cameraPreviewPhotoTagList.langcode = app.langcode;
-                // add tags to form
+            app.getTagList(function(err, list) {
+              if (!err) {
+                // reset the tag list
                 app.cameraPreviewPhotoFrame.resetTagList(list);
-              });
-            } else {
-              // add tags to form
-              app.cameraPreviewPhotoFrame.resetTagList(app.cameraPreviewPhotoTagList.list);
-            }
+              }
+            });
         };
         this.cameraPreviewPhotoFrame.show = function () {
             document.removeEventListener('backbutton', app.cameraPopup.hide);
@@ -1249,13 +1258,19 @@ var App = new function() {
             if (!description) {
               description = 'No description';
             }
-            var tags = feature.get('tags');
-            if (!tags) {
-              tags = 'No tags';
-            }
-            var infoText = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tags) + '<br>' + feature.get('time');
-            document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
-            document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
+
+            app.getTagList(function (err, list) {
+              if (!err) {
+                var tags = feature.get('tags');
+                if (!tags) {
+                  tags = 'No tags';
+                }
+                var infoText = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tags) + '<br>' + feature.get('time');
+                document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
+                document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
+              }
+            });
+
 
             var photo = new Image();
             photo.onload = function() {

@@ -61,6 +61,11 @@ function FeatureCollection(message, errno){
         }
 }
 
+function tagStringToArray(tagstring)
+{
+  return tagstring.split(',').map(function(item){var keyval=item.split(' => ').map(function(s){return s.replace(/"/g, '');}); var result={}; result[keyval[0]]=keyval[1]; return result;});
+}
+
 function createCollection(features, message, errno) {
         var featureCollection = new FeatureCollection(message, errno);
 
@@ -75,8 +80,8 @@ function createCollection(features, message, errno) {
                       time: features[i].time,
                       width: features[i].width,
                       height: features[i].height,
-		      description: features[i].description,
-                      tags: features[i].tags
+		                  description: features[i].description,
+                      tags: tagStringToArray(features[i].tags)
               }
             });
         }
