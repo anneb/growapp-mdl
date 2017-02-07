@@ -1078,7 +1078,7 @@ var App = new function() {
                     if (box.value=="5") {
                       obj[box.value] = document.querySelector('#gapp_camera_photo_form_input_circumference').value.replace(',', '.');
                     } else {
-                      obj[box.value] = "1";
+                      obj[box.value] = "";
                     }
                     return obj;
                   })
@@ -1261,11 +1261,31 @@ var App = new function() {
 
             app.getTagList(function (err, list) {
               if (!err) {
+                var tagtext = '';
                 var tags = feature.get('tags');
-                if (!tags) {
-                  tags = 'No tags';
+                if (tags.length === 0) {
+                  tagtext = 'No tags';
+                } else {
+                  for (var i=0; i < tags.length; i++) {
+                    for (var key in tags[i]) {
+                      for (var k = 0; k < list.length; k++) {
+                        if (key == list[k].tagid) {
+                          if (tagtext !== '') {
+                            tagtext += ', ';
+                          }
+                          tagtext += list[k].tagtext;
+                          if ((tags[i])[key] !== '') {
+                            tagtext += ': ' + (tags[i])[key];
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
-                var infoText = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tags) + '<br>' + feature.get('time');
+                var date = new Date();
+                date.setTime(Date.parse(feature.get('time')));
+                var dateText = date.toLocaleDateString() + ', ' + date.toLocaleTimeString();
+                var infoText = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tagtext) + '<br>' + dateText;
                 document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
                 document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
               }
