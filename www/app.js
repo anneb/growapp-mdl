@@ -789,10 +789,13 @@ var App = new function() {
 
         this.featureInfoPopup.toggleInfo = function() {
           var infoText = document.querySelector('#gapp_featureinfo_infotext');
+          var infoText2 = document.querySelector('#gapp_fullscreenphotopopup_infotext');
           if (infoText.classList.contains('hidden')) {
             infoText.classList.remove('hidden');
+            infoText2.classList.remove('hidden');
           } else {
             infoText.classList.add('hidden');
+            infoText2.classList.add('hidden');
           }
         };
 
@@ -826,6 +829,9 @@ var App = new function() {
 
         var gappFeatureInfo = document.querySelector('#gapp_featureinfo_info');
         gappFeatureInfo.addEventListener('click', app.featureInfoPopup.toggleInfo);
+
+        var gappFullScreenPhotoInfo = document.querySelector('#gapp_fullscreenphotopopup_info');
+        gappFullScreenPhotoInfo.addEventListener('click', app.featureInfoPopup.toggleInfo);
 
         var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
         gappFeatureInfoFullScreenClose.addEventListener('click', app.fullscreenphotopopup.hide);
@@ -1238,7 +1244,7 @@ var App = new function() {
             app.featureInfoPhoto.url = picture_url;
             app.featureInfoPhoto.photoid = feature.get('id');
             spinner.classList.add('is-active');
-            var infoText = document.querySelector('#gapp_featureinfo_infotext');
+
             var description = feature.get('description');
             if (!description) {
               description = 'No description';
@@ -1247,8 +1253,9 @@ var App = new function() {
             if (!tags) {
               tags = 'No tags';
             }
-            var time = feature.get('time');
-            infoText.innerHTML = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tags) + '<br>' + feature.get('time');
+            var infoText = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tags) + '<br>' + feature.get('time');
+            document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
+            document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
 
             var photo = new Image();
             photo.onload = function() {

@@ -141,6 +141,23 @@
         right: 10px;
         top: 10px;
       }
+      #gapp_fullscreenphotopopup_info {
+        position: absolute;
+        top: 10px;
+        right: 50px;
+      }
+      #gapp_fullscreenphotopopup_infotext {
+        position: absolute;
+        top: 50px;
+        left: 0px;
+        width: 90%;
+        width: calc(100% - 20px);
+        color: white;
+        padding: 10px;
+        text-shadow: 0 1px gray;
+        background: #333;
+        background: rgba(0,0,0,0.18);
+      }
       #gapp_camera_popup {
         position: absolute;
         max-height: 100%;
@@ -448,7 +465,9 @@
       </div>
       <div id="gapp_fullscreenphotopopup" class="hidden">
         <img id="gapp_fullscreenphoto" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+        <div id="gapp_fullscreenphotopopup_infotext" class="hidden"></div>
         <button id="gapp_fullscreenphotopopup_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
+        <button id="gapp_fullscreenphotopopup_info" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE88F;<!--info_outline--></i></button>
       </div>
       <div id="gapp_camera_popup" class="hidden">
 	       <div id="gapp_camera_overlay_picture_frame" class="hidden">
