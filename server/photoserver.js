@@ -63,7 +63,11 @@ function FeatureCollection(message, errno){
 
 function tagStringToArray(tagstring)
 {
-  return tagstring.split(',').map(function(item){var keyval=item.split(' => ').map(function(s){return s.replace(/"/g, '');}); var result={}; result[keyval[0]]=keyval[1]; return result;});
+  if (tagstring) {
+      return tagstring.split(', ').map(function(item){var keyval=item.split('=>').map(function(s){return s.replace(/"/g, '');}); var result={}; result[keyval[0]]=keyval[1]; return result;});
+  } else {
+   return [];
+  } 
 }
 
 function createCollection(features, message, errno) {
