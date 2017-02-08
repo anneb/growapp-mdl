@@ -846,6 +846,7 @@ var App = new function() {
                     // overlay_pictue: replace animated picture with first picture
                         url = url.substr(0, url.length -4) + '.jpg';
                     }
+                    app.overlayURL = url;
                     app.cameraPopup.show(url, photoid);
                 } else {
                     // device could not be registered, offline? no window.localStorage?
@@ -945,6 +946,7 @@ var App = new function() {
         cameraButton.addEventListener('click', function() {
             PhotoServer.ensureDeviceRegistration(function(result) {
                 if (result) {
+                    app.overlayUrl = null;
                     app.cameraPopup.show();
                 } else {
                     // device could not be registered, offline? no window.localStorage?
@@ -1096,13 +1098,20 @@ var App = new function() {
                     // success! Free memory and close dialog
                     p.rawdata = null;
                     app.cameraPreviewPhoto.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-                    PhotoServer.resetCacheTime(); // reset cache
-                    app.photoLayer = PhotoServer.updatePhotos();
                     app.cameraPreviewPhotoFrame.hide();
                     app.cameraPopup.hide();
                     setTimeout (function() {
-                      app.clickFeatureHandler(app.activeFeature); // reload feature
-                    }, 3000);
+                      PhotoServer.resetCacheTime(); // reset cache
+                      app.photoLayer = PhotoServer.updatePhotos();
+                      setTimeout(function(){
+                        if (app.overlayURL && app.activeFeature) {
+                          var url = app.activeFeature.get('filename');
+                          url = url.substr(0, url.length -4) + '.gif';
+                          app.activeFeature.set('filename', url);
+                        }
+                        app.clickFeatureHandler(app.activeFeature); // reload feature
+                      }, 1000);
+                    }, 5000);
                 }
             });
         });
