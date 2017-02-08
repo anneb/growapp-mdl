@@ -62,5 +62,6 @@ After the first build, cordova created new directories:<br>
 Manually copy or move:<br>
 ```res/mipmap-* ```
 <br>to:<br>
-```platforms/android/res/```
+```platforms/android/res/ ```
+
 <br>and rebuild the app.
