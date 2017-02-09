@@ -44,7 +44,7 @@
                     document.querySelector('#accountemail').classList.add('hidden');
                     document.querySelector('#accountinfo').classList.add('hidden');
                     document.querySelector('#accountverify').classList.remove('hidden');
-                    App.showMessage("mail sent, please check your email");
+                    app.showMessage("mail sent, please check your email");
                     break;
                 case '#info':
                     showUserInfo();
@@ -97,17 +97,17 @@
                         // send email
                         photoServer.emailValidationCode(emailaddress, function(err, result) {
                             if (err) {
-                                App.showMessage('Mail error: ' + result);
+                                app.showMessage('Mail error: ' + result);
                             } else {
                                 // update screen
                                 window.location='#verify';
                                 document.querySelector('#accountemail').classList.add('hidden');
                                 document.querySelector('#accountverify').classList.remove('hidden');
-                                App.showMessage("mail sent, please check your email");
+                                app.showMessage("mail sent, please check your email");
                             }
                         })
                     } else {
-                        App.showMessage("please provide a valid email address");
+                        app.showMessage("please provide a valid email address");
                     }
                 },false);
                 document.querySelector('#buttoncode').addEventListener('click', function(){
@@ -116,7 +116,7 @@
                     if (isValidCode(code)) {
                         photoServer.validateuser(emailaddress, code, localStorage.deviceid, localStorage.devicehash, function(err, result) {
                             if (err) {
-                                App.showMessage(result);
+                                app.showMessage(result);
                             } else {
                                 localStorage.email = emailaddress;
                                 localStorage.hash = result;
