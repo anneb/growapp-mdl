@@ -78,8 +78,8 @@ var _utils = {
 };
 
 // object for communicating with remote photoserver
-var PhotoServer = new function() {
-  var photoServer = this;
+var PhotoServer = function() {
+  var _photoServer = this;
 
   this.init = function(serverURL)  {
       this.server = serverURL;
@@ -111,20 +111,20 @@ var PhotoServer = new function() {
   this.photoLayer = null;
   this.updatePhotos = function() {
     //adds or reloads photo positions into Photolayer
-    if (photoServer.photoLayer) {
+    if (_photoServer.photoLayer) {
         // update source
-        photoServer.photoLayer.setSource(
+        _photoServer.photoLayer.setSource(
             new ol.source.Vector({
                 projection: 'EPSG:4326',
-                url: photoServer.server + '/photoserver/getphotos?' + photoServer.getCacheTime(), // File created in node
+                url: _photoServer.server + '/photoserver/getphotos?' + _photoServer.getCacheTime(), // File created in node
                 format: new ol.format.GeoJSON()
             })
         );
     } else {
-        photoServer.photoLayer = new ol.layer.Vector({
+        _photoServer.photoLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 projection: 'EPSG:4326',
-                url: photoServer.server + '/photoserver/getphotos?' + photoServer.getCacheTime(), // File created in node
+                url: _photoServer.server + '/photoserver/getphotos?' + _photoServer.getCacheTime(), // File created in node
                 format: new ol.format.GeoJSON()
             }),
             style: new ol.style.Style({
@@ -145,16 +145,16 @@ var PhotoServer = new function() {
             })
         });
     }
-    return photoServer.photoLayer;
+    return _photoServer.photoLayer;
   };
 
   // return url to large version of photo
   this.bigPhotoUrl = function(photofile) {
     if (photofile.substr(-4, 4) === '.gif') {
         /* todo: add cache update to url for gif, sequence number? */
-        return photoServer.server + '/uploads/' + photofile;
+        return _photoServer.server + '/uploads/' + photofile;
     }
-    return photoServer.server + '/uploads/' + photofile;
+    return _photoServer.server + '/uploads/' + photofile;
   };
 
   // ensure this device is registered with server
@@ -168,7 +168,7 @@ var PhotoServer = new function() {
         if ((!deviceid) || (deviceid==='undefined') || (!devicehash) || (devicehash==='undefined') ) {
             var xhr = new XMLHttpRequest();
             var formData = 'username=' + email +  '&hash=' + hash;
-            xhr.open('POST', photoServer.server+'/photoserver/createdevice');
+            xhr.open('POST', _photoServer.server+'/photoserver/createdevice');
             xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
             // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
             xhr.onreadystatechange = function (event) {
@@ -208,7 +208,7 @@ var PhotoServer = new function() {
   this.uploadPhotoData = function(imagedata, rootid, location, accuracy, description, callback) {
       var xhr = new XMLHttpRequest();
       var formData = 'photo=' + encodeURIComponent(imagedata) + '&latitude=' + location[1] + '&longitude=' + location[0] + '&accuracy=' + accuracy + '&description='+encodeURIComponent(description.description)+'&tags='+encodeURIComponent(JSON.stringify(description.tags))+'&username=' + window.localStorage.email +  '&hash=' + window.localStorage.hash + '&rootid=' + rootid + '&deviceid=' + window.localStorage.deviceid + '&devicehash=' + window.localStorage.devicehash;
-      xhr.open('POST', photoServer.server + '/photoserver/sendphoto');
+      xhr.open('POST', _photoServer.server + '/photoserver/sendphoto');
       xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
       xhr.onreadystatechange = function (event) {
          if (xhr.readyState === 4) {
@@ -226,7 +226,7 @@ var PhotoServer = new function() {
   this.getMyPhotos = function(callback) {
         var xhr = new XMLHttpRequest();
         var formData = 'username=' + window.localStorage.email +  '&hash=' + window.localStorage.hash + '&deviceid=' + window.localStorage.deviceid + '&devicehash=' + window.localStorage.devicehash;
-        xhr.open('POST', photoServer.server+'/photoserver/getmyphotos');
+        xhr.open('POST', _photoServer.server+'/photoserver/getmyphotos');
         xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
@@ -278,7 +278,7 @@ var PhotoServer = new function() {
     {
         var xhr = new XMLHttpRequest();
         var formData = 'email=' + encodeURIComponent(email);
-        xhr.open('POST', photoServer.server+'/photoserver/validatemail');
+        xhr.open('POST', _photoServer.server+'/photoserver/validatemail');
         xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
@@ -296,7 +296,7 @@ var PhotoServer = new function() {
     {
         var xhr = new XMLHttpRequest();
         var formData = 'email=' + encodeURIComponent(email) + '&validationcode=' + encodeURIComponent(code)  + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + '&devicehash=' + encodeURIComponent(localStorage.devicehash);
-        xhr.open('POST', photoServer.server+'/photoserver/validateuser');
+        xhr.open('POST', _photoServer.server+'/photoserver/validateuser');
         xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
@@ -322,7 +322,7 @@ var PhotoServer = new function() {
             window.localStorage.email = window.localStorage.email.trim().toLowerCase();
         }
         var formData = 'email=' + encodeURIComponent(localStorage.email) + '&hash=' + encodeURIComponent(localStorage.hash) + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + '&devicehash=' + encodeURIComponent(localStorage.devicehash);
-        xhr.open('POST', photoServer.server+'/photoserver/checkuser');
+        xhr.open('POST', _photoServer.server+'/photoserver/checkuser');
         xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
         xhr.onreadystatechange = function (event) {
@@ -349,7 +349,7 @@ var PhotoServer = new function() {
     this.getTagList = function (langcode, callback) {
       var xhr = new XMLHttpRequest();
       var formData = 'langcode=' + encodeURIComponent(langcode);
-      xhr.open('GET', photoServer.server+'/photoserver/taglist?'+ formData);
+      xhr.open('GET', _photoServer.server+'/photoserver/taglist?'+ formData);
       xhr.onreadystatechange = function (event) {
           if (xhr.readyState === 4) {
               if (xhr.status === 200) {
@@ -367,7 +367,9 @@ var PhotoServer = new function() {
       xhr.send(formData);
     };
 
-}(); // PhotoServer
+}; // PhotoServer
+
+var photoServer = new PhotoServer();
 
 var OLMap = new function() {
     var olMap = this;
@@ -381,7 +383,7 @@ var OLMap = new function() {
     };
 
     this.initMap = function (mapId) {
-        this.photoLayer = PhotoServer.updatePhotos();
+        this.photoLayer = photoServer.updatePhotos();
         this.openStreetMapLayer = new ol.layer.Tile({
             source: new ol.source.OSM({
                 url: 'https://saturnus.geodan.nl/mapproxy/osm/tiles/osmgrayscale_EPSG900913/{z}/{x}/{y}.png?origin=nw'
@@ -566,7 +568,7 @@ var App = new function() {
         this.cameraPopupInit();
 
         // initialize photoServer object
-        PhotoServer.init(server);
+        photoServer.init(server);
 
         // setup handler hooks into OLMap
         OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
@@ -838,7 +840,7 @@ var App = new function() {
 
         var buttonFeatureInfoAddPhoto = document.querySelector('#gapp_featureinfo_addphoto');
         buttonFeatureInfoAddPhoto.addEventListener('click', function(){
-            PhotoServer.ensureDeviceRegistration(function(result) {
+            photoServer.ensureDeviceRegistration(function(result) {
                 if (result) {
                     var url = app.featureInfoPhoto.url;
                     var photoid = app.featureInfoPhoto.photoid;
@@ -944,7 +946,7 @@ var App = new function() {
         };
         var cameraButton = document.querySelector('#gapp_button_camera');
         cameraButton.addEventListener('click', function() {
-            PhotoServer.ensureDeviceRegistration(function(result) {
+            photoServer.ensureDeviceRegistration(function(result) {
                 if (result) {
                     app.overlayUrl = null;
                     app.cameraPopup.show();
@@ -1005,7 +1007,7 @@ var App = new function() {
         this.getTagList = function(callback) {
           if (app.cameraPreviewPhotoTagList.list === null || app.cameraPreviewPhotoTagList.langcode !== app.langcode) {
             // get new tag list
-            PhotoServer.getTagList(app.langcode, function(err, list) {
+            photoServer.getTagList(app.langcode, function(err, list) {
               if (err) {
                 callback(err, list);
               } else {
@@ -1091,7 +1093,7 @@ var App = new function() {
         this.buttonPreviewPhotoOk.addEventListener('click', function() {
             app.showMessage('uploading photo...');
             var p = app.cameraPreviewPhoto;
-            PhotoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, app.getFullPhotoDescription(), function(err, message) {
+            photoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, app.getFullPhotoDescription(), function(err, message) {
                 if (err) {
                     app.showMessage('Upload failed: ' + message);
                 } else {
@@ -1101,8 +1103,8 @@ var App = new function() {
                     app.cameraPreviewPhotoFrame.hide();
                     app.cameraPopup.hide();
                     setTimeout (function() {
-                      PhotoServer.resetCacheTime(); // reset cache
-                      app.photoLayer = PhotoServer.updatePhotos();
+                      photoServer.resetCacheTime(); // reset cache
+                      app.photoLayer = photoServer.updatePhotos();
                       setTimeout(function(){
                         if (app.overlayURL && app.activeFeature) {
                           var url = app.activeFeature.get('filename');
@@ -1253,7 +1255,7 @@ var App = new function() {
                 distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
             }
 
-            var picture_url = PhotoServer.bigPhotoUrl(feature.get('filename'));
+            var picture_url = photoServer.bigPhotoUrl(feature.get('filename'));
             var spinner = document.querySelector('#gapp_featureinfo_spinner');
             var errorInfo = document.querySelector('#gapp_featureinfo_error');
             errorInfo.classList.add('hidden');

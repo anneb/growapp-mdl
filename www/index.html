@@ -70,7 +70,7 @@
         var message = document.querySelector('#message');
         if (err) {
           message.classList.add('errormessage');
-          message.innerHTML = result+'<p><a href="index.html">Try again</a> later or update the app if the problem persists</p>';
+          message.innerHTML = result+'<p>check connection, <a href="index.html">Try again</a> later or update the app if the problem persists</p>';
         }
         else {
           if (result.major && result.major > clientVersion.major) {

@@ -118,20 +118,20 @@
 </style>
 
 <script>
-PhotoServer.init('https://phenology.geodan.nl');
+photoServer.init('https://phenology.geodan.nl');
 
 var gallery = null;
 
 function getmyphotos(callback)
 {
-  PhotoServer.getMyPhotos(function (err, result){
+  photoServer.getMyPhotos(function (err, result){
     if (err) {
       callback(true, "getMyPhotos failed: " + result);
     } else {
       var photolist = JSON.parse(result);
       if (photolist.length > 0) {
         myphotocount = photolist.length;
-        callback(false, photolist.map(function(element) {return {w: element.width, h: element.height, src: PhotoServer.server + '/uploads/' + element.filename + "?" + new Date().getTime()}} ));
+        callback(false, photolist.map(function(element) {return {w: element.width, h: element.height, src: photoServer.server + '/uploads/' + element.filename + "?" + new Date().getTime()}} ));
       } else {
         callback(false, []);
       }
@@ -186,7 +186,7 @@ function gallerysetup()
 function rotatephoto(degrees)
 {
   var photo = {filename: gallery.currItem.src.replace(/^.*[\\\/]/, '').split('?')[0]};
-  PhotoServer.rotateMyPhoto(photo, degrees, function(err, result){
+  photoServer.rotateMyPhoto(photo, degrees, function(err, result){
     if (err) {
       alert (result);
     } else {
@@ -210,7 +210,7 @@ function deletePhotoFromServer()
 {
     closeDialog();
     var photo = {filename: gallery.currItem.src.replace(/^.*[\\\/]/, '').split('?')[0]};
-    PhotoServer.deletePhoto (photo, function(err, result) {
+    photoServer.deletePhoto (photo, function(err, result) {
       if (err) {
         alert(result);
       } else {
