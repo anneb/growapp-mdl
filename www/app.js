@@ -371,15 +371,15 @@ var PhotoServer = function() {
 
 var photoServer = new PhotoServer();
 
-var OLMap = new function() {
-    var olMap = this;
+var OLMap = function() {
+    var _olMap = this;
 
     this.init = function(mapId, featureFieldName) {
-        olMap.initMap(mapId);
-        olMap.initGeoLocation();
-        olMap.initDragHandler();
-        olMap.initPanZoomHandler();
-        olMap.initClickFeatureHandler(featureFieldName);
+        _olMap.initMap(mapId);
+        _olMap.initGeoLocation();
+        _olMap.initDragHandler();
+        _olMap.initPanZoomHandler();
+        _olMap.initClickFeatureHandler(featureFieldName);
     };
 
     this.initMap = function (mapId) {
@@ -425,7 +425,7 @@ var OLMap = new function() {
         });
         this.accuracyFeature = new ol.Feature();
         this.geoLocation.on('change:accuracyGeometry', function() {
-            olMap.accuracyFeature.setGeometry(olMap.geoLocation.getAccuracyGeometry());
+            _olMap.accuracyFeature.setGeometry(_olMap.geoLocation.getAccuracyGeometry());
         });
 
         this.positionFeature = new ol.Feature();
@@ -443,17 +443,17 @@ var OLMap = new function() {
         }));
         this.mapTracking = true;
         this.geoLocation.on('change:position', function() {
-            var coordinates = olMap.geoLocation.getPosition();
-            olMap.positionFeature.setGeometry(coordinates ?
+            var coordinates = _olMap.geoLocation.getPosition();
+            _olMap.positionFeature.setGeometry(coordinates ?
                 new ol.geom.Point(coordinates) : null);
-            if (coordinates && olMap.mapTracking) {
-                olMap.isManualMove = false;
-                olMap.olmap.getView().setCenter(coordinates);
+            if (coordinates && _olMap.mapTracking) {
+                _olMap.isManualMove = false;
+                _olMap.olmap.getView().setCenter(coordinates);
                 setTimeout(function() {
-                    olMap.isManualMove = true;
+                    _olMap.isManualMove = true;
                 }, 300);
             }
-            olMap.geoLocationChangedHandler(coordinates);
+            _olMap.geoLocationChangedHandler(coordinates);
         });
         new ol.layer.Vector({
             map: this.olmap,
@@ -464,7 +464,7 @@ var OLMap = new function() {
 
         // handle geolocation error.
         this.geoLocation.on('error', function(error) {
-            olMap.geoLocationErrorHandler(error.message);
+            _olMap.geoLocationErrorHandler(error.message);
         });
     };
 
@@ -477,21 +477,21 @@ var OLMap = new function() {
 
     this.initDragHandler = function() {
       this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental
-          if (!olMap.dragStart) {
-            olMap.dragStart = true;
-            olMap.dragStartPixel = olMap.dragPrevPixel = event.pixel;
-            olMap.dragHandler('dragstart', event.pixel, event.pixel);
+          if (!_olMap.dragStart) {
+            _olMap.dragStart = true;
+            _olMap.dragStartPixel = _olMap.dragPrevPixel = event.pixel;
+            _olMap.dragHandler('dragstart', event.pixel, event.pixel);
           } else {
-            olMap.dragHandler('dragging', event.pixel, olMap.dragPrevPixel);
-            olMap.dragPrevPixel = event.pixel;
+            _olMap.dragHandler('dragging', event.pixel, _olMap.dragPrevPixel);
+            _olMap.dragPrevPixel = event.pixel;
           }
       });
       this.olmap.on('moveend', function (event){
-          if (olMap.dragStart) {
-              olMap.dragStart = false;
-              olMap.dragHandler('dragend', olMap.dragPrevPixel, olMap.dragPrevPixel);
+          if (_olMap.dragStart) {
+              _olMap.dragStart = false;
+              _olMap.dragHandler('dragend', _olMap.dragPrevPixel, _olMap.dragPrevPixel);
           } else {
-            olMap.dragHandler('moveend', null, null);
+            _olMap.dragHandler('moveend', null, null);
           }
       });
     };
@@ -502,7 +502,7 @@ var OLMap = new function() {
 
     this.initPanZoomHandler = function () {
       this.olmap.getView().on('change:resolution', function(){
-          olMap.panZoomHandler('zoom');
+          _olMap.panZoomHandler('zoom');
       });
     };
 
@@ -527,11 +527,13 @@ var OLMap = new function() {
     this.initClickFeatureHandler = function(featureFieldName) {
         this.olmap.on('click', function(event){
             if (!event.dragging) {
-                olMap.clickFeatureHandler(olMap.getFeatureFromPixel(olMap.olmap.getEventPixel(event.originalEvent), featureFieldName));
+                _olMap.clickFeatureHandler(_olMap.getFeatureFromPixel(_olMap.olmap.getEventPixel(event.originalEvent), featureFieldName));
             }
         });
     };
 };
+
+var olMap = new OLMap();
 
 // main app object
 var App = new function() {
@@ -570,16 +572,16 @@ var App = new function() {
         // initialize photoServer object
         photoServer.init(server);
 
-        // setup handler hooks into OLMap
-        OLMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
-        OLMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
-        OLMap.dragHandler = this.mapDragHandler;
-        OLMap.clickFeatureHandler = this.clickFeatureHandler;
-        OLMap.panZoomHandler = this.panZoomHandler;
-        // intialise OLMap
-        OLMap.init(mapId, 'filename');
+        // setup handler hooks into olMap
+        olMap.geoLocationErrorHandler = this.geoLocationErrorHandler;
+        olMap.geoLocationChangedHandler = this.geoLocationChangedHandler;
+        olMap.dragHandler = this.mapDragHandler;
+        olMap.clickFeatureHandler = this.clickFeatureHandler;
+        olMap.panZoomHandler = this.panZoomHandler;
+        // intialise olMap
+        olMap.init(mapId, 'filename');
         this.buttonLocation = document.querySelector('#gapp_button_location');
-        this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!OLMap.mapTracking);});
+        this.buttonLocation.addEventListener('click', function(){app.setMapTracking(!olMap.mapTracking);});
 
         window.addEventListener('hashchange', this.navigate.bind(this), false);
         this.showStoredMessage();
@@ -614,7 +616,7 @@ var App = new function() {
         [].forEach.call(legendmax, function (element) {
             element.innerHTML = '';
         });
-        var layers = OLMap.olmap.getLayers();
+        var layers = olMap.olmap.getLayers();
         if (layers.getLength() > 2) {
             layers.removeAt(1);
         }
@@ -1160,13 +1162,13 @@ var App = new function() {
 
     this.cordovaDeviceReady = function () {
         CameraPreview.setOnPictureTakenHandler(function(result){
-            var myLocation = OLMap.geoLocation.getPosition();
+            var myLocation = olMap.geoLocation.getPosition();
             if (myLocation) {
                 app.cameraPreviewPhoto.rawdata = result;
                 result = null; // free memory
                 app.cameraPreviewPhoto.src = 'data:image/jpeg;base64,' + app.cameraPreviewPhoto.rawdata;
                 myLocation = ol.proj.transform(myLocation, 'EPSG:3857', 'EPSG:4326');
-                var accuracy = OLMap.geoLocation.getAccuracy();
+                var accuracy = olMap.geoLocation.getAccuracy();
                 app.cameraPreviewPhoto.myLocation = myLocation;
                 app.cameraPreviewPhoto.accuracy = accuracy;
                 app.cameraPreviewPhotoFrame.show();
@@ -1198,12 +1200,12 @@ var App = new function() {
 
     // tracking: automatically keep user location in map center on/off
     this.setMapTracking = function(enabled) {
-        OLMap.mapTracking = enabled;
+        olMap.mapTracking = enabled;
         if (enabled) {
             app.buttonLocation.classList.remove('inactive');
-            var coordinates = OLMap.geoLocation.getPosition();
+            var coordinates = olMap.geoLocation.getPosition();
             if (coordinates) {
-                OLMap.olmap.getView().setCenter(coordinates);
+                olMap.olmap.getView().setCenter(coordinates);
             }
         } else {
             app.buttonLocation.classList.add('inactive');
@@ -1228,7 +1230,7 @@ var App = new function() {
                 if (app.activeFeature) {
                     var geometry = app.activeFeature.getGeometry();
                     var coordinates = geometry.getCoordinates();
-                    var endpixel = OLMap.olmap.getPixelFromCoordinate(coordinates);
+                    var endpixel = olMap.olmap.getPixelFromCoordinate(coordinates);
 
                     app.featureInfoPopup.style.left = endpixel[0] + 'px';
                     app.featureInfoPopup.style.top = (endpixel[1] - 15) + 'px';
@@ -1243,13 +1245,13 @@ var App = new function() {
         if (feature) {
             var geometry = feature.getGeometry();
             var coordinates = geometry.getCoordinates();
-            var pixel = OLMap.olmap.getPixelFromCoordinate(coordinates);
+            var pixel = olMap.olmap.getPixelFromCoordinate(coordinates);
 
             app.featureInfoPopup.style.left = pixel[0] + 'px';
             app.featureInfoPopup.style.top = (pixel[1] - 15) + 'px';
 
             // calculate distance between user and feature
-            var userLocation = OLMap.geoLocation.getPosition();
+            var userLocation = olMap.geoLocation.getPosition();
             var distance = 1000; // initialize at 1000 km
             if (userLocation) {
                 distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
