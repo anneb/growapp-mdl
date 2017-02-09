@@ -533,13 +533,24 @@ var OLMap = function() {
       });
     };
 
-    /* find first feature at pixel that has featureFieldName */
+    var prevFeature = null;
+    var prevFeatureIndex = 0;
+    /* find feature at pixel that has featureFieldName */
     this.getFeatureFromPixel = function(pixel, featureFieldName) {
       var resultfeature = null;
       this.olmap.forEachFeatureAtPixel(pixel, function(feature, layer) {
         if (feature.get('features')) {
-          // clusterfeature, set feature to first feature from cluster
-          feature = feature.get('features')[0];
+          // clusterfeature, set feature to next feature from cluster
+          if (prevFeature === feature) {
+            prevFeatureIndex++;
+            if (prevFeatureIndex >= feature.get('features').length) {
+              prevFeatureIndex = 0;
+            }
+          } else {
+            prevFeature = feature;
+            prevFeatureIndex = 0;
+          }
+          feature = feature.get('features')[prevFeatureIndex];
         }
         if (feature.get(featureFieldName)) {
             resultfeature = feature;
