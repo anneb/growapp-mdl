@@ -942,34 +942,46 @@ var App = function() {
             document.querySelector('#mainUI').classList.remove('hidden');
             _app.cameraPopup.classList.add('hidden');
         };
+
         this.cameraPopup.startCamera = function() {
             if (_app.isMobileDevice) {
-                var width = _app.cameraPopup.offsetWidth;
-                var height = _app.cameraPopup.offsetHeight;
-                if (width > height) {
-                    // landscape
-                    if (screen.width > screen.height) {
-                        width = screen.width;
-                        height = screen.height;
-                    } else {
-                        width = screen.height;
-                        height = screen.width;
-                    }
-                } else {
-                    // portrait
-                    if (screen.width < screen.height) {
-                        width = screen.width;
-                        height = screen.height;
-                    } else {
-                        width = screen.height;
-                        height = screen.width;
-                    }
-                }
+                var width = _app.cameraPopup.clientWidth;
+                var height = _app.cameraPopup.clientHeight;
                 var tapEnabled = true;
                 var dragEnabled = true;
                 var toBack = true; // camera z-value can either be completely at the back or completey on top
                 CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
                 CameraPreview.setZoom(0);
+                setTimeout(function() {CameraPreview.getPreviewSize(function(size){
+                  CameraPreview.stopCamera();
+                  if ((size.width > size.height && width < height) || (size.width < size.height && width > height)) {
+                    // container and photo size have different orentation
+                    var temp = size.width;
+                    size.width = size.height;
+                    size.height = temp;
+                  }
+                  var photoAspectRatio = size.height / size.width;
+                  var containerAspectRatio = height / width;
+                  var camWidth = width;
+                  var camHeight = height;
+                  var camLeft = 0;
+                  var camTop = 0;
+                  if (photoAspectRatio > containerAspectRatio) {
+                    // photo taller than container
+                    camWidth = height / photoAspectRatio;
+                    camLeft = (width - camWidth) / 2;
+                  } else {
+                    // photo equal or wider than container
+                    camHeight = width * photoAspectRatio;
+                    camTop = (height - camHeight) / 2;
+                  }
+                  var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+                  overlayPictureFrame.style.left = camLeft + 'px';
+                  overlayPictureFrame.style.top = camTop + 'px';
+                  overlayPictureFrame.style.height = camHeight + 'px';
+                  overlayPictureFrame.style.width = camWidth + 'px';
+                  CameraPreview.startCamera({x: camLeft, y: camTop, width: camWidth, height: camHeight, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
+                });}, 3000);
                 window.plugins.insomnia.keepAwake();
                 // force css recalculation
                 document.body.style.zoom=1.00001;
