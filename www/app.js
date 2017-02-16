@@ -943,6 +943,30 @@ var App = function() {
             _app.cameraPopup.classList.add('hidden');
         };
 
+        this.cameraPopup.OverlayFit = function(width, height, camWidth, camHeight, cameraAspectRatio) {
+          if (_app.overlayURL) {
+            var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+            var overlayPicture = document.querySelector('#gapp_camera_overlay_picture');
+            var overlayAspectRatio = overlayPicture.naturalHeight / overlayPicture.naturalWidth;
+            var overlayWidth = 0, overlayHeight = 0, overlayLeft = 0, overlayTop = 0;
+            if (overlayAspectRatio > cameraAspectRatio) {
+              // overlay photo taller than camera photo
+              overlayWidth = camHeight / overlayAspectRatio;
+              overlayHeight = camHeight;
+            } else {
+              // overlay photo wider than camera photo
+              overlayWidth = camWidth;
+              overlayHeight = camWidth * overlayAspectRatio;
+            }
+            overlayLeft = (width - overlayWidth) / 2;
+            overlayTop = (height - overlayHeight) / 2;
+            overlayPictureFrame.style.left = overlayLeft + 'px';
+            overlayPictureFrame.style.top = overlayTop + 'px';
+            overlayPictureFrame.style.height = overlayHeight + 'px';
+            overlayPictureFrame.style.width = overlayWidth + 'px';
+          }
+        };
+
         this.cameraPopup.startCamera = function() {
             if (_app.isMobileDevice) {
                 var width = _app.cameraPopup.clientWidth;
@@ -950,42 +974,43 @@ var App = function() {
                 var tapEnabled = true;
                 var dragEnabled = true;
                 var toBack = true; // camera z-value can either be completely at the back or completey on top
-                CameraPreview.startCamera({x: 0, y: 0, width: width, height: height, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
-                CameraPreview.setZoom(0);
-                setTimeout(function() {CameraPreview.getPreviewSize(function(size){
-                  CameraPreview.stopCamera();
-                  if ((size.width > size.height && width < height) || (size.width < size.height && width > height)) {
-                    // container and photo size have different orentation
-                    var temp = size.width;
-                    size.width = size.height;
-                    size.height = temp;
+                var cameraAspectRatio;
+                var containerAspectRatio = height / width;
+                var camWidth = width;
+                var camHeight = height;
+                var camLeft = 0;
+                var camTop = 0;
+                if (window.localStorage.cameraAspectRatio) {
+                  cameraAspectRatio = window.localStorage.cameraAspectRatio;
+                  if ((cameraAspectRatio > 1 && containerAspectRatio < 1) || (cameraAspectRatio < 1 && containerAspectRatio > 1)) {
+                    cameraAspectRatio = 1 / cameraAspectRatio;
                   }
-                  var photoAspectRatio = size.height / size.width;
-                  var containerAspectRatio = height / width;
-                  var camWidth = width;
-                  var camHeight = height;
-                  var camLeft = 0;
-                  var camTop = 0;
-                  if (photoAspectRatio > containerAspectRatio) {
-                    // photo taller than container
-                    camWidth = height / photoAspectRatio;
+                  if (cameraAspectRatio > containerAspectRatio) {
+                    // camera photo taller than container
+                    camWidth = height / cameraAspectRatio;
                     camLeft = (width - camWidth) / 2;
                   } else {
-                    // photo equal or wider than container
-                    camHeight = width * photoAspectRatio;
+                    // camera photo equal or wider than container
+                    camHeight = width * cameraAspectRatio;
                     camTop = (height - camHeight) / 2;
                   }
-                  var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
-                  overlayPictureFrame.style.left = camLeft + 'px';
-                  overlayPictureFrame.style.top = camTop + 'px';
-                  overlayPictureFrame.style.height = camHeight + 'px';
-                  overlayPictureFrame.style.width = camWidth + 'px';
-                  CameraPreview.startCamera({x: camLeft, y: camTop, width: camWidth, height: camHeight, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
-                });}, 3000);
+                  _app.cameraPopup.OverlayFit(width, height, camWidth, camHeight, cameraAspectRatio);
+                }
+                CameraPreview.startCamera({x: camLeft, y: camTop, width: camWidth, height: camHeight, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
+                //CameraPreview.setZoom(0);
+
                 window.plugins.insomnia.keepAwake();
                 // force css recalculation
-                document.body.style.zoom=1.00001;
-                setTimeout(function(){document.body.style.zoom=1;}, 50);
+                // document.body.style.zoom=1.00001;
+                // setTimeout(function(){document.body.style.zoom=1;}, 50);
+                if (!window.localStorage.cameraAspectRatio) {
+                  // camera aspect no yet known, read from camera when started
+                  setTimeout(function() {CameraPreview.getPreviewSize(function(size){
+                    cameraAspectRatio = size.height / size.width;
+                    window.localStorage.cameraAspectRatio = cameraAspectRatio;
+                    _app.cameraPopup.resetCamera();
+                  });}, 1000);
+                }
             }
         };
         this.cameraPopup.stopCamera = function() {
@@ -1004,7 +1029,7 @@ var App = function() {
         cameraButton.addEventListener('click', function() {
             photoServer.ensureDeviceRegistration(function(result) {
                 if (result) {
-                    _app.overlayUrl = null;
+                    _app.overlayURL = null;
                     _app.cameraPopup.show();
                 } else {
                     // device could not be registered, offline? no window.localStorage?
