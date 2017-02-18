@@ -141,7 +141,7 @@
         right: 10px;
         top: 10px;
       }
-      #gapp_fullscreenphotopopup_info {
+      #gapp_fullscreenphotopup_info {
         position: absolute;
         top: 10px;
         right: 50px;
@@ -183,39 +183,20 @@
         right: 10px;
         top: 10px;
       }
-      @media all and (orientation:portrait) {
-	    #gapp_camera_overlay_picture_frame {
+      #gapp_camera_overlay_picture_frame {
             position: relative;
-            float: right;
-            right: 50%;
             height: 100%;
             width: auto;
-            left: auto;
-        }
-        #gapp_camera_overlay_picture {
-			      position: relative;
-            right: -50%;
-            top: 0;
-            width: auto;
-            height: 100%;
-            opacity: 0.5;
-            border: 0;
-        }
       }
-      @media all and (orientation:landscape) {
-        #gapp_camera_overlay_picture_frame {
-            position: absolute;
-			      top: 50%;
-            width: 100%;
-        }
-		#gapp_camera_overlay_picture {
-            position: absolute;
-            width: 100%;
-            opacity: 0.5;
-            -ms-transform: translateY(-50%);
-            -webkit-transform: translateY(-50%);
-            transform: translateY(-50%);
-        }
+      #gapp_camera_overlay_picture {
+        position: relative;
+        left: auto;
+        right: auto;
+        top: auto;
+        bottom: auto;
+        height: 100%;
+        opacity: 0.5;
+        border: 0;
       }
       #gapp_camera_photo_preview_frame {
         position: absolute;
@@ -470,7 +451,7 @@
         <button id="gapp_fullscreenphotopopup_info" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE88F;<!--info_outline--></i></button>
       </div>
       <div id="gapp_camera_popup" class="hidden">
-	       <div id="gapp_camera_overlay_picture_frame" class="hidden">
+         <div id="gapp_camera_overlay_picture_frame" class="hidden">
             <img id="gapp_camera_overlay_picture" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
          </div>
          <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab mdl-color--white">
