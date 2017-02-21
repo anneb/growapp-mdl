@@ -131,13 +131,13 @@ var PhotoServer = function() {
              var result = JSON.parse(xhr.responseText);
              callback(null, result);
            } else {
-             callback(true, 'Error retrieving photoset: ' + xhr.status + ' ' + xhr.statusText)
+             callback(true, 'Error retrieving photoset: ' + xhr.status + ' ' + xhr.statusText);
              console.log ('Error : ' + xhr.status + ' ' + xhr.statusText);
            }
        }
     };
     xhr.send(formData);
-  }
+  };
 
   // return url to large version of photo
   this.bigPhotoUrl = function(photofile) {
@@ -1342,6 +1342,8 @@ var App = function() {
         }
     };
 
+    this.loopInterval = 500;
+
     this.showOnePhoto = function(feature, targetElement, done)
     {
       var basePhotoURL = photoServer.server + '/uploads/preview/' + feature.filename;
@@ -1397,7 +1399,7 @@ var App = function() {
           if (photoIndex >= photoset.length) {
             photoIndex = 0;
           }
-          setTimeout(loopPhotos, 500);
+          setTimeout(loopPhotos, _app.loopInterval);
         });
       }
       if (targetElement.classList.contains('photoloop')) {
@@ -1405,8 +1407,8 @@ var App = function() {
         targetElement.classList.remove('photoloop');
         setTimeout(function() {
           targetElement.classList.add('photoloop');
-          loopPhotos()
-        }, 1000);
+          loopPhotos();
+        }, 2 * _app.loopInterval);
       } else {
         targetElement.classList.add('photoloop');
         loopPhotos();
@@ -1432,6 +1434,22 @@ var App = function() {
             }
 
             var picture_url = photoServer.bigPhotoUrl(feature.get('filename'));
+
+            var photoset = feature.get('photoset');
+            if (!photoset) {
+              if (picture_url.substr(-4, 4) != '.gif') {
+                photoset = [];
+              } else {
+                photoServer.getPhotoSet(feature.get('id'), function(err, result){
+                  photoset = result;
+                  feature.set('photoset', photoset);
+                });
+              }
+            }
+            if (picture_url.substr(-4, 4) == '.gif') {
+              picture_url = picture_url.substr(0, picture_url.length - 4) + '.jpg';
+            }
+
             var spinner = document.querySelector('#gapp_featureinfo_spinner');
             var errorInfo = document.querySelector('#gapp_featureinfo_error');
             errorInfo.classList.add('hidden');
@@ -1444,17 +1462,6 @@ var App = function() {
             var description = feature.get('description');
             if (!description) {
               description = 'No description';
-            }
-            var photoset = feature.get('photoset');
-            if (!photoset) {
-              if (picture_url.substr(-4, 4) != '.gif') {
-                photoset = [];
-              } else {
-                photoServer.getPhotoSet(feature.get('id'), function(err, result){
-                  photoset = result;
-                  feature.set('photoset', photoset);
-                });
-              }
             }
 
             _app.getTagList(function (err, list) {
@@ -1488,20 +1495,10 @@ var App = function() {
                 document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
               }
             });
-            var photo = new Image();
-            photo.onload = function() {
-                spinner.classList.remove('is-active');
-                _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
-                if (photoset && photoset.length > 0) {
-                  _app.doAnimation(feature, _app.featureInfoPopup);
-                }
-            };
-            photo.onerror = function() {
-                spinner.classList.remove('is-active');
-                errorInfo.classList.remove('hidden');
-            };
 
-            photo.src = picture_url;
+            var photoframe = document.querySelector('#gapp_featureinfo_photo_frame');
+            photoframe.style.left = '0';
+            photoframe.style.top = '0';
             var picture_width = feature.get('width');
             var picture_height = feature.get('height');
             var aspectratio = 1.0;
@@ -1510,13 +1507,13 @@ var App = function() {
             }
             if (aspectratio >= 1) {
                 // landscape
-                _app.featureInfoPopup.style.width = Math.floor(200 * aspectratio) + 'px';
-                _app.featureInfoPopup.style.height = '200px';
+                _app.featureInfoPopup.style.width = photoframe.style.width = Math.floor(200 * aspectratio) + 'px';
+                _app.featureInfoPopup.style.height = photoframe.style.height = '200px';
             }
             else {
                 // portrait
-                _app.featureInfoPopup.style.width = '200px';
-                _app.featureInfoPopup.style.height = Math.floor(200 / aspectratio) + 'px';
+                _app.featureInfoPopup.style.width = photoframe.style.width = '200px';
+                _app.featureInfoPopup.style.height = photoframe.style.height = Math.floor(200 / aspectratio) + 'px';
             }
 
             var addphotobutton = document.querySelector('#gapp_featureinfo_addphoto');
@@ -1527,6 +1524,26 @@ var App = function() {
                 addphotobutton.setAttribute('disabled', '');
             }
             _app.featureInfoPopup.show();
+            var photo = new Image();
+            photo.onload = function() {
+                var timeout = 0;
+                if (_app.featureInfoPopup.classList.contains('photoloop')) {
+                  _app.featureInfoPopup.classList.remove('photoloop');
+                  timeout = 2 * _app.loopInterval;
+                }
+                setTimeout(function() {
+                  spinner.classList.remove('is-active');
+                  _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
+                  if (photoset && photoset.length > 0) {
+                    _app.doAnimation(feature, _app.featureInfoPopup);
+                  }
+                }, timeout);
+            };
+            photo.onerror = function() {
+                spinner.classList.remove('is-active');
+                errorInfo.classList.remove('hidden');
+            };
+            photo.src = picture_url;
         }
     };
 
