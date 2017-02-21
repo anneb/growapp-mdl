@@ -78,11 +78,14 @@
         top: 45%;
         left: 45%;
       }
-	  #gapp_featureinfo_error {
+  	  #gapp_featureinfo_error {
+          position: absolute;
+          top: 45%;
+          left: 10%;
+  		    color: red;
+      }
+      #gapp_featureinfo_photo_frame {
         position: absolute;
-        top: 45%;
-        left: 10%;
-		color: red;
       }
       #gapp_featureinfo_photo {
         width: 100%;
@@ -423,14 +426,16 @@
                       <i class="material-icons">&#xE412;</i>
                 </button>
                 <div id="gapp_featureinfo" class="hidden">
-                  <img id="gapp_featureinfo_photo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                  <div id="gapp_featureinfo_photo_frame">
+                    <img id="gapp_featureinfo_photo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                  </div>
                   <div id="gapp_featureinfo_infotext" class="hidden"></div>
                   <button id="gapp_featureinfo_addphoto" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" disabled><i class="material-icons">&#xE439;</i></button>
                   <button id="gapp_featureinfo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
                   <button id="gapp_featureinfo_fullscreen" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">fullscreen</i></button>
                   <button id="gapp_featureinfo_info" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE88F;<!--info_outline--></i></button>
                   <div id="gapp_featureinfo_spinner" class="mdl-spinner mdl-js-spinner is-active"></div>
-				  <div id="gapp_featureinfo_error" class="hidden"><i class="material-icons">&#xE888;</i> Error loading picture</div>
+				          <div id="gapp_featureinfo_error" class="hidden"><i class="material-icons">&#xE888;</i> Error loading picture</div>
                 </div>
                 <div id="gapp_legendvertical" class="hidden">
                   <span class="legendtop legendmin legendwhite"></span><span class="legendbottom legendmax legendwhite"></span>
