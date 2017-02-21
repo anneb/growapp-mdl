@@ -119,6 +119,26 @@ var PhotoServer = function() {
     return _photoServer.photoSource;
   };
 
+  this.getPhotoSet  = function(photoid, callback) {
+    var xhr = new XMLHttpRequest();
+    var formData = 'photoid=' + photoid;
+    xhr.open('POST', _photoServer.server+'/photoserver/getphotoset');
+    xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
+    // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
+    xhr.onreadystatechange = function (event) {
+       if (xhr.readyState === 4) {
+           if (xhr.status === 200) {
+             var result = JSON.parse(xhr.responseText);
+             callback(null, result);
+           } else {
+             callback(true, 'Error retrieving photoset: ' + xhr.status + ' ' + xhr.statusText)
+             console.log ('Error : ' + xhr.status + ' ' + xhr.statusText);
+           }
+       }
+    };
+    xhr.send(formData);
+  }
+
   // return url to large version of photo
   this.bigPhotoUrl = function(photofile) {
     if (photofile.substr(-4, 4) === '.gif') {
@@ -1353,6 +1373,17 @@ var App = function() {
             var description = feature.get('description');
             if (!description) {
               description = 'No description';
+            }
+            var photoset = feature.get('photoset');
+            if (!photoset) {
+              if (picture_url.substr(-4, 4) != '.gif') {
+                photoset = [];
+              } else {
+                photoServer.getPhotoSet(feature.get('id'), function(err, result){
+                  photoset = result;
+                  feature.set('photoset', photoset);
+                });
+              }
             }
 
             _app.getTagList(function (err, list) {
