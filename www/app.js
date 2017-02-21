@@ -119,6 +119,26 @@ var PhotoServer = function() {
     return _photoServer.photoSource;
   };
 
+  this.getPhotoSet  = function(photoid, callback) {
+    var xhr = new XMLHttpRequest();
+    var formData = 'photoid=' + photoid;
+    xhr.open('POST', _photoServer.server+'/photoserver/getphotoset');
+    xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
+    // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
+    xhr.onreadystatechange = function (event) {
+       if (xhr.readyState === 4) {
+           if (xhr.status === 200) {
+             var result = JSON.parse(xhr.responseText);
+             callback(null, result);
+           } else {
+             callback(true, 'Error retrieving photoset: ' + xhr.status + ' ' + xhr.statusText)
+             console.log ('Error : ' + xhr.status + ' ' + xhr.statusText);
+           }
+       }
+    };
+    xhr.send(formData);
+  }
+
   // return url to large version of photo
   this.bigPhotoUrl = function(photofile) {
     if (photofile.substr(-4, 4) === '.gif') {
@@ -1322,6 +1342,77 @@ var App = function() {
         }
     };
 
+    this.showOnePhoto = function(feature, targetElement, done)
+    {
+      var basePhotoURL = photoServer.server + '/uploads/preview/' + feature.filename;
+      if (basePhotoURL.substr(-4, 4) === '.gif') {
+        basePhotoURL =  basePhotoURL.substr(0, basePhotoURL.length -4) + '.jpg';
+      }
+
+      var basePhotoWidth = feature.width;
+      var basePhotoHeight = feature.height;
+      var basePhotoAspectRatio = basePhotoWidth / basePhotoHeight;
+
+      var elementAspectRatio = targetElement.clientWidth / targetElement.clientHeight;
+
+      var photoframe = document.querySelector('#gapp_featureinfo_photo_frame');
+      if (elementAspectRatio > basePhotoAspectRatio) {
+        // target wider than basePhoto
+        photoframe.style.height = targetElement.clientHeight + 'px';
+        photoframe.style.width = (targetElement.clientHeight * basePhotoAspectRatio) + 'px';
+      } else {
+        // target equal or taller than basePhoto
+        photoframe.style.height = (targetElement.clientWidth / basePhotoAspectRatio) + 'px';
+        photoframe.style.width = targetElement.clientWidth + 'px';
+      }
+      photoframe.style.left = ((targetElement.clientWidth - photoframe.clientWidth) / 2) + 'px';
+      photoframe.style.top  = ((targetElement.clientHeight - photoframe.clientHeight) / 2) + 'px';
+      var photo = new Image();
+      var image = document.querySelector("#gapp_featureinfo_photo");
+      photo.onload = function() {
+        image.src = photo.src;
+        done();
+      };
+      photo.src = basePhotoURL;
+    };
+
+    this.doAnimation = function(feature, targetElement)
+    {
+      var photoset = feature.get('photoset');
+      if (!photoset || photoset.length === 0) {
+        return;
+      }
+      var photoIndex = 0;
+      var nextFeature;
+
+      function loopPhotos() {
+        if (targetElement.classList.contains('hidden') || !targetElement.classList.contains('photoloop')) {
+          targetElement.classList.remove('photoloop');
+          // end loop
+          return;
+        }
+        nextFeature = photoset[photoIndex];
+        _app.showOnePhoto(nextFeature, targetElement, function() {
+          photoIndex++;
+          if (photoIndex >= photoset.length) {
+            photoIndex = 0;
+          }
+          setTimeout(loopPhotos, 500);
+        });
+      }
+      if (targetElement.classList.contains('photoloop')) {
+        // stop previous loop
+        targetElement.classList.remove('photoloop');
+        setTimeout(function() {
+          targetElement.classList.add('photoloop');
+          loopPhotos()
+        }, 1000);
+      } else {
+        targetElement.classList.add('photoloop');
+        loopPhotos();
+      }
+    };
+
     this.clickFeatureHandler = function(feature) {
         _app.featureInfoPopup.hide();
         _app.activeFeature = feature;
@@ -1353,6 +1444,17 @@ var App = function() {
             var description = feature.get('description');
             if (!description) {
               description = 'No description';
+            }
+            var photoset = feature.get('photoset');
+            if (!photoset) {
+              if (picture_url.substr(-4, 4) != '.gif') {
+                photoset = [];
+              } else {
+                photoServer.getPhotoSet(feature.get('id'), function(err, result){
+                  photoset = result;
+                  feature.set('photoset', photoset);
+                });
+              }
             }
 
             _app.getTagList(function (err, list) {
@@ -1386,12 +1488,13 @@ var App = function() {
                 document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
               }
             });
-
-
             var photo = new Image();
             photo.onload = function() {
                 spinner.classList.remove('is-active');
                 _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
+                if (photoset && photoset.length > 0) {
+                  _app.doAnimation(feature, _app.featureInfoPopup);
+                }
             };
             photo.onerror = function() {
                 spinner.classList.remove('is-active');

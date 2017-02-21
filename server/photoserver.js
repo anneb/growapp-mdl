@@ -67,7 +67,7 @@ function tagStringToArray(tagstring)
       return tagstring.split(', ').map(function(item){var keyval=item.split('=>').map(function(s){return s.replace(/"/g, '');}); var result={}; result[keyval[0]]=keyval[1]; return result;});
   } else {
    return [];
-  } 
+  }
 }
 
 function createCollection(features, message, errno) {
@@ -110,10 +110,10 @@ app.get('/photoserver/getphotos', cors(), function(req, res) {
 app.post('/photoserver/getphotoset', cors(), function(req, res) {
   console.log('POST /photoserver/getphotoset');
   var photoid = req.body.photoid;
-  var sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, filename, time, width, height from photo where rootid=$1 or id=$1 order by time';
+  var sql = 'select id, accuracy, filename, time, width, height, description, tags from photo where rootid=$1 or id=$1 order by time';
   dbPool.query(sql, [photoid])
     .then(function(result){
-      res.json(createCollection(result.rows, null, null));
+      res.json(result.rows);
       res.end();
     })
     .catch(function(reason){
@@ -211,8 +211,17 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
               var height = result.rows[0].width;
               sql = 'update photo set width=$1, height=$2 where id=$3';
               dbPool.query(sql, [width, height, result.rows[0].id])
-                .then(function (result){
-                  res.end('image rotated');
+                .then(function (result2){
+                  filename = './uploads/preview/' + result.rows[0].filename;
+                  gm(filename).rotate('white', d).write(filename, function(err) {
+                    if (err) {
+                      res.writeHead(500, {'Content-Type' : 'text/html'});
+                      res.end('unable to rotate preview image');
+                      return;
+                    } else {
+                      res.end('image rotated');
+                    }
+                  });
                 });
             });
           } else {
@@ -268,6 +277,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                     dbPool.query(sql, [photoid])
                         .then(function(result) {
                             // photo deleted from table, now delete from disk
+                            fs.unlink(__dirname + '/uploads/preview/' + filename, function(err) {;});
                             fs.unlink(__dirname + '/uploads/' + filename, function(err, result) {
                                 if (err) {
                                     console.log("failed to delete file " + __dirname + '/uploads/' + filename);
@@ -283,6 +293,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                     // check if this photo was part of an animation
                                     if (animationfilename) {
                                       // this photo was first photo of an animation
+                                      fs.unlink(__dirname + '/uploads/preview/' + animationfilename, function(err) {;});
                                       fs.unlink(__dirname + '/uploads/' + animationfilename, function(err, result) {
                                         if (err) {
                                           console.log("failed to delete animation file " + animationfilename);
@@ -321,6 +332,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                               sql = "update photo set animationfilename=null, rootid=0 where id=$1";
                                               dbPool.query(sql, [result.rows[0].id])
                                                 .then(function(){
+                                                  fs.unlink(__dirname + '/uploads/preview/' + animationfilename, function(err) {;});
                                                   fs.unlink(__dirname + '/uploads/' + animationfilename, function(err, result){
                                                     if (err) {
                                                       console.log("failed to delete animation file " + animationfilename);
@@ -730,6 +742,7 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                             });
                             res.end("Error: invalid photo, could not get size: " + err);
                             console.log ("error: : " + err);
+                            fs.unlink(filename, function(err){;});
                           } else {
                             console.log("username=" + username + ", hash=" + hash + ", filename=" + shortfilename + ", width: " + imageinfo.width + ", height: " + imageinfo.height + ", location=" + location + ", accuracy=" + accuracy + ", rootid=" + rootid + ", deviceid=" + deviceid + ", devicehash="  + devicehash);
                             //var sql = "insert into photo (filename, location, accurary) values ('"+shortfilename+"','"+ location + "'," + accuracy + ")";
@@ -755,26 +768,35 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                                     'Content-Type': 'text/html'
                                                 });
                                                 res.end('Internal Error: ' + reason);
+                                                fs.unlink(filename, function(err){;});
                                             })
                                             .then(function(result) {
                                                 console.log('photo inserted!');
-                                                fs.writeFile(filename.slice(0, -5) + ".dat", JSON.stringify({
-                                                    latitude: req.body.latitude,
-                                                    longitude: req.body.longitude,
-                                                    accuracy: req.body.accuracy
-                                                }), function(err) {
-                                                    if (err) {
-                                                        res.writeHead(500, {
-                                                            'Content-Type': 'text/html'
+                                                gm(filename).resize('200', '200', '^').write(__dirname + '/uploads/preview/' + shortfilename,
+                                                    function(err) {
+                                                      if (err) {
+                                                        console.log('failed to create preview');
+                                                      }
+                                                      fs.writeFile(filename.slice(0, -5) + ".dat", JSON.stringify({
+                                                            latitude: req.body.latitude,
+                                                            longitude: req.body.longitude,
+                                                            accuracy: req.body.accuracy
+                                                        }), function(err) {
+                                                            if (err) {
+                                                                res.writeHead(500, {
+                                                                    'Content-Type': 'text/html'
+                                                                });
+                                                                res.end('Server error:', err);
+                                                                fs.unlink(filename, function(err){;});
+                                                                fs.unlink(__dirname + '/uploads/preview/' + shortfilename, function(err) {;});
+                                                            } else {
+                                                                res.writeHead(200, {
+                                                                    'Content-Type': 'text/html'
+                                                                });
+                                                                res.end('thanks');
+                                                            }
                                                         });
-                                                        res.end('Server error:', err);
-                                                    } else {
-                                                        res.writeHead(200, {
-                                                            'Content-Type': 'text/html'
-                                                        });
-                                                        res.end('thanks');
-                                                    }
-                                                });
+                                                    });
                                                 if (rootid > 0) {
                                                     updateAnimation(rootid, "./uploads");
                                                 }
@@ -785,6 +807,7 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                             'Content-Type': 'text/html'
                                         });
                                         res.end('Access denied: device not known or invalid credentials');
+                                        fs.unlink(filename, function(err){;});
                                     }
                                 }); // checkDevice
                           } // valid photo
