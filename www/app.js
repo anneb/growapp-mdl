@@ -865,8 +865,40 @@ var App = function() {
           }
         };
 
+        this.photoFrameContainerFit = function(fitToElement, frameContainerElement, photoWidth, photoHeight)
+        {
+          var parentAspectRatio = fitToElement.clientWidth / fitToElement.clientHeight;
+          var photoAspectratio = photoWidth / photoHeight;
+          var left, top, width, height;
+          if (photoAspectratio > parentAspectRatio) {
+              // photo wider than parent, fit frameContainer to parent width
+              width = fitToElement.clientWidth;
+              height = fitToElement.clientWidth / photoAspectratio;
+          } else {
+              // photo higher than parent, fit frameContainer to parent height
+              width = fitToElement.clientHeight * photoAspectratio;
+              height = fitToElement.clientHeight;
+          }
+          left = (fitToElement.clientWidth - width) / 2;
+          top = (fitToElement.clientHeight - height) / 2;
+          frameContainerElement.style.left = Math.round(left) + 'px';
+          frameContainerElement.style.top = Math.round(top) + 'px';
+          frameContainerElement.style.width = Math.round(width) + 'px';
+          frameContainerElement.style.height = Math.round(height) + 'px';
+        };
+
         /* todo: zoomable fullscreen photo? http://ignitersworld.com/lab/imageViewer.html */
         this.fullscreenphotopopup = document.querySelector('#gapp_fullscreenphotopopup');
+
+        window.addEventListener('orientationchange', function(){
+          if (!_app.fullscreenphotopopup.classList.contains('hidden')){
+            _app.photoFrameContainerFit(_app.fullscreenphotopopup,
+                document.querySelector('#gapp_fullscreenphotopop_frame_container'),
+                _app.activeFeature.get('width'),
+                _app.activeFeature.get('height'));
+          }
+        });
+
         this.fullscreenphotopopup.show = function() {
             if (typeof StatusBar !== 'undefined') {
                 StatusBar.hide();
@@ -876,14 +908,24 @@ var App = function() {
             _app.fullscreenphoto.src = featureinfophoto.src;
             document.removeEventListener('backbutton', _app.featureInfoPopup.hide);
             document.addEventListener('backbutton', _app.fullscreenphotopopup.hide);
+            var frameContainer = document.querySelector('#gapp_fullscreenphotopop_frame_container');
+            _app.animationTargetElement = frameContainer;
             _app.fullscreenphotopopup.classList.remove('hidden');
+            setTimeout(function() {
+                _app.photoFrameContainerFit(_app.fullscreenphotopopup,
+                    frameContainer,
+                    _app.activeFeature.get('width'),
+                    _app.activeFeature.get('height'));
+              }, 100);
         };
+
         this.fullscreenphotopopup.hide = function() {
             if (typeof StatusBar !== 'undefined') {
                 StatusBar.show();
             }
             document.removeEventListener('backbutton', _app.fullscreenphotopopup.hide);
             document.addEventListener('backbutton', _app.featureInfoPopup.hide);
+            _app.animationTargetElement = _app.featureInfoPopup;
             _app.fullscreenphotopopup.classList.add('hidden');
         };
 
@@ -1343,16 +1385,18 @@ var App = function() {
     };
 
     this.loopInterval = 500;
+    this.animationTargetElement = null;
 
-    this.showOnePhoto = function(feature, targetElement, done)
+    this.showOnePhoto = function(basePhotoURL, width, height, targetElement, done)
     {
-      var basePhotoURL = photoServer.server + '/uploads/preview/' + feature.filename;
+      //var targetElement = _app.animationTargetElement;
+      //var basePhotoURL = photoServer.server + '/uploads/preview/' + feature.filename;
       if (basePhotoURL.substr(-4, 4) === '.gif') {
         basePhotoURL =  basePhotoURL.substr(0, basePhotoURL.length -4) + '.jpg';
       }
 
-      var basePhotoWidth = feature.width;
-      var basePhotoHeight = feature.height;
+      var basePhotoWidth = width;
+      var basePhotoHeight = height;
       var basePhotoAspectRatio = basePhotoWidth / basePhotoHeight;
 
       var elementAspectRatio = targetElement.clientWidth / targetElement.clientHeight;
@@ -1369,16 +1413,22 @@ var App = function() {
       }
       photoframe.style.left = ((targetElement.clientWidth - photoframe.clientWidth) / 2) + 'px';
       photoframe.style.top  = ((targetElement.clientHeight - photoframe.clientHeight) / 2) + 'px';
+      var errorInfo = document.querySelector('#gapp_featureinfo_error');
       var photo = new Image();
-      var image = document.querySelector("#gapp_featureinfo_photo");
+      var image = photoframe.querySelector("img");
       photo.onload = function() {
+        errorInfo.classList.add('hidden');
         image.src = photo.src;
         done();
+      };
+      photo.onerror = function() {
+          errorInfo.classList.remove('hidden');
+          done();
       };
       photo.src = basePhotoURL;
     };
 
-    this.doAnimation = function(feature, targetElement)
+    this.doAnimation = function(feature)
     {
       var photoset = feature.get('photoset');
       if (!photoset || photoset.length === 0) {
@@ -1393,7 +1443,8 @@ var App = function() {
           return;
         }
         nextFeature = photoset[photoIndex];
-        _app.showOnePhoto(nextFeature, targetElement, function() {
+        _app.showOnePhoto(photoServer.server + '/uploads/preview/' + nextFeature.filename,
+                  nextFeature.width, nextFeature.height, _app.animationTargetElement, function() {
           photoIndex++;
           if (photoIndex >= photoset.length) {
             photoIndex = 0;
@@ -1515,14 +1566,12 @@ var App = function() {
             _app.featureInfoPopup.show();
             var photo = new Image();
             photo.onload = function() {
-                var timeout = 0;
-                setTimeout(function() {
-                  spinner.classList.remove('is-active');
-                  _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
-                  if (photoset && photoset.length > 0) {
-                    _app.doAnimation(feature, _app.featureInfoPopup);
-                  }
-                }, timeout);
+                spinner.classList.remove('is-active');
+                _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
+                if (photoset && photoset.length > 0) {
+                  _app.animationTargetElement = _app.featureInfoPopup;
+                  _app.doAnimation(feature);
+                }
             };
             photo.onerror = function() {
                 spinner.classList.remove('is-active');
