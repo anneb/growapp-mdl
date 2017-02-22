@@ -219,7 +219,7 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
                       res.end('unable to rotate small image');
                       return;
                     } else {
-                      filename = './uploads/medium/' + result[0].filename;
+                      filename = './uploads/medium/' + result.rows[0].filename;
                       gm(filename).rotate('white', d).write(filename, function(err) {
                         if (err) {
                           res.writeHead(500, {'Content-Type' : 'text/html'});
