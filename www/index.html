@@ -90,7 +90,7 @@
                   console.log('3');
                   console.warn('Location permission is not turned on');
                   setTimeout(function() {
-                    window.location = "main.html";
+                    window.location.replace("main.html");
                   }, 500);
                 };
 
@@ -100,7 +100,7 @@
                   }
                   else {
                     // all permissions granted
-                    window.location = "main.html";
+                    window.location.replace("main.html");
                     //setTimeout(function(){window.location= "main.html"}, 2000);
                   }
                 };
@@ -129,7 +129,7 @@
             }, false);
           }
           else {
-            window.location = "main.html";
+            window.location.replace("main.html");
           }
         }
       });

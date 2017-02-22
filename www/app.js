@@ -1357,7 +1357,7 @@ var App = function() {
 
       var elementAspectRatio = targetElement.clientWidth / targetElement.clientHeight;
 
-      var photoframe = document.querySelector('#gapp_featureinfo_photo_frame');
+      var photoframe = targetElement.querySelector('.gapp_photo_frame');
       if (elementAspectRatio > basePhotoAspectRatio) {
         // target wider than basePhoto
         photoframe.style.height = targetElement.clientHeight + 'px';
@@ -1388,8 +1388,7 @@ var App = function() {
       var nextFeature;
 
       function loopPhotos() {
-        if (targetElement.classList.contains('hidden') || !targetElement.classList.contains('photoloop')) {
-          targetElement.classList.remove('photoloop');
+        if (feature !== _app.activeFeature) {
           // end loop
           return;
         }
@@ -1402,17 +1401,7 @@ var App = function() {
           setTimeout(loopPhotos, _app.loopInterval);
         });
       }
-      if (targetElement.classList.contains('photoloop')) {
-        // stop previous loop
-        targetElement.classList.remove('photoloop');
-        setTimeout(function() {
-          targetElement.classList.add('photoloop');
-          loopPhotos();
-        }, 2 * _app.loopInterval);
-      } else {
-        targetElement.classList.add('photoloop');
-        loopPhotos();
-      }
+      loopPhotos();
     };
 
     this.clickFeatureHandler = function(feature) {
@@ -1496,7 +1485,7 @@ var App = function() {
               }
             });
 
-            var photoframe = document.querySelector('#gapp_featureinfo_photo_frame');
+            var photoframe = _app.featureInfoPopup.querySelector('.gapp_photo_frame');
             photoframe.style.left = '0';
             photoframe.style.top = '0';
             var picture_width = feature.get('width');
@@ -1527,10 +1516,6 @@ var App = function() {
             var photo = new Image();
             photo.onload = function() {
                 var timeout = 0;
-                if (_app.featureInfoPopup.classList.contains('photoloop')) {
-                  _app.featureInfoPopup.classList.remove('photoloop');
-                  timeout = 2 * _app.loopInterval;
-                }
                 setTimeout(function() {
                   spinner.classList.remove('is-active');
                   _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
