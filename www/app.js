@@ -384,11 +384,11 @@ var OLMap = function() {
 
     /* define photo icons for display in map */
     // based on materialdesignicons and http://www.rapidtables.com/web/tools/svg-viewer-editor.htm
-    var svg_image_area = '<svg xml:space="preserve" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24"><rect x="1" y="3" width="22" height="18" fill="white"/><path fill="green" d="M20,5A2,2 0 0,1 22,7V17A2,2 0 0,1 20,19H4C2.89,19 2,18.1 2,17V7C2,5.89 2.89,5 4,5H20M5,16H19L14.5,10L11,14.5L8.5,11.5L5,16Z" /></svg>';
+    //var svg_image_area = '<svg xml:space="preserve" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24"><rect x="1" y="3" width="22" height="18" fill="white"/><path fill="green" d="M20,5A2,2 0 0,1 22,7V17A2,2 0 0,1 20,19H4C2.89,19 2,18.1 2,17V7C2,5.89 2.89,5 4,5H20M5,16H19L14.5,10L11,14.5L8.5,11.5L5,16Z" /></svg>';
     var svg_image = '<svg xml:space="preserve" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" fill="white"/><path fill="orange" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z" /></svg>';
     var svg_image_multiple = '<svg xml:space="preserve" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24"><rect x="5" y="1" width="18" height="18" fill="white"/><path fill="red" d="M22,16V4A2,2 0 0,0 20,2H8A2,2 0 0,0 6,4V16A2,2 0 0,0 8,18H20A2,2 0 0,0 22,16M11,12L13.03,14.71L16,11L20,16H8M2,6V20A2,2 0 0,0 4,22H18V20H4V6" /></svg>';
-    var svg_tree = '<svg xml:space="preserve" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24"><rect x="2" y="1" width="20" height="22" fill="green"/><path fill="white" d="M11,21V16.74C10.53,16.91 10.03,17 9.5,17C7,17 5,15 5,12.5C5,11.23 5.5,10.09 6.36,9.27C6.13,8.73 6,8.13 6,7.5C6,5 8,3 10.5,3C12.06,3 13.44,3.8 14.25,5C14.33,5 14.41,5 14.5,5A5.5,5.5 0 0,1 20,10.5A5.5,5.5 0 0,1 14.5,16C14,16 13.5,15.93 13,15.79V21H11Z" /></svg>';
-    var svg_tree_fir = '<svg xml:space="preserve" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24"><rect x="2" y="1" width="20" height="22" fill="green"/><path fill="white" d="M10,21V18H3L8,13H5L10,8H7L12,3L17,8H14L19,13H16L21,18H14V21H10Z" /></svg>';
+    //var svg_tree = '<svg xml:space="preserve" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24"><rect x="2" y="1" width="20" height="22" fill="green"/><path fill="white" d="M11,21V16.74C10.53,16.91 10.03,17 9.5,17C7,17 5,15 5,12.5C5,11.23 5.5,10.09 6.36,9.27C6.13,8.73 6,8.13 6,7.5C6,5 8,3 10.5,3C12.06,3 13.44,3.8 14.25,5C14.33,5 14.41,5 14.5,5A5.5,5.5 0 0,1 20,10.5A5.5,5.5 0 0,1 14.5,16C14,16 13.5,15.93 13,15.79V21H11Z" /></svg>';
+    //var svg_tree_fir = '<svg xml:space="preserve" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24"><rect x="2" y="1" width="20" height="22" fill="green"/><path fill="white" d="M10,21V18H3L8,13H5L10,8H7L12,3L17,8H14L19,13H16L21,18H14V21H10Z" /></svg>';
     var image_area = new Image();
     image_area.src = 'data:image/svg+xml;charset=UTF-8,' + escape(svg_image);
     var image_multiple = new Image();
@@ -914,7 +914,6 @@ var App = function() {
                 StatusBar.hide();
             }
             _app.fullscreenphoto = document.querySelector('#gapp_fullscreenphoto');
-            var featureinfophoto = document.querySelector('#gapp_featureinfo_photo');
             if (_app.isMobileDevice) {
               _app.fullscreenphoto.src = photoServer.fullPhotoUrl(_app.activeFeature.get('filename'), 'medium');
             } else {
@@ -1022,8 +1021,6 @@ var App = function() {
         this.cameraPopup.OverlayFit = function(width, height, camWidth, camHeight, cameraAspectRatio) {
           if (_app.overlayURL) {
             var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
-            var overlayPicture = document.querySelector('#gapp_camera_overlay_picture');
-            //var overlayAspectRatio = overlayPicture.naturalHeight / overlayPicture.naturalWidth;
             var overlayAspectRatio = _app.activeFeature.get('height') / _app.activeFeature.get('width');
             var overlayWidth = 0, overlayHeight = 0, overlayLeft = 0, overlayTop = 0;
             if (overlayAspectRatio > cameraAspectRatio) {
