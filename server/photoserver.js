@@ -212,14 +212,23 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
               sql = 'update photo set width=$1, height=$2 where id=$3';
               dbPool.query(sql, [width, height, result.rows[0].id])
                 .then(function (result2){
-                  filename = './uploads/preview/' + result.rows[0].filename;
+                  filename = './uploads/small/' + result.rows[0].filename;
                   gm(filename).rotate('white', d).write(filename, function(err) {
                     if (err) {
                       res.writeHead(500, {'Content-Type' : 'text/html'});
-                      res.end('unable to rotate preview image');
+                      res.end('unable to rotate small image');
                       return;
                     } else {
-                      res.end('image rotated');
+                      filename = './uploads/medium/' + result[0].filename;
+                      gm(filename).rotate('white', d).write(filename, function(err) {
+                        if (err) {
+                          res.writeHead(500, {'Content-Type' : 'text/html'});
+                          res.end('unable to rotate medium image');
+                          return;
+                        } else {
+                          res.end('image rotated');
+                        }
+                      });                      
                     }
                   });
                 });
@@ -277,7 +286,8 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                     dbPool.query(sql, [photoid])
                         .then(function(result) {
                             // photo deleted from table, now delete from disk
-                            fs.unlink(__dirname + '/uploads/preview/' + filename, function(err) {;});
+                            fs.unlink(__dirname + '/uploads/small/' + filename, function(err) {;});
+                            fs.unlink(__dirname + '/uploads/medium/' + filename, function(err) {;});
                             fs.unlink(__dirname + '/uploads/' + filename, function(err, result) {
                                 if (err) {
                                     console.log("failed to delete file " + __dirname + '/uploads/' + filename);
@@ -293,7 +303,8 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                     // check if this photo was part of an animation
                                     if (animationfilename) {
                                       // this photo was first photo of an animation
-                                      fs.unlink(__dirname + '/uploads/preview/' + animationfilename, function(err) {;});
+                                      fs.unlink(__dirname + '/uploads/small/' + animationfilename, function(err) {;});
+                                      fs.unlink(__dirname + '/uploads/medium/' + animationfilename, function(err) {;});
                                       fs.unlink(__dirname + '/uploads/' + animationfilename, function(err, result) {
                                         if (err) {
                                           console.log("failed to delete animation file " + animationfilename);
@@ -332,7 +343,8 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                               sql = "update photo set animationfilename=null, rootid=0 where id=$1";
                                               dbPool.query(sql, [result.rows[0].id])
                                                 .then(function(){
-                                                  fs.unlink(__dirname + '/uploads/preview/' + animationfilename, function(err) {;});
+                                                  fs.unlink(__dirname + '/uploads/small/' + animationfilename, function(err) {;});
+                                                  fs.unlink(__dirname + '/uploads/medium/' + animationfilename, function(err) {;});
                                                   fs.unlink(__dirname + '/uploads/' + animationfilename, function(err, result){
                                                     if (err) {
                                                       console.log("failed to delete animation file " + animationfilename);
@@ -772,10 +784,17 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                             })
                                             .then(function(result) {
                                                 console.log('photo inserted!');
-                                                gm(filename).resize('200', '200', '^').write(__dirname + '/uploads/preview/' + shortfilename,
+                                                gm(filename).resize('200', '200', '^').write(__dirname + '/uploads/small/' + shortfilename,
                                                     function(err) {
                                                       if (err) {
-                                                        console.log('failed to create preview');
+                                                        console.log('failed to create small image');
+                                                      } else {
+                                                        gm(filename).resize('640', '640', '^').write(__dirname + '/uploads/medium/' + shortfilename,
+                                                          function(err) {
+                                                            if (err) {
+                                                              console.log('failed to create medium image');
+                                                            }
+                                                          })
                                                       }
                                                       fs.writeFile(filename.slice(0, -5) + ".dat", JSON.stringify({
                                                             latitude: req.body.latitude,
@@ -788,7 +807,8 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                                                 });
                                                                 res.end('Server error:', err);
                                                                 fs.unlink(filename, function(err){;});
-                                                                fs.unlink(__dirname + '/uploads/preview/' + shortfilename, function(err) {;});
+                                                                fs.unlink(__dirname + '/uploads/small/' + shortfilename, function(err) {;});
+                                                                fs.unline(__dirname + '/uploads/medium/' + shortfilename, function(err) {;});
                                                             } else {
                                                                 res.writeHead(200, {
                                                                     'Content-Type': 'text/html'

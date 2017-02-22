@@ -12,7 +12,7 @@ function resizeImages(inputdir, outputdir)
 			if (file.substr(-4, 4) == '.jpg') {
 				var inputFilename = Path.join(inputdir, file);
 				var outputFilename = Path.join(outputdir, Path.parse(file).base);
-				gm(inputFilename).resize('200', '200', '^').write(outputFilename, function(err){
+				gm(inputFilename).resize('640', '640', '^').write(outputFilename, function(err){
 					if (err) {
 						console.log('error resizing file: ' + outputFilename);
 						callback(null);
@@ -28,7 +28,7 @@ function resizeImages(inputdir, outputdir)
 	});
 }
 
-resizeImages('uploads', 'uploads/preview');
+resizeImages('uploads', 'uploads/preview2');
 
 
 
