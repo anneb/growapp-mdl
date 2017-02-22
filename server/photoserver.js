@@ -80,6 +80,7 @@ function createCollection(features, message, errno) {
               'properties': {
                       id: features[i].id,
                       filename: features[i].filename,
+                      isroot: features[i].isroot,
                       accuracy: features[i].accuracy,
                       time: features[i].time,
                       width: features[i].width,
@@ -94,7 +95,7 @@ function createCollection(features, message, errno) {
 
 app.get('/photoserver/getphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getphotos');
-  var sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo where visible=true and rootid=0';
+  var sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo where visible=true and rootid=0';
   dbPool.query(sql)
     .then(function(result) {
       res.json(createCollection (result.rows, null, null));
@@ -317,7 +318,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                           if (result.rows.length > 0) {
                                             // store id of new first photo in animation
                                             var newrootid = result.rows[0].id;
-                                            sql = "update photo set rootid=0, animationfilename=null where id=$1";
+                                            sql = "update photo set rootid=0, animationfilename=null, isroot=false where id=$1";
                                             dbPool.query(sql, [newrootid])
                                               .then(function(){
                                                 // reset rootid of rest of photos in animation
@@ -340,7 +341,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                                             // only one photo, remove animation
                                             var animationfilename = result.rows[0].animationfilename;
                                             if (animationfilename) {
-                                              sql = "update photo set animationfilename=null, rootid=0 where id=$1";
+                                              sql = "update photo set animationfilename=null, rootid=0, isroot=false where id=$1";
                                               dbPool.query(sql, [result.rows[0].id])
                                                 .then(function(){
                                                   fs.unlink(__dirname + '/uploads/small/' + animationfilename, function(err) {;});
@@ -617,7 +618,7 @@ function updateAnimation(rootid, path)
                 if (err) {
                   console.log("Failed to create animation: " + err);
                 } else {
-                    sql = "update photo set animationfilename=$1 where id=$2";
+                    sql = "update photo set animationfilename=$1, isroot=true where id=$2";
                     console.log("hier: " + sql);
                     dbPool.query(sql, [outputfilename, rootid])
                       .catch(function(reason) {
