@@ -149,12 +149,12 @@ var PhotoServer = function() {
   };
 
   // return url to large version of photo
-  this.bigPhotoUrl = function(photofile) {
-    if (photofile.substr(-4, 4) === '.gif') {
-        /* todo: add cache update to url for gif, sequence number? */
-        return _photoServer.server + '/uploads/medium/' + photofile;
+  this.fullPhotoUrl = function(photofile, size) {
+    // size expected to be either 'small' or 'medium' or 'full'
+    if (size === 'medium' || size === 'small' ) {
+      return _photoServer.server + '/uploads/' + size + '/' + photofile;
     }
-    return _photoServer.server + '/uploads/medium/' + photofile;
+    return _photoServer.server + '/uploads/' + photofile;
   };
 
   // ensure this device is registered with server
@@ -915,7 +915,11 @@ var App = function() {
             }
             _app.fullscreenphoto = document.querySelector('#gapp_fullscreenphoto');
             var featureinfophoto = document.querySelector('#gapp_featureinfo_photo');
-            _app.fullscreenphoto.src = featureinfophoto.src;
+            if (_app.isMobileDevice) {
+              _app.fullscreenphoto.src = photoServer.fullPhotoUrl(_app.activeFeature.get('filename'), 'medium');
+            } else {
+              _app.fullscreenphoto.src = photoServer.fullPhotoUrl(_app.activeFeature.get('filename'), 'full');
+            }
             document.removeEventListener('backbutton', _app.featureInfoPopup.hide);
             document.addEventListener('backbutton', _app.fullscreenphotopopup.hide);
             var frameContainer = document.querySelector('#gapp_fullscreenphotopop_frame_container');
@@ -1454,8 +1458,18 @@ var App = function() {
           return;
         }
         nextFeature = photoset[photoIndex];
-        _app.showOnePhoto(photoServer.server + '/uploads/medium/' + nextFeature.filename,
-                  nextFeature.width, nextFeature.height, _app.animationTargetElement, function() {
+        var fullUrl;
+        if (_app.animationTargetElement == _app.featureInfoPopup) {
+          fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'small');
+        } else {
+          if (_app.isMobileDevice) {
+            fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'medium');
+          } else {
+            fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'full');
+          }
+        }
+        _app.showOnePhoto(fullUrl, nextFeature.width, nextFeature.height,
+             _app.animationTargetElement, function() {
           photoIndex++;
           if (photoIndex >= photoset.length) {
             photoIndex = 0;
@@ -1489,7 +1503,7 @@ var App = function() {
                     distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
                 }
 
-                var picture_url = photoServer.bigPhotoUrl(feature.get('filename'));
+                var picture_url = photoServer.fullPhotoUrl(feature.get('filename'), 'small');
 
                 if (picture_url.substr(-4, 4) == '.gif') {
                   picture_url = picture_url.substr(0, picture_url.length - 4) + '.jpg';
