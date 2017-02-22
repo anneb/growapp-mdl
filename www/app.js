@@ -119,31 +119,40 @@ var PhotoServer = function() {
     return _photoServer.photoSource;
   };
 
-  this.getPhotoSet  = function(photoid, callback) {
-    var xhr = new XMLHttpRequest();
-    var formData = 'photoid=' + photoid;
-    xhr.open('POST', _photoServer.server+'/photoserver/getphotoset');
-    xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
-    // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
-    xhr.onreadystatechange = function (event) {
-       if (xhr.readyState === 4) {
-           if (xhr.status === 200) {
-             var result = JSON.parse(xhr.responseText);
-             callback(null, result);
-           } else {
-             callback(true, 'Error retrieving photoset: ' + xhr.status + ' ' + xhr.statusText);
-             console.log ('Error : ' + xhr.status + ' ' + xhr.statusText);
+  this.getPhotoSet = function(feature, callback) {
+    if (feature.photoset) {
+      callback(null, feature.photoset);
+    } else {
+      if (feature.get('filename').substr(-4,4) != '.gif') {
+        callback(null, []);
+      } else {
+        var photoid = feature.get('id');
+        var xhr = new XMLHttpRequest();
+        var formData = 'photoid=' + photoid;
+        xhr.open('POST', _photoServer.server+'/photoserver/getphotoset');
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
+        // xhr.responseType = 'json'; // DOES NOT WORK ON ANDROID 4.4!
+        xhr.onreadystatechange = function (event) {
+           if (xhr.readyState === 4) {
+               if (xhr.status === 200) {
+                 var result = JSON.parse(xhr.responseText);
+                 callback(null, result);
+               } else {
+                 callback(true, 'Error retrieving photoset: ' + xhr.status + ' ' + xhr.statusText);
+                 console.log ('Error : ' + xhr.status + ' ' + xhr.statusText);
+               }
            }
-       }
-    };
-    xhr.send(formData);
+        };
+        xhr.send(formData);
+      }
+    }
   };
 
   // return url to large version of photo
-  this.bigPhotoUrl = function(photofile) {
-    if (photofile.substr(-4, 4) === '.gif') {
-        /* todo: add cache update to url for gif, sequence number? */
-        return _photoServer.server + '/uploads/' + photofile;
+  this.fullPhotoUrl = function(photofile, size) {
+    // size expected to be either 'small' or 'medium' or 'full'
+    if (size === 'medium' || size === 'small' ) {
+      return _photoServer.server + '/uploads/' + size + '/' + photofile;
     }
     return _photoServer.server + '/uploads/' + photofile;
   };
@@ -561,16 +570,17 @@ var OLMap = function() {
       this.olmap.forEachFeatureAtPixel(pixel, function(feature, layer) {
         if (feature.get('features')) {
           // clusterfeature, set feature to next feature from cluster
-          if (prevFeature === feature) {
+          var features = feature.get('features');
+          if (prevFeature === features[0].get('id')) {
             prevFeatureIndex++;
-            if (prevFeatureIndex >= feature.get('features').length) {
+            if (prevFeatureIndex >= features.length) {
               prevFeatureIndex = 0;
             }
           } else {
-            prevFeature = feature;
+            prevFeature = features[0].get('id');
             prevFeatureIndex = 0;
           }
-          feature = feature.get('features')[prevFeatureIndex];
+          feature = features[prevFeatureIndex];
         }
         if (feature.get(featureFieldName)) {
             resultfeature = feature;
@@ -905,7 +915,11 @@ var App = function() {
             }
             _app.fullscreenphoto = document.querySelector('#gapp_fullscreenphoto');
             var featureinfophoto = document.querySelector('#gapp_featureinfo_photo');
-            _app.fullscreenphoto.src = featureinfophoto.src;
+            if (_app.isMobileDevice) {
+              _app.fullscreenphoto.src = photoServer.fullPhotoUrl(_app.activeFeature.get('filename'), 'medium');
+            } else {
+              _app.fullscreenphoto.src = photoServer.fullPhotoUrl(_app.activeFeature.get('filename'), 'full');
+            }
             document.removeEventListener('backbutton', _app.featureInfoPopup.hide);
             document.addEventListener('backbutton', _app.fullscreenphotopopup.hide);
             var frameContainer = document.querySelector('#gapp_fullscreenphotopop_frame_container');
@@ -1009,7 +1023,8 @@ var App = function() {
           if (_app.overlayURL) {
             var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
             var overlayPicture = document.querySelector('#gapp_camera_overlay_picture');
-            var overlayAspectRatio = overlayPicture.naturalHeight / overlayPicture.naturalWidth;
+            //var overlayAspectRatio = overlayPicture.naturalHeight / overlayPicture.naturalWidth;
+            var overlayAspectRatio = _app.activeFeature.get('height') / _app.activeFeature.get('width');
             var overlayWidth = 0, overlayHeight = 0, overlayLeft = 0, overlayTop = 0;
             if (overlayAspectRatio > cameraAspectRatio) {
               // overlay photo taller than camera photo
@@ -1063,8 +1078,8 @@ var App = function() {
 
                 window.plugins.insomnia.keepAwake();
                 // force css recalculation
-                // document.body.style.zoom=1.00001;
-                // setTimeout(function(){document.body.style.zoom=1;}, 50);
+                document.body.style.zoom=1.00001;
+                setTimeout(function(){document.body.style.zoom=1;}, 50);
                 if (!window.localStorage.cameraAspectRatio) {
                   // camera aspect no yet known, read from camera when started
                   setTimeout(function() {CameraPreview.getPreviewSize(function(size){
@@ -1443,8 +1458,18 @@ var App = function() {
           return;
         }
         nextFeature = photoset[photoIndex];
-        _app.showOnePhoto(photoServer.server + '/uploads/preview/' + nextFeature.filename,
-                  nextFeature.width, nextFeature.height, _app.animationTargetElement, function() {
+        var fullUrl;
+        if (_app.animationTargetElement == _app.featureInfoPopup) {
+          fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'small');
+        } else {
+          if (_app.isMobileDevice) {
+            fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'medium');
+          } else {
+            fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'full');
+          }
+        }
+        _app.showOnePhoto(fullUrl, nextFeature.width, nextFeature.height,
+             _app.animationTargetElement, function() {
           photoIndex++;
           if (photoIndex >= photoset.length) {
             photoIndex = 0;
@@ -1459,125 +1484,121 @@ var App = function() {
         _app.featureInfoPopup.hide();
         _app.activeFeature = feature;
         if (feature) {
-            var geometry = feature.getGeometry();
-            var coordinates = geometry.getCoordinates();
-            var pixel = olMap.olmap.getPixelFromCoordinate(coordinates);
-
-            _app.featureInfoPopup.style.left = pixel[0] + 'px';
-            _app.featureInfoPopup.style.top = (pixel[1] - 15) + 'px';
-
-            // calculate distance between user and feature
-            var userLocation = olMap.geoLocation.getPosition();
-            var distance = 1000; // initialize at 1000 km
-            if (userLocation) {
-                distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
-            }
-
-            var picture_url = photoServer.bigPhotoUrl(feature.get('filename'));
-
-            var photoset = feature.get('photoset');
-            if (!photoset) {
-              if (picture_url.substr(-4, 4) != '.gif') {
-                photoset = [];
+            photoServer.getPhotoSet(feature, function(err, photoset) {
+              if (err) {
+                // todo
               } else {
-                photoServer.getPhotoSet(feature.get('id'), function(err, result){
-                  photoset = result;
-                  feature.set('photoset', photoset);
-                });
-              }
-            }
-            if (picture_url.substr(-4, 4) == '.gif') {
-              picture_url = picture_url.substr(0, picture_url.length - 4) + '.jpg';
-            }
+                feature.set('photoset', photoset);
+                var geometry = feature.getGeometry();
+                var coordinates = geometry.getCoordinates();
+                var pixel = olMap.olmap.getPixelFromCoordinate(coordinates);
 
-            var spinner = document.querySelector('#gapp_featureinfo_spinner');
-            var errorInfo = document.querySelector('#gapp_featureinfo_error');
-            errorInfo.classList.add('hidden');
-            _app.featureInfoPhoto = document.querySelector('#gapp_featureinfo_photo');
-            _app.featureInfoPhoto.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-            _app.featureInfoPhoto.url = picture_url;
-            _app.featureInfoPhoto.photoid = feature.get('id');
-            spinner.classList.add('is-active');
+                _app.featureInfoPopup.style.left = pixel[0] + 'px';
+                _app.featureInfoPopup.style.top = (pixel[1] - 15) + 'px';
 
-            var description = feature.get('description');
-            if (!description) {
-              description = 'No description';
-            }
+                // calculate distance between user and feature
+                var userLocation = olMap.geoLocation.getPosition();
+                var distance = 1000; // initialize at 1000 km
+                if (userLocation) {
+                    distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
+                }
 
-            _app.getTagList(function (err, list) {
-              if (!err) {
-                var tagtext = '';
-                var tags = feature.get('tags');
-                if (tags.length === 0) {
-                  tagtext = 'No tags';
-                } else {
-                  for (var i=0; i < tags.length; i++) {
-                    for (var key in tags[i]) {
-                      for (var k = 0; k < list.length; k++) {
-                        if (key == list[k].tagid) {
-                          if (tagtext !== '') {
-                            tagtext += ', ';
-                          }
-                          tagtext += list[k].tagtext;
-                          if ((tags[i])[key] !== '') {
-                            tagtext += ': ' + (tags[i])[key];
+                var picture_url = photoServer.fullPhotoUrl(feature.get('filename'), 'small');
+
+                if (picture_url.substr(-4, 4) == '.gif') {
+                  picture_url = picture_url.substr(0, picture_url.length - 4) + '.jpg';
+                }
+
+                var spinner = document.querySelector('#gapp_featureinfo_spinner');
+                var errorInfo = document.querySelector('#gapp_featureinfo_error');
+                errorInfo.classList.add('hidden');
+                _app.featureInfoPhoto = document.querySelector('#gapp_featureinfo_photo');
+                _app.featureInfoPhoto.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+                _app.featureInfoPhoto.url = picture_url;
+                _app.featureInfoPhoto.photoid = feature.get('id');
+                spinner.classList.add('is-active');
+
+                var description = feature.get('description');
+                if (!description) {
+                  description = 'No description';
+                }
+
+                _app.getTagList(function (err, list) {
+                  if (!err) {
+                    var tagtext = '';
+                    var tags = feature.get('tags');
+                    if (tags.length === 0) {
+                      tagtext = 'No tags';
+                    } else {
+                      for (var i=0; i < tags.length; i++) {
+                        for (var key in tags[i]) {
+                          for (var k = 0; k < list.length; k++) {
+                            if (key == list[k].tagid) {
+                              if (tagtext !== '') {
+                                tagtext += ', ';
+                              }
+                              tagtext += list[k].tagtext;
+                              if ((tags[i])[key] !== '') {
+                                tagtext += ': ' + (tags[i])[key];
+                              }
+                            }
                           }
                         }
                       }
                     }
+                    var date = new Date();
+                    date.setTime(Date.parse(feature.get('time')));
+                    var dateText = date.toLocaleDateString() + ', ' + date.toLocaleTimeString();
+                    var infoText = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tagtext) + '<br>' + dateText;
+                    document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
+                    document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
                   }
+                });
+
+                var photoframe = _app.featureInfoPopup.querySelector('.gapp_photo_frame');
+                photoframe.style.left = '0';
+                photoframe.style.top = '0';
+                var picture_width = feature.get('width');
+                var picture_height = feature.get('height');
+                var aspectratio = 1.0;
+                if (picture_height && picture_width) {
+                    aspectratio = picture_width / picture_height;
                 }
-                var date = new Date();
-                date.setTime(Date.parse(feature.get('time')));
-                var dateText = date.toLocaleDateString() + ', ' + date.toLocaleTimeString();
-                var infoText = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tagtext) + '<br>' + dateText;
-                document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
-                document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
+                if (aspectratio >= 1) {
+                    // landscape
+                    _app.featureInfoPopup.style.width = photoframe.style.width = Math.floor(200 * aspectratio) + 'px';
+                    _app.featureInfoPopup.style.height = photoframe.style.height = '200px';
+                }
+                else {
+                    // portrait
+                    _app.featureInfoPopup.style.width = photoframe.style.width = '200px';
+                    _app.featureInfoPopup.style.height = photoframe.style.height = Math.floor(200 / aspectratio) + 'px';
+                }
+
+                var addphotobutton = document.querySelector('#gapp_featureinfo_addphoto');
+                if (_app.isMobileDevice && distance < 0.08) {
+                    addphotobutton.removeAttribute('disabled');
+                }
+                else {
+                    addphotobutton.setAttribute('disabled', '');
+                }
+                _app.featureInfoPopup.show();
+                var photo = new Image();
+                photo.onload = function() {
+                    spinner.classList.remove('is-active');
+                    _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
+                    if (photoset && photoset.length > 0) {
+                      _app.animationTargetElement = _app.featureInfoPopup;
+                      _app.doAnimation(feature);
+                    }
+                };
+                photo.onerror = function() {
+                    spinner.classList.remove('is-active');
+                    errorInfo.classList.remove('hidden');
+                };
+                photo.src = picture_url;
               }
             });
-
-            var photoframe = _app.featureInfoPopup.querySelector('.gapp_photo_frame');
-            photoframe.style.left = '0';
-            photoframe.style.top = '0';
-            var picture_width = feature.get('width');
-            var picture_height = feature.get('height');
-            var aspectratio = 1.0;
-            if (picture_height && picture_width) {
-                aspectratio = picture_width / picture_height;
-            }
-            if (aspectratio >= 1) {
-                // landscape
-                _app.featureInfoPopup.style.width = photoframe.style.width = Math.floor(200 * aspectratio) + 'px';
-                _app.featureInfoPopup.style.height = photoframe.style.height = '200px';
-            }
-            else {
-                // portrait
-                _app.featureInfoPopup.style.width = photoframe.style.width = '200px';
-                _app.featureInfoPopup.style.height = photoframe.style.height = Math.floor(200 / aspectratio) + 'px';
-            }
-
-            var addphotobutton = document.querySelector('#gapp_featureinfo_addphoto');
-            if (_app.isMobileDevice && distance < 0.08) {
-                addphotobutton.removeAttribute('disabled');
-            }
-            else {
-                addphotobutton.setAttribute('disabled', '');
-            }
-            _app.featureInfoPopup.show();
-            var photo = new Image();
-            photo.onload = function() {
-                spinner.classList.remove('is-active');
-                _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
-                if (photoset && photoset.length > 0) {
-                  _app.animationTargetElement = _app.featureInfoPopup;
-                  _app.doAnimation(feature);
-                }
-            };
-            photo.onerror = function() {
-                spinner.classList.remove('is-active');
-                errorInfo.classList.remove('hidden');
-            };
-            photo.src = picture_url;
         }
     };
 
