@@ -895,6 +895,9 @@ var App = function() {
           frameContainerElement.style.top = Math.round(top) + 'px';
           frameContainerElement.style.width = Math.round(width) + 'px';
           frameContainerElement.style.height = Math.round(height) + 'px';
+          var animationFrame = frameContainerElement.querySelector('.gapp_photo_frame');
+          animationFrame.style.left = animationFrame.style.top = 0;
+          animationFrame.style.width = animationFrame.style.height = '100%';
         };
 
         /* todo: zoomable fullscreen photo? http://ignitersworld.com/lab/imageViewer.html */
