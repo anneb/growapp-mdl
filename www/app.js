@@ -942,7 +942,7 @@ var App = function() {
           }
         };
 
-        this.photoFrameContainerFit = function(fitToElement, frameContainerElement, photoWidth, photoHeight)
+        this.photoFrameContainerFit = function()
         {
           var rect = _app.fitRectangleToDisplay(_app.activeFeature.get('width')/_app.activeFeature.get('height'),
               _app.fullscreenphotopopup.clientWidth, _app.fullscreenphotopopup.clientHeight, true);
@@ -953,12 +953,13 @@ var App = function() {
           animationFrame.style.width = animationFrame.style.height = '100%';
         };
 
+
         /* todo: zoomable fullscreen photo? http://ignitersworld.com/lab/imageViewer.html */
         this.fullscreenphotopopup = document.querySelector('#gapp_fullscreenphotopopup');
 
-        window.addEventListener('orientationchange', function(){
+        window.addEventListener('resize', function(){
           if (!_app.fullscreenphotopopup.classList.contains('hidden')){
-            _app.photoFrameContainerFit();
+              _app.photoFrameContainerFit();
           }
         });
 
