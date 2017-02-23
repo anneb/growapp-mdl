@@ -22,7 +22,18 @@
     <script src="./node_modules/proj4/dist/proj4.js"></script>
     <script src="./app.js"></script>
     <script src="./config.js"></script>
-
+    <!-- script>
+    photoServer.featureFilter = function(features, callback)
+    {
+      // filter by tag keys 1 or 5
+      features = features.filter(function(feature){
+        return feature.get('tags').filter(function(tag) {
+          return ('1' in tag) || ('5' in tag);
+        }).length > 0;
+      });
+      callback (features);
+    }
+    </script -->
     <style>
       body {
         margin: 0;

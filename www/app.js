@@ -108,13 +108,56 @@ var PhotoServer = function() {
     return cacheTime;
   };
 
+  this.getGeoJSON = function (url, callback){
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState != 4) {
+        return;
+      }
+      if (xhr.status == 200 || xhr.status == 304) {
+        callback(JSON.parse(xhr.response));
+      }
+    };
+    xhr.send();
+  };
+
+  this.featureFilter =  function (features, callback) {
+    /*
+    // filter by description
+    features = features.filter(function(feature) {
+      var description = feature.get('description');
+      return (description !== null && description !== '');
+    });
+    */
+    /*
+    // filter by tag keys 1 or 5
+    features = features.filter(function(feature){
+      return feature.get('tags').filter(function(tag) {
+        return ('1' in tag) || ('5' in tag);
+      }).length > 0;
+    });
+    */
+    callback(features);
+  };
+
   this.photoSource = null;
   this.updatePhotos = function() {
     //adds or reloads photo positions into photoSource
     _photoServer.photoSource = new ol.source.Vector({
-        projection: 'EPSG:4326',
+        /* projection: 'EPSG:4326',
         url: _photoServer.server + '/photoserver/getphotos?' + _photoServer.getCacheTime(), // File created in node
-        format: new ol.format.GeoJSON()
+        format: new ol.format.GeoJSON() */
+        loader: function () {
+          var format = new ol.format.GeoJSON();
+          var source = this;
+          _photoServer.getGeoJSON(_photoServer.server + '/photoserver/getphotos?' + _photoServer.getCacheTime(), function(response){
+            var features = format.readFeatures(response, { featureProjection: 'EPSG:3857'});
+            _photoServer.featureFilter(features, function(filteredFeatures){
+              source.addFeatures(filteredFeatures);
+            });
+          });
+        }
     });
     return _photoServer.photoSource;
   };
