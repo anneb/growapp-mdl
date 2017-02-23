@@ -1443,6 +1443,8 @@ var App = function() {
       photo.src = basePhotoURL;
     };
 
+    this.animating = false;
+
     this.doAnimation = function(feature)
     {
       var photoset = feature.get('photoset');
@@ -1453,8 +1455,9 @@ var App = function() {
       var nextFeature;
 
       function loopPhotos() {
-        if (feature !== _app.activeFeature) {
-          // end loop
+        if (feature !== _app.activeFeature || !_app.animating) {
+          // end animation loop
+          _app.animating = false;
           return;
         }
         nextFeature = photoset[photoIndex];
@@ -1477,7 +1480,17 @@ var App = function() {
           setTimeout(loopPhotos, _app.loopInterval);
         });
       }
-      loopPhotos();
+      if (_app.animating) {
+        // stop previous animations, before starting anew
+        _app.animating = false;
+        setTimeout(function(){
+          _app.animating = true;
+          loopPhotos();
+        }, _app.loopInterval * 2);
+      } else {
+        _app.animating = true;
+        loopPhotos();
+      }
     };
 
     this.clickFeatureHandler = function(feature) {
