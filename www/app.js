@@ -655,7 +655,6 @@ var App = function() {
     // set self (geodan policy: use lowercase class name)
     var _app = this;
 
-
     this.init = function(server, mapId, isMobileDevice) {
         // update account info in drawer if available
         if (window.localStorage.email && window.localStorage.email !== '') {
@@ -892,6 +891,31 @@ var App = function() {
         }
     };
 
+    this.fitRectangleToDisplay = function(rectangleAspect, displayWidth, displayHeight, fitInside)
+    {
+      var rectangle = {};
+      var displayAspect = displayWidth / displayHeight;
+      if ((fitInside && displayAspect > rectangleAspect) || (!fitInside && displayAspect < rectangleAspect)) {
+        // fit to height
+        rectangle.height = displayHeight;
+        rectangle.width = displayHeight * rectangleAspect;
+      } else {
+        // fit to width
+        rectangle.width = displayWidth;
+        rectangle.height = displayWidth / rectangleAspect;
+      }
+      rectangle.left = Math.round((displayWidth - rectangle.width) / 2);
+      rectangle.top = Math.round((displayHeight - rectangle.height) / 2);
+      return rectangle;
+    };
+
+    this.setElementStyleToRect = function(element, rect) {
+      element.style.left = rect.left + 'px';
+      element.style.top = rect.top + 'px';
+      element.style.width = rect.width + 'px';
+      element.style.height = rect.height + 'px';
+    };
+
     this.featureInfoPopupInit = function()
     {
         this.featureInfoPopup = document.querySelector('#gapp_featureinfo');
@@ -917,6 +941,8 @@ var App = function() {
             infoText2.classList.add('hidden');
           }
         };
+
+
 
         this.photoFrameContainerFit = function(fitToElement, frameContainerElement, photoWidth, photoHeight)
         {
