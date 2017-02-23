@@ -1068,35 +1068,6 @@ var App = function() {
             _app.cameraPopup.classList.add('hidden');
         };
 
-        this.cameraPopup.overlayFit = function(width, height, camWidth, camHeight, cameraAspectRatio) {
-          if (_app.overlayURL) {
-            var rect = _app.fitRectangleToDisplay(
-              _app.activeFeature.get('width') / _app.activeFeature.get('height'),
-              camWidth, camHeight, true);
-            var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
-            _app.setElementStyleToRect(overlayPictureFrame, rect);
-            /*
-            var overlayAspectRatio = _app.activeFeature.get('height') / _app.activeFeature.get('width');
-            var overlayWidth = 0, overlayHeight = 0, overlayLeft = 0, overlayTop = 0;
-            if (overlayAspectRatio > cameraAspectRatio) {
-              // overlay photo taller than camera photo
-              overlayWidth = camHeight / overlayAspectRatio;
-              overlayHeight = camHeight;
-            } else {
-              // overlay photo wider than camera photo
-              overlayWidth = camWidth;
-              overlayHeight = camWidth * overlayAspectRatio;
-            }
-            overlayLeft = (width - overlayWidth) / 2;
-            overlayTop = (height - overlayHeight) / 2;
-            overlayPictureFrame.style.left = overlayLeft + 'px';
-            overlayPictureFrame.style.top = overlayTop + 'px';
-            overlayPictureFrame.style.height = overlayHeight + 'px';
-            overlayPictureFrame.style.width = overlayWidth + 'px';
-            */
-          }
-        };
-
         this.cameraPopup.startCamera = function() {
             if (_app.isMobileDevice) {
                 var width = _app.cameraPopup.clientWidth;
@@ -1106,10 +1077,6 @@ var App = function() {
                 var toBack = true; // camera z-value can either be completely at the back or completey on top
                 var cameraAspectRatio;
                 var containerAspectRatio = width / height;
-                var camWidth = width;
-                var camHeight = height;
-                var camLeft = 0;
-                var camTop = 0;
                 if (window.localStorage.cameraAspectRatio) {
                   cameraAspectRatio = window.localStorage.cameraAspectRatio;
                   if ((cameraAspectRatio > 1 && containerAspectRatio < 1) || (cameraAspectRatio < 1 && containerAspectRatio > 1)) {
@@ -1126,7 +1093,6 @@ var App = function() {
                     var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
                     _app.setElementStyleToRect(overlayPictureFrame, overlayRect);
                   }
-                  //_app.cameraPopup.overlayFit(width, height, camWidth, camHeight, cameraAspectRatio);
                 }
                 CameraPreview.startCamera({x: camRect.left, y: camRect.top, width: camRect.width, height: camRect.height, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
                 //CameraPreview.setZoom(0);
@@ -1135,8 +1101,9 @@ var App = function() {
                 // force css recalculation
                 document.body.style.zoom=1.00001;
                 setTimeout(function(){document.body.style.zoom=1;}, 50);
+
                 if (!window.localStorage.cameraAspectRatio) {
-                  // camera aspect no yet known, read from camera when started
+                  // camera aspect not yet known, read from camera when started
                   setTimeout(function() {CameraPreview.getPreviewSize(function(size){
                     cameraAspectRatio = size.width / size.height;
                     window.localStorage.cameraAspectRatio = cameraAspectRatio;
@@ -1459,30 +1426,14 @@ var App = function() {
 
     this.showOnePhoto = function(basePhotoURL, width, height, targetElement, done)
     {
-      //var targetElement = _app.animationTargetElement;
-      //var basePhotoURL = photoServer.server + '/uploads/preview/' + feature.filename;
       if (basePhotoURL.substr(-4, 4) === '.gif') {
         basePhotoURL =  basePhotoURL.substr(0, basePhotoURL.length -4) + '.jpg';
       }
-
-      var basePhotoWidth = width;
-      var basePhotoHeight = height;
-      var basePhotoAspectRatio = basePhotoWidth / basePhotoHeight;
-
-      var elementAspectRatio = targetElement.clientWidth / targetElement.clientHeight;
-
+      var rect = _app.fitRectangleToDisplay(width/height,
+        targetElement.clientWidth, targetElement.clientHeight, true);
       var photoframe = targetElement.querySelector('.gapp_photo_frame');
-      if (elementAspectRatio > basePhotoAspectRatio) {
-        // target wider than basePhoto
-        photoframe.style.height = targetElement.clientHeight + 'px';
-        photoframe.style.width = (targetElement.clientHeight * basePhotoAspectRatio) + 'px';
-      } else {
-        // target equal or taller than basePhoto
-        photoframe.style.height = (targetElement.clientWidth / basePhotoAspectRatio) + 'px';
-        photoframe.style.width = targetElement.clientWidth + 'px';
-      }
-      photoframe.style.left = ((targetElement.clientWidth - photoframe.clientWidth) / 2) + 'px';
-      photoframe.style.top  = ((targetElement.clientHeight - photoframe.clientHeight) / 2) + 'px';
+      _app.setElementStyleToRect(photoframe, rect);
+
       var errorInfo = document.querySelector('#gapp_featureinfo_error');
       var photo = new Image();
       var image = photoframe.querySelector("img");
