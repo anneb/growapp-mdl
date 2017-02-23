@@ -942,28 +942,12 @@ var App = function() {
           }
         };
 
-
-
         this.photoFrameContainerFit = function(fitToElement, frameContainerElement, photoWidth, photoHeight)
         {
-          var parentAspectRatio = fitToElement.clientWidth / fitToElement.clientHeight;
-          var photoAspectratio = photoWidth / photoHeight;
-          var left, top, width, height;
-          if (photoAspectratio > parentAspectRatio) {
-              // photo wider than parent, fit frameContainer to parent width
-              width = fitToElement.clientWidth;
-              height = fitToElement.clientWidth / photoAspectratio;
-          } else {
-              // photo higher than parent, fit frameContainer to parent height
-              width = fitToElement.clientHeight * photoAspectratio;
-              height = fitToElement.clientHeight;
-          }
-          left = (fitToElement.clientWidth - width) / 2;
-          top = (fitToElement.clientHeight - height) / 2;
-          frameContainerElement.style.left = Math.round(left) + 'px';
-          frameContainerElement.style.top = Math.round(top) + 'px';
-          frameContainerElement.style.width = Math.round(width) + 'px';
-          frameContainerElement.style.height = Math.round(height) + 'px';
+          var rect = _app.fitRectangleToDisplay(_app.activeFeature.get('width')/_app.activeFeature.get('height'),
+              _app.fullscreenphotopopup.clientWidth, _app.fullscreenphotopopup.clientHeight, true);
+          var frameContainerElement = document.querySelector('#gapp_fullscreenphotopop_frame_container');
+          _app.setElementStyleToRect(frameContainerElement, rect);
           var animationFrame = frameContainerElement.querySelector('.gapp_photo_frame');
           animationFrame.style.left = animationFrame.style.top = 0;
           animationFrame.style.width = animationFrame.style.height = '100%';
@@ -974,10 +958,7 @@ var App = function() {
 
         window.addEventListener('orientationchange', function(){
           if (!_app.fullscreenphotopopup.classList.contains('hidden')){
-            _app.photoFrameContainerFit(_app.fullscreenphotopopup,
-                document.querySelector('#gapp_fullscreenphotopop_frame_container'),
-                _app.activeFeature.get('width'),
-                _app.activeFeature.get('height'));
+            _app.photoFrameContainerFit();
           }
         });
 
@@ -997,10 +978,7 @@ var App = function() {
             _app.animationTargetElement = frameContainer;
             _app.fullscreenphotopopup.classList.remove('hidden');
             setTimeout(function() {
-                _app.photoFrameContainerFit(_app.fullscreenphotopopup,
-                    frameContainer,
-                    _app.activeFeature.get('width'),
-                    _app.activeFeature.get('height'));
+                _app.photoFrameContainerFit();
               }, 100);
         };
 
@@ -1090,9 +1068,14 @@ var App = function() {
             _app.cameraPopup.classList.add('hidden');
         };
 
-        this.cameraPopup.OverlayFit = function(width, height, camWidth, camHeight, cameraAspectRatio) {
+        this.cameraPopup.overlayFit = function(width, height, camWidth, camHeight, cameraAspectRatio) {
           if (_app.overlayURL) {
+            var rect = _app.fitRectangleToDisplay(
+              _app.activeFeature.get('width') / _app.activeFeature.get('height'),
+              camWidth, camHeight, true);
             var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+            _app.setElementStyleToRect(overlayPictureFrame, rect);
+            /*
             var overlayAspectRatio = _app.activeFeature.get('height') / _app.activeFeature.get('width');
             var overlayWidth = 0, overlayHeight = 0, overlayLeft = 0, overlayTop = 0;
             if (overlayAspectRatio > cameraAspectRatio) {
@@ -1110,6 +1093,7 @@ var App = function() {
             overlayPictureFrame.style.top = overlayTop + 'px';
             overlayPictureFrame.style.height = overlayHeight + 'px';
             overlayPictureFrame.style.width = overlayWidth + 'px';
+            */
           }
         };
 
@@ -1121,7 +1105,7 @@ var App = function() {
                 var dragEnabled = true;
                 var toBack = true; // camera z-value can either be completely at the back or completey on top
                 var cameraAspectRatio;
-                var containerAspectRatio = height / width;
+                var containerAspectRatio = width / height;
                 var camWidth = width;
                 var camHeight = height;
                 var camLeft = 0;
@@ -1131,18 +1115,20 @@ var App = function() {
                   if ((cameraAspectRatio > 1 && containerAspectRatio < 1) || (cameraAspectRatio < 1 && containerAspectRatio > 1)) {
                     cameraAspectRatio = 1 / cameraAspectRatio;
                   }
-                  if (cameraAspectRatio > containerAspectRatio) {
-                    // camera photo taller than container
-                    camWidth = height / cameraAspectRatio;
-                    camLeft = (width - camWidth) / 2;
-                  } else {
-                    // camera photo equal or wider than container
-                    camHeight = width * cameraAspectRatio;
-                    camTop = (height - camHeight) / 2;
+                  var camRect = _app.fitRectangleToDisplay(cameraAspectRatio, width, height, true);
+                  var cameraFrame = document.querySelector('#gapp_camera_frame');
+                  _app.setElementStyleToRect(cameraFrame, camRect);
+
+                  if (_app.overlayURL) {
+                    var overlayRect = _app.fitRectangleToDisplay(
+                      _app.activeFeature.get('width') / _app.activeFeature.get('height'),
+                      camRect.width, camRect.height, false);
+                    var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+                    _app.setElementStyleToRect(overlayPictureFrame, overlayRect);
                   }
-                  _app.cameraPopup.OverlayFit(width, height, camWidth, camHeight, cameraAspectRatio);
+                  //_app.cameraPopup.overlayFit(width, height, camWidth, camHeight, cameraAspectRatio);
                 }
-                CameraPreview.startCamera({x: camLeft, y: camTop, width: camWidth, height: camHeight, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
+                CameraPreview.startCamera({x: camRect.left, y: camRect.top, width: camRect.width, height: camRect.height, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
                 //CameraPreview.setZoom(0);
 
                 window.plugins.insomnia.keepAwake();
@@ -1152,7 +1138,7 @@ var App = function() {
                 if (!window.localStorage.cameraAspectRatio) {
                   // camera aspect no yet known, read from camera when started
                   setTimeout(function() {CameraPreview.getPreviewSize(function(size){
-                    cameraAspectRatio = size.height / size.width;
+                    cameraAspectRatio = size.width / size.height;
                     window.localStorage.cameraAspectRatio = cameraAspectRatio;
                     _app.cameraPopup.resetCamera();
                   });}, 1000);
