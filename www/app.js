@@ -1464,6 +1464,8 @@ var App = function() {
       function loopPhotos() {
         if (feature !== _app.activeFeature || !_app.animating) {
           // end animation loop
+          document.querySelector('#gapp_fullscreenphotopopup_pause').classList.add('hidden');
+          document.querySelector('#gapp_fullscreenphotopopup_play').classList.add('hidden');
           _app.animating = false;
           return;
         }
@@ -1492,10 +1494,12 @@ var App = function() {
         _app.animating = false;
         setTimeout(function(){
           _app.animating = true;
+          document.querySelector('#gapp_fullscreenphotopopup_pause').classList.remove('hidden');
           loopPhotos();
         }, _app.loopInterval * 2);
       } else {
         _app.animating = true;
+        document.querySelector('#gapp_fullscreenphotopopup_pause').classList.remove('hidden');
         loopPhotos();
       }
     };
