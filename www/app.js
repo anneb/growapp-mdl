@@ -1537,6 +1537,49 @@ var App = function() {
       }
     };
 
+    this.getFeatureInfoText = function(description, tags, time, callback)
+    {
+      if (!description) {
+        description = '';
+      }
+      if (description !== '') {
+        description = _utils.escapeHTML(description) + '<br>';
+      }
+
+      _app.getTagList(function (err, list) {
+        if (err) {
+          callback(true, 'getTagList failed');
+        } else  {
+          var tagtext = '';
+          if (tags.length > 0) {
+            for (var i=0; i < tags.length; i++) {
+              for (var key in tags[i]) {
+                for (var k = 0; k < list.length; k++) {
+                  if (key == list[k].tagid) {
+                    if (tagtext !== '') {
+                      tagtext += ', ';
+                    }
+                    tagtext += list[k].tagtext;
+                    if ((tags[i])[key] !== '') {
+                      tagtext += ': ' + (tags[i])[key];
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if (tagtext !== '') {
+            tagtext = _utils.escapeHTML(tagtext) + '<br>';
+          }
+          var date = new Date();
+          date.setTime(Date.parse(time));
+          var dateText = date.toISOString().replace('T', ' ').split('.')[0];
+
+          callback(null, description + tagtext + dateText);
+        }
+      });
+    };
+
     this.clickFeatureHandler = function(feature) {
         _app.featureInfoPopup.hide();
         _app.activeFeature = feature;
@@ -1571,41 +1614,9 @@ var App = function() {
                 _app.featureInfoPhoto.photoid = feature.get('id');
                 spinner.classList.add('is-active');
 
-                var description = feature.get('description');
-                if (!description) {
-                  description = 'No description';
-                }
-
-                _app.getTagList(function (err, list) {
-                  if (!err) {
-                    var tagtext = '';
-                    var tags = feature.get('tags');
-                    if (tags.length === 0) {
-                      tagtext = 'No tags';
-                    } else {
-                      for (var i=0; i < tags.length; i++) {
-                        for (var key in tags[i]) {
-                          for (var k = 0; k < list.length; k++) {
-                            if (key == list[k].tagid) {
-                              if (tagtext !== '') {
-                                tagtext += ', ';
-                              }
-                              tagtext += list[k].tagtext;
-                              if ((tags[i])[key] !== '') {
-                                tagtext += ': ' + (tags[i])[key];
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                    var date = new Date();
-                    date.setTime(Date.parse(feature.get('time')));
-                    var dateText = date.toLocaleDateString() + ', ' + date.toLocaleTimeString();
-                    var infoText = _utils.escapeHTML(description) + '<br>' + _utils.escapeHTML(tagtext) + '<br>' + dateText;
-                    document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
-                    document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
-                  }
+                _app.getFeatureInfoText(feature.get('description'), feature.get('tags'), feature.get('time'), function(err, infoText){
+                  document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
+                  document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
                 });
 
                 var photoframe = _app.featureInfoPopup.querySelector('.gapp_photo_frame');
@@ -1651,7 +1662,7 @@ var App = function() {
                 };
                 photo.src = picture_url;
               }
-            });
+          });
         }
     };
 
