@@ -1236,6 +1236,7 @@ var App = function() {
             document.addEventListener('backbutton', _app.cameraPreviewPhotoFrame.hide);
             document.querySelector('#gapp_camera_photo_button_adddescription_text').innerHTML = 'Add description...';
             _app.cameraPreviewPhotoFrame.resetPhotoForm();
+            _app.buttonPreviewPhotoOk.removeAttribute('disabled');
             _app.cameraPreviewPhotoFrame.classList.remove('hidden');
         };
         this.cameraPreviewPhotoFrame.hide = function () {
@@ -1277,9 +1278,11 @@ var App = function() {
 
         this.buttonPreviewPhotoOk = document.querySelector('#gapp_camera_photo_ok');
         this.buttonPreviewPhotoOk.addEventListener('click', function() {
+            _app.buttonPreviewPhotoOk.setAttribute('disabled', '');
             _app.showMessage('uploading photo...');
             var p = _app.cameraPreviewPhoto;
             photoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, _app.getFullPhotoDescription(), function(err, message) {
+                _app.buttonPreviewPhotoOk.removeAttribute('disabled');
                 if (err) {
                     _app.showMessage('Upload failed: ' + message);
                 } else {
