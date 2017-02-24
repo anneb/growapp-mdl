@@ -1486,7 +1486,7 @@ var App = function() {
 
     this.NextFeatureInfo = function(nextFeature, callback) {
       if (nextFeature.infoText) {
-        callback(nextFeature.InfoText);
+        callback(nextFeature.infoText);
       } else {
         _app.getFeatureInfoText(nextFeature.description, nextFeature.tags, nextFeature.time, function(err, result) {
           nextFeature.infoText = result;
@@ -1560,7 +1560,9 @@ var App = function() {
       if (description !== '') {
         description = _utils.escapeHTML(description) + '<br>';
       }
-
+      if (!tags) {
+        tags = [];
+      }
       _app.getTagList(function (err, list) {
         if (err) {
           callback(true, 'getTagList failed');
