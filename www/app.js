@@ -993,6 +993,9 @@ var App = function() {
             document.removeEventListener('backbutton', _app.fullscreenphotopopup.hide);
             document.addEventListener('backbutton', _app.featureInfoPopup.hide);
             _app.animationTargetElement = _app.featureInfoPopup;
+            if (app.animating) {
+              app.playAnimation();
+            }
             _app.fullscreenphotopopup.classList.add('hidden');
         };
 
@@ -1450,6 +1453,7 @@ var App = function() {
         _app.pauseButton.classList.add('hidden');
         _app.pauseButton.removeEventListener('click', _app.pauseAnimation);
         _app.playButton.removeEventListener('click', _app.playAnimation);
+        _app.animationPaused = false;
       }
     };
 
