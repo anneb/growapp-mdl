@@ -1460,7 +1460,7 @@ var App = function() {
       }
     };
 
-    this.showOnePhoto = function(basePhotoURL, width, height, targetElement, done)
+    this.showOnePhoto = function(basePhotoURL, width, height, targetElement, infoText, done)
     {
       var rect = _app.fitRectangleToDisplay(width/height,
         targetElement.clientWidth, targetElement.clientHeight, true);
@@ -1472,14 +1472,27 @@ var App = function() {
       var image = photoframe.querySelector("img");
       photo.onload = function() {
         errorInfo.classList.add('hidden');
+        _app.setInfoText(infoText);
         image.src = photo.src;
         done();
       };
       photo.onerror = function() {
           errorInfo.classList.remove('hidden');
+          _app.setInfoText('');
           done();
       };
       photo.src = basePhotoURL;
+    };
+
+    this.NextFeatureInfo = function(nextFeature, callback) {
+      if (nextFeature.infoText) {
+        callback(nextFeature.InfoText);
+      } else {
+        _app.getFeatureInfoText(nextFeature.description, nextFeature.tags, nextFeature.time, function(err, result) {
+          nextFeature.infoText = result;
+          callback(result);
+        });
+      }
     };
 
     this.animating = false;
@@ -1507,19 +1520,21 @@ var App = function() {
           photoIndex = 0;
         }
         nextFeature = photoset[photoIndex];
-        var fullUrl;
-        if (_app.animationTargetElement == _app.featureInfoPopup) {
-          fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'small');
-        } else {
-          if (_app.isMobileDevice) {
-            fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'medium');
+        _app.NextFeatureInfo(nextFeature, function(infoText){
+          var fullUrl;
+          if (_app.animationTargetElement == _app.featureInfoPopup) {
+            fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'small');
           } else {
-            fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'full');
+            if (_app.isMobileDevice) {
+              fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'medium');
+            } else {
+              fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'full');
+            }
           }
-        }
-        _app.showOnePhoto(fullUrl, nextFeature.width, nextFeature.height,
-             _app.animationTargetElement, function() {
-          setTimeout(loopPhotos, _app.loopInterval);
+          _app.showOnePhoto(fullUrl, nextFeature.width, nextFeature.height,
+               _app.animationTargetElement, infoText, function() {
+            setTimeout(loopPhotos, _app.loopInterval);
+          });
         });
       }
       if (_app.animating) {
@@ -1580,6 +1595,12 @@ var App = function() {
       });
     };
 
+    this.setInfoText = function(infoText)
+    {
+      document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
+      document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
+    };
+
     this.clickFeatureHandler = function(feature) {
         _app.featureInfoPopup.hide();
         _app.activeFeature = feature;
@@ -1615,8 +1636,7 @@ var App = function() {
                 spinner.classList.add('is-active');
 
                 _app.getFeatureInfoText(feature.get('description'), feature.get('tags'), feature.get('time'), function(err, infoText){
-                  document.querySelector('#gapp_featureinfo_infotext').innerHTML = infoText;
-                  document.querySelector('#gapp_fullscreenphotopopup_infotext').innerHTML = infoText;
+                  _app.setInfoText(infoText);
                 });
 
                 var photoframe = _app.featureInfoPopup.querySelector('.gapp_photo_frame');
