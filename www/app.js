@@ -166,7 +166,7 @@ var PhotoServer = function() {
     if (feature.photoset) {
       callback(null, feature.photoset);
     } else {
-      if (feature.get('filename').substr(-4,4) != '.gif') {
+      if (feature.get('isroot') === false) {
         callback(null, []);
       } else {
         var photoid = feature.get('id');
@@ -194,6 +194,9 @@ var PhotoServer = function() {
   // return url to large version of photo
   this.fullPhotoUrl = function(photofile, size) {
     // size expected to be either 'small' or 'medium' or 'full'
+    if (photofile.substr(-4, 4) == '.gif') {
+      photofile = photofile.substr(0, photofile.length - 4) + '.jpg';
+    }
     if (size === 'medium' || size === 'small' ) {
       return _photoServer.server + '/uploads/' + size + '/' + photofile;
     }
@@ -459,10 +462,10 @@ var OLMap = function() {
       })
         });
     } else {
-      var extension = feature.get('features')[0].get('filename').substr(-4,4);
+      var isMultiPhoto = feature.get('features')[0].get('isroot');
       style = new ol.style.Style({
         image: new ol.style.Icon({
-          img: extension === '.gif' ? image_multiple : image_area,
+          img: isMultiPhoto ? image_multiple : image_area,
           imgSize: [24,24]
         })
       });
@@ -1014,10 +1017,6 @@ var App = function() {
                 if (result) {
                     var url = _app.featureInfoPhoto.url;
                     var photoid = _app.featureInfoPhoto.photoid;
-                    if (url.substr(-4, 4) === '.gif') {
-                    // overlay_pictue: replace animated picture with first picture
-                        url = url.substr(0, url.length -4) + '.jpg';
-                    }
                     _app.overlayURL = url;
                     _app.cameraPopup.show(url, photoid);
                 } else {
@@ -1026,6 +1025,8 @@ var App = function() {
                 }
             });
         });
+        this.playButton = document.querySelector('#gapp_fullscreenphotopopup_play');
+        this.pauseButton = document.querySelector('#gapp_fullscreenphotopopup_pause');
     };
 
     /* camera window */
@@ -1078,12 +1079,13 @@ var App = function() {
                 var toBack = true; // camera z-value can either be completely at the back or completey on top
                 var cameraAspectRatio;
                 var containerAspectRatio = width / height;
+                var camRect = {left: 0, top: 0, width: width, height: height};
                 if (window.localStorage.cameraAspectRatio) {
                   cameraAspectRatio = window.localStorage.cameraAspectRatio;
                   if ((cameraAspectRatio > 1 && containerAspectRatio < 1) || (cameraAspectRatio < 1 && containerAspectRatio > 1)) {
                     cameraAspectRatio = 1 / cameraAspectRatio;
                   }
-                  var camRect = _app.fitRectangleToDisplay(cameraAspectRatio, width, height, true);
+                  camRect = _app.fitRectangleToDisplay(cameraAspectRatio, width, height, true);
                   var cameraFrame = document.querySelector('#gapp_camera_frame');
                   _app.setElementStyleToRect(cameraFrame, camRect);
 
@@ -1291,10 +1293,9 @@ var App = function() {
                           source: _app.photoSource
                         }));
                       setTimeout(function(){
-                        if (_app.overlayURL && _app.activeFeature) {
-                          var url = _app.activeFeature.get('filename');
-                          url = url.substr(0, url.length -4) + '.gif';
-                          _app.activeFeature.set('filename', url);
+                        if (_app.overlayURL && !_app.activeFeature.get('isroot')) {
+                          // change activeFeature to animated
+                          _app.activeFeature.set('isroot', true);
                         }
                         _app.clickFeatureHandler(_app.activeFeature); // reload feature
                       }, 1000);
@@ -1424,12 +1425,36 @@ var App = function() {
 
     this.loopInterval = 500;
     this.animationTargetElement = null;
+    this.animationPaused = false;
+
+    this.pauseAnimation = function() {
+      _app.pauseButton.classList.add('hidden');
+      _app.playButton.classList.remove('hidden');
+      _app.animationPaused = true;
+    };
+
+    this.playAnimation = function() {
+      _app.playButton.classList.add('hidden');
+      _app.pauseButton.classList.remove('hidden');
+      _app.animationPaused = false;
+    };
+
+    this.enablePlayPause = function(enabled)
+    {
+      if (enabled) {
+        _app.pauseButton.classList.remove('hidden');
+        _app.pauseButton.addEventListener('click', _app.pauseAnimation);
+        _app.playButton.addEventListener('click', _app.playAnimation);
+      } else {
+        _app.playButton.classList.add('hidden');
+        _app.pauseButton.classList.add('hidden');
+        _app.pauseButton.removeEventListener('click', _app.pauseAnimation);
+        _app.playButton.removeEventListener('click', _app.playAnimation);
+      }
+    };
 
     this.showOnePhoto = function(basePhotoURL, width, height, targetElement, done)
     {
-      if (basePhotoURL.substr(-4, 4) === '.gif') {
-        basePhotoURL =  basePhotoURL.substr(0, basePhotoURL.length -4) + '.jpg';
-      }
       var rect = _app.fitRectangleToDisplay(width/height,
         targetElement.clientWidth, targetElement.clientHeight, true);
       var photoframe = targetElement.querySelector('.gapp_photo_frame');
@@ -1458,16 +1483,21 @@ var App = function() {
       if (!photoset || photoset.length === 0) {
         return;
       }
-      var photoIndex = 0;
+      var photoIndex = -1;
       var nextFeature;
 
       function loopPhotos() {
         if (feature !== _app.activeFeature || !_app.animating) {
           // end animation loop
-          document.querySelector('#gapp_fullscreenphotopopup_pause').classList.add('hidden');
-          document.querySelector('#gapp_fullscreenphotopopup_play').classList.add('hidden');
+          _app.enablePlayPause(false);
           _app.animating = false;
           return;
+        }
+        if (!_app.animationPaused) {
+          photoIndex++;
+        }
+        if (photoIndex >= photoset.length || photoIndex < 0) {
+          photoIndex = 0;
         }
         nextFeature = photoset[photoIndex];
         var fullUrl;
@@ -1482,10 +1512,6 @@ var App = function() {
         }
         _app.showOnePhoto(fullUrl, nextFeature.width, nextFeature.height,
              _app.animationTargetElement, function() {
-          photoIndex++;
-          if (photoIndex >= photoset.length) {
-            photoIndex = 0;
-          }
           setTimeout(loopPhotos, _app.loopInterval);
         });
       }
@@ -1494,12 +1520,12 @@ var App = function() {
         _app.animating = false;
         setTimeout(function(){
           _app.animating = true;
-          document.querySelector('#gapp_fullscreenphotopopup_pause').classList.remove('hidden');
+          _app.enablePlayPause(true);
           loopPhotos();
         }, _app.loopInterval * 2);
       } else {
         _app.animating = true;
-        document.querySelector('#gapp_fullscreenphotopopup_pause').classList.remove('hidden');
+        _app.enablePlayPause(true);
         loopPhotos();
       }
     };
@@ -1528,10 +1554,6 @@ var App = function() {
                 }
 
                 var picture_url = photoServer.fullPhotoUrl(feature.get('filename'), 'small');
-
-                if (picture_url.substr(-4, 4) == '.gif') {
-                  picture_url = picture_url.substr(0, picture_url.length - 4) + '.jpg';
-                }
 
                 var spinner = document.querySelector('#gapp_featureinfo_spinner');
                 var errorInfo = document.querySelector('#gapp_featureinfo_error');
