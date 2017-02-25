@@ -184,7 +184,7 @@ var PhotoServer = function() {
            if (xhr.readyState === 4) {
                if (xhr.status === 200) {
                  var result = JSON.parse(xhr.responseText);
-                 callback(null, result);
+                 callback(false, result);
                } else {
                  callback(true, __('Error retrieving photoset') + ': ' + xhr.status + ' ' + xhr.statusText);
                  console.log ('Error : ' + xhr.status + ' ' + xhr.statusText);
@@ -679,17 +679,6 @@ var App = function() {
           } else {
             accountinfo.innerHTML = window.localStorage.email;
           }
-        }
-        if (window.localStorage) {
-          if (window.localStorage.langcode && window.localStorage.langcode !== '') {
-            this.langcode = window.localStorage.langcode;
-          } else {
-            /* todo: get preferred language from device, find best app match */
-            this.langcode = 'en';
-            window.localStorage.langcode = this.langcode;
-          }
-        } else {
-          this.langcode = 'en';
         }
 
         // store setup for mobile device or web
@@ -1640,7 +1629,7 @@ var App = function() {
         if (feature) {
             photoServer.getPhotoSet(feature, function(err, photoset) {
               if (err) {
-                // todo
+                _app.showMessage(photoset);
               } else {
                 feature.set('photoset', photoset);
                 var geometry = feature.getGeometry();
