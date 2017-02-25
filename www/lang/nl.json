@@ -25,7 +25,7 @@
   "Input is not a valid circumference" : "Ongeldige omtrek",
   "January" : "januari",
   "December" : "december",
-  "mail sent, please check your email" : "mail verstuurd, check je mail",
+  "mail sent, please check your email" : "mail verstuurd, check e-mail",
   "please provide a valid email address" : "voer een geldig e-mailadres in",
   "GrowApp - Account" : "GrowApp - Account",
   "Associate device with email" : "Koppel dit apparaat met mailadres",
@@ -56,5 +56,4 @@
   "device registration failed, try again later" : "apparaatkoppeling mislukt, probeer later opnieuw",
   "Upload failed" : "Versturen mislukt",
   "Wrong camera orientation, please adjust" : "Verkeerde cameraoriëntatie, draai halve slag"
-
 }

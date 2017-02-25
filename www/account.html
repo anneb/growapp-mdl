@@ -45,7 +45,7 @@
                     document.querySelector('#accountemail').classList.add('hidden');
                     document.querySelector('#accountinfo').classList.add('hidden');
                     document.querySelector('#accountverify').classList.remove('hidden');
-                    app.showMessage("mail sent, please check your email");
+                    app.showMessage(__("mail sent, please check your email"));
                     break;
                 case '#info':
                     showUserInfo();
@@ -113,7 +113,7 @@
                             }
                         })
                     } else {
-                        app.showMessage("please provide a valid email address");
+                        app.showMessage(__("please provide a valid email address"));
                     }
                 },false);
                 document.querySelector('#buttoncode').addEventListener('click', function(){
