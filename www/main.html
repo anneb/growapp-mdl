@@ -61,6 +61,14 @@
         width: 100%;
         height: 100%;
       }
+      #gapp_map_attribution {
+        position: absolute;
+        bottom: 0;
+        left: 10px;
+        color: gray;
+        background-color: transparent;
+        pointer-events: none;
+      }
       #gapp_button_location {
         position: absolute;
         bottom: 80px;
@@ -80,11 +88,13 @@
         background-color: white;
         overflow: hidden;
         background: darkgray;
+        pointer-events: none;
       }
       #gapp_featureinfo_addphoto {
         position: absolute;
         bottom: 10px;
         right: 10px;
+        pointer-events: all;
       }
       #gapp_featureinfo_spinner {
         position: absolute;
@@ -108,16 +118,19 @@
         position: absolute;
         right: 10px;
         top: 10px;
+        pointer-events: all;
       }
       #gapp_featureinfo_fullscreen {
         position: absolute;
         top: 10px;
         right: 50px;
+        pointer-events: all;
       }
       #gapp_featureinfo_info {
         position: absolute;
         top: 10px;
         right: 90px;
+        pointer-events: all;
       }
       #gapp_featureinfo_infotext {
         position: absolute;
@@ -442,6 +455,7 @@
                 <button id="gapp_button_camera" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" disabled>
                       <i class="material-icons">&#xE412;</i>
                 </button>
+                <div id="gapp_map_attribution">© OpenStreetMap contributors</div>
                 <div id="gapp_featureinfo" class="hidden">
                   <div class="gapp_photo_frame">
                     <img id="gapp_featureinfo_photo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
