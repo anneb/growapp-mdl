@@ -1067,7 +1067,6 @@ var App = function() {
                   cameraOverlayPictureFrame.classList.add('hidden');
               }
               document.addEventListener('backbutton', _app.cameraPopup.hide);
-              // todo: do not reset camera when preview picture active
               window.addEventListener('orientationchange', _app.cameraPopup.resetCamera);
               document.querySelector('#mainUI').classList.add('hidden');
               _app.cameraPopup.classList.remove('hidden');
@@ -1125,7 +1124,7 @@ var App = function() {
                   setTimeout(function() {CameraPreview.getPreviewSize(function(size){
                     cameraAspectRatio = size.width / size.height;
                     window.localStorage.cameraAspectRatio = cameraAspectRatio;
-                    _app.cameraPopup.resetCamera();
+                    _app.cameraPopup.resetCamera(true);
                   });}, 1000);
                 }
             }
@@ -1136,11 +1135,18 @@ var App = function() {
                 window.plugins.insomnia.allowSleepAgain();
             }
         };
-        this.cameraPopup.resetCamera = function() {
-            /* todo: replace setTimeout by wait for resize event */
-            /* todo: resize: handle case where resetCamera() is called by code */
+        this.cameraPopup.resetCamera = function(force) {
+            var waitForResize = function() {
+              window.removeEventListener('resize', waitForResize);
+              _app.cameraPopup.startCamera();
+            };
             _app.cameraPopup.stopCamera();
-            setTimeout(_app.cameraPopup.startCamera, 1000);
+            if (force) {
+              setTimeout(_app.cameraPopup.startCamera, 1000);
+            } else {
+              // resetCamera called by orientationchange, wait for resize
+              window.addEventListener('resize', waitForResize);
+            }
         };
         var cameraButton = document.querySelector('#gapp_button_camera');
         cameraButton.addEventListener('click', function() {
@@ -1259,7 +1265,7 @@ var App = function() {
         this.buttonPreviewPhotoClose = document.querySelector('#gapp_camera_photo_close');
         this.buttonPreviewPhotoClose.addEventListener('click', function() {
             _app.cameraPreviewPhotoFrame.hide();
-            _app.cameraPopup.resetCamera();
+            _app.cameraPopup.resetCamera(true);
         });
         var buttonAddDescription = document.querySelector('#gapp_camera_photo_button_adddescription');
         var descriptionForm = document.querySelector('#gapp_camera_photo_form');
