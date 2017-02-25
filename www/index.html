@@ -67,10 +67,13 @@
     }
 
     function setup() {
-      getJSON('lang/nl.json', function(table) {
-        languageTable = table;
-        TranslateUI();
-      });
+      var language;
+      if (window.localStorage && window.localStorage.language) {
+        language = window.localStorage.language;
+      } else {
+        language = navigator.language || navigator.userLanguage;
+      }
+      languageProvider.setLanguage(language);
       checkServerVersion(function(err, result) {
         var message = document.querySelector('#message');
         if (err) {

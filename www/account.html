@@ -81,11 +81,13 @@
         }
 
         function init() {
-            getJSON('lang/nl.json', function(table) {
-              languageTable = table;
-              TranslateUI();
-              //componentHandler.upgradeDom();
-            });
+            var language;
+            if (window.localStorage && window.localStorage.language) {
+              language = window.localStorage.language;
+            } else {
+              language = navigator.language || navigator.userLanguage;
+            }
+            languageProvider.setLanguage(language);
             document.querySelector('#backbutton').addEventListener('click', function(){
                 // warning: history keeps track of hashchanges
                 window.history.back();

@@ -142,10 +142,13 @@ function getmyphotos(callback)
 
 function gallerysetup()
 {
-  getJSON('lang/nl.json', function(table) {
-    languageTable = table;
-    TranslateUI();
-  });
+  var language;
+  if (window.localStorage && window.localStorage.language) {
+    language = window.localStorage.language;
+  } else {
+    language = navigator.language || navigator.userLanguage;
+  }
+  languageProvider.setLanguage(language);
   var pswpElement = document.querySelector('#photoswipe');
   if (typeof cordova != "undefined") {
     //app-version

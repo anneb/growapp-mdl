@@ -664,10 +664,13 @@ var App = function() {
     var _app = this;
 
     this.init = function(server, mapId, isMobileDevice) {
-        getJSON('lang/nl.json', function(table) {
-          languageTable = table;
-          TranslateUI();
-        });
+        var language;
+        if (window.localStorage && window.localStorage.language) {
+          language = window.localStorage.language;
+        } else {
+          language = navigator.language || navigator.userLanguage;
+        }
+        languageProvider.setLanguage(language);
         // update account info in drawer if available
         if (window.localStorage.email && window.localStorage.email !== '') {
           var accountinfo = document.querySelector('#gapp_account_info');
