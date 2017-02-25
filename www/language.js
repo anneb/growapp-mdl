@@ -12,8 +12,9 @@ var languageProvider = new function()
     if (bcp47.length > 1) {
       this.countryCode = bcp47[1].toUpperCase();
     } else {
-      this.countryCode = '';
+      this.countryCode = this.langCode;
     }
+    this.languageTable = null;
     this.translateUI();
   };
 

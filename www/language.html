@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
 
     <script>
+      var supportedLanguages = ['en', 'nl'];
       function init() {
           var language;
           if (window.localStorage && window.localStorage.language) {
@@ -27,6 +28,23 @@
             language = navigator.language || navigator.userLanguage;
           }
           languageProvider.setLanguage(language);
+          if (supportedLanguages.indexOf(languageProvider.langCode) > -1) {
+            // update form
+            var radiobutton = document.querySelector('#' + languageProvider.langCode);
+            if (radiobutton && !radiobutton.disabled) {
+              radiobutton.parentNode.MaterialRadio.check();
+            }
+          }
+          [].forEach.call(document.languageform.languages, function(radiobutton){
+            radiobutton.onchange = function() {
+              language = this.value;
+              window.localStorage.language = language;
+              window.location.reload(false); // cannot translate backward, so reload
+            };
+          });
+          document.querySelector('#buttondone').addEventListener('click', function() {
+            window.history.back();
+          });
           document.querySelector('#backbutton').addEventListener('click', function(){
               // warning: history keeps track of hashchanges
               window.history.back();
@@ -40,10 +58,10 @@
             font-family: 'Roboto', 'Noto', sans-serif;
             background-color: transparent;
         }
-		main {
-			background-color: #fff;
-			background-color: color: rgba(255, 255, 255, 0.56);
-		}
+        main {
+           background-color: #fff;
+           background-color: color: rgba(255, 255, 255, 0.56);
+        }
         .page-content {
             width: 80%;
             max-width: 512px;
@@ -85,23 +103,23 @@
                     <h2 class="mdl-card__title-text"><i class="material-icons">language</i><span class="translate">Set Language</span></h2>
                 </div>
                 <div class="mdl-card__supporting-text">
-                    <form action="#">
+                    <form name="languageform" action="#">
                         <ul class="mdl-list">
                             <li class="mdl-list__item">
-                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
-                            <input type="radio" id="option-1" class="mdl-radio__button" name="languages" value="de" disabled>
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="de">
+                            <input type="radio" id="de" class="mdl-radio__button" name="languages" value="de" disabled>
                             <span class="mdl-radio__label">Deutsch</span>
                         </label>
                             </li>
                             <li class="mdl-list__item">
-                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
-                            <input type="radio" id="option-2" class="mdl-radio__button" name="languages" value="en" checked>
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="en">
+                            <input type="radio" id="en" class="mdl-radio__button" name="languages" value="en" checked>
                             <span class="mdl-radio__label">English</span>
                         </label>
                             </li>
                             <li class="mdl-list__item">
-                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-3">
-                            <input type="radio" id="option-3" class="mdl-radio__button" name="languages" value="nl" disabled>
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="nl">
+                            <input type="radio" id="nl" class="mdl-radio__button" name="languages" value="nl">
                             <span class="mdl-radio__label">Nederlands</span>
                         </label>
                             </li>
@@ -109,7 +127,7 @@
                     </form>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
-                    <a id="buttonemail" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                    <a id="buttondone" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
                         <span class="translate">DONE</span>
                     </a>
                 </div>
