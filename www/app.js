@@ -1496,11 +1496,11 @@ var App = function() {
       photo.src = basePhotoURL;
     };
 
-    this.NextFeatureInfo = function(nextFeature, callback) {
+    this.NextFeatureInfo = function(nextFeature, photoIndex, callback) {
       if (nextFeature.infoText) {
         callback(nextFeature.infoText);
       } else {
-        _app.getFeatureInfoText(nextFeature.description, nextFeature.tags, nextFeature.time, function(err, result) {
+        _app.getFeatureInfoText(nextFeature.description, nextFeature.tags, nextFeature.time, photoIndex, function(err, result) {
           nextFeature.infoText = result;
           callback(result);
         });
@@ -1532,7 +1532,7 @@ var App = function() {
           photoIndex = 0;
         }
         nextFeature = photoset[photoIndex];
-        _app.NextFeatureInfo(nextFeature, function(infoText){
+        _app.NextFeatureInfo(nextFeature, photoIndex + 1, function(infoText){
           var fullUrl;
           if (_app.animationTargetElement == _app.featureInfoPopup) {
             fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'small');
@@ -1564,13 +1564,17 @@ var App = function() {
       }
     };
 
-    this.getFeatureInfoText = function(description, tags, time, callback)
+    this.getFeatureInfoText = function(description, tags, time, photoIndex, callback)
     {
-      if (!description) {
-        description = '';
+      if (photoIndex && photoIndex !== '') {
+        photoIndex = photoIndex + '<br>';
+      } else {
+        photoIndex = '';
       }
-      if (description !== '') {
+      if (description && description !== '') {
         description = _utils.escapeHTML(description) + '<br>';
+      } else {
+        description = '';
       }
       if (!tags) {
         tags = [];
@@ -1604,7 +1608,7 @@ var App = function() {
           date.setTime(Date.parse(time));
           var dateText = date.toISOString().replace('T', ' ').split('.')[0];
 
-          callback(null, description + tagtext + dateText);
+          callback(null, photoIndex + description + tagtext + dateText);
         }
       });
     };
@@ -1649,7 +1653,7 @@ var App = function() {
                 _app.featureInfoPhoto.photoid = feature.get('id');
                 spinner.classList.add('is-active');
 
-                _app.getFeatureInfoText(feature.get('description'), feature.get('tags'), feature.get('time'), function(err, infoText){
+                _app.getFeatureInfoText(feature.get('description'), feature.get('tags'), feature.get('time'), null, function(err, infoText){
                   _app.setInfoText(infoText);
                 });
 
