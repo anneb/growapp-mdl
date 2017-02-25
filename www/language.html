@@ -13,6 +13,7 @@
     <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
     <link rel="stylesheet" href="./material.min.css">
     <script src="./node_modules/material-design-lite/material.min.js"></script>
+    <script src="./language.js"></script>
 
     <link rel="stylesheet" href="./iconfont/material-icons.css">
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
@@ -20,6 +21,10 @@
     <script>
 
         function init() {
+            getJSON('lang/nl.json', function(table) {
+              languageTable = table;
+              TranslateUI();
+            });
             document.querySelector('#backbutton').addEventListener('click', function(){
                 // warning: history keeps track of hashchanges
                 window.history.back();
@@ -41,7 +46,7 @@
             width: 80%;
             max-width: 512px;
             margin-left: auto;
-            margin-right: auto;			
+            margin-right: auto;
         }
         .account-card-wide.mdl-card {
             width: 100%;
@@ -67,7 +72,7 @@
         <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i></div>
         <div class="mdl-layout__header-row">
             <!-- Title -->
-            <span class="mdl-layout-title"> GrowApp - Language</span>
+            <span class="mdl-layout-title"> <span class="translate">GrowApp - Language</span></span>
         </div>
     </header>
 
@@ -75,7 +80,7 @@
         <div class="page-content">
             <div id="accountemail" class="account-card-wide mdl-card mdl-shadow--2dp">
                 <div class="mdl-card__title">
-                    <h2 class="mdl-card__title-text"><i class="material-icons">language</i>Set Language</h2>
+                    <h2 class="mdl-card__title-text"><i class="material-icons">language</i><span class="translate">Set Language</span></h2>
                 </div>
                 <div class="mdl-card__supporting-text">
                     <form action="#">
@@ -103,7 +108,7 @@
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
                     <a id="buttonemail" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                        Done
+                        <span class="translate">DONE</span>
                     </a>
                 </div>
             </div>

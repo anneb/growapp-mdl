@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="./iconfont/material-icons.css">
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
 
+    <script src="./language.js"></script>
     <script src="./app.js"></script>
     <script>
         /* todo: change or remove email association? */
@@ -80,6 +81,11 @@
         }
 
         function init() {
+            getJSON('lang/nl.json', function(table) {
+              languageTable = table;
+              TranslateUI();
+              //componentHandler.upgradeDom();
+            });
             document.querySelector('#backbutton').addEventListener('click', function(){
                 // warning: history keeps track of hashchanges
                 window.history.back();
@@ -103,7 +109,7 @@
                                 window.location='#verify';
                                 document.querySelector('#accountemail').classList.add('hidden');
                                 document.querySelector('#accountverify').classList.remove('hidden');
-                                app.showMessage("mail sent, please check your email");
+                                app.showMessage(__("mail sent, please check your email"));
                             }
                         })
                     } else {
@@ -170,7 +176,7 @@
         <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i></div>
         <div class="mdl-layout__header-row">
             <!-- Title -->
-            <span class="mdl-layout-title"> GrowApp - Account</span>
+            <span class="mdl-layout-title"> <span class="translate">GrowApp - Account</span></span>
         </div>
     </header>
 
@@ -178,67 +184,67 @@
         <div class="page-content">
             <div id="accountemail" class="account-card-wide mdl-card mdl-shadow--2dp hidden">
                 <div class="mdl-card__title">
-                    <h2 class="mdl-card__title-text">Associate device with email</h2>
+                    <h2 class="mdl-card__title-text"><span class="translate">Associate device with email</span></h2>
                 </div>
                 <div class="mdl-card__supporting-text">
                     <form action="#">
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                             <input class="mdl-textfield__input" type="email" id="emailaddress">
-                            <label class="mdl-textfield__label" for="emailaddress">Email Address</label>
-                            <span class="mdl-textfield__error">Input is not a valid email address</span>
+                            <label class="mdl-textfield__label" for="emailaddress"><span class="translate">Email Address</span></label>
+                            <span class="mdl-textfield__error translate">Input is not a valid email address</span>
                             <i class="material-icons mdl-textfield__label__icon">mail</i>
                         </div>
                     </form>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
                     <a id="buttonemail" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                        Verify Email
+                        <span class="translate">Verify Email</span>
                     </a>
                 </div>
             </div>
 
             <div id="accountverify" class="account-card-wide mdl-card mdl-shadow--2dp hidden">
                 <div class="mdl-card__title">
-                    <h2 class="mdl-card__title-text">Verify code</h2>
+                    <h2 class="mdl-card__title-text"><span class="translate">Verify code<span></h2>
                 </div>
                 <div class="mdl-card__supporting-text">
                     <form action="#">
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                             <input class="mdl-textfield__input" type="password" id="verifycode" pattern="([0-9]){5}">
-                            <label class="mdl-textfield__label" for="verifycode">Verification code (check mail)</label>
-                            <span class="mdl-textfield__error">Input is not a valid code</span>
+                            <label class="mdl-textfield__label" for="verifycode"><span class="translate">Verification code (check mail)</span></label>
+                            <span class="mdl-textfield__error translate">Input is not a valid code</span>
                             <i class="material-icons mdl-textfield__label__icon">&#xE898;<!--lock_open--></i>
                         </div>
                     </form>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
                     <a id="buttoncode" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                        Associate
+                        <span class="translate">Associate</span>
                     </a>
                 </div>
             </div>
 
             <div id="accountinfo" class="account-card-wide mdl-card mdl-shadow--2dp hidden">
                 <div class="mdl-card__title">
-                    <h2 class="mdl-card__title-text">Account info</h2>
+                    <h2 class="mdl-card__title-text"><span class="translate">Account info</span></h2>
                 </div>
                 <div class="mdl-card__supporting-text">
                     <form action="#">
                         <div id="mdl-displayname" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                             <input id="displayname" class="mdl-textfield__input" type="text">
-                            <label class="mdl-textfield__label" for="displayname">Display name</label>
+                            <label class="mdl-textfield__label" for="displayname"><span class="translate">Display name</span></label>
                             <i class="material-icons mdl-textfield__label__icon">&#xE853;</i>
                         </div>
                         <div id="mdl-emailinfo" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                             <input class="mdl-textfield__input" type="email" id="emailinfo" disabled>
-                            <label class="mdl-textfield__label" for="emailinfo">email address</label>
+                            <label class="mdl-textfield__label" for="emailinfo"><span class="translate">email address</span></label>
                             <i class="material-icons mdl-textfield__label__icon">mail</i>
                         </div>
                     </form>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
                     <a id="buttoninfo" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                        Done
+                        <span class="translate">DONE</span>
                     </a>
                 </div>
             </div>

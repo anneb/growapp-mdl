@@ -16,6 +16,7 @@
 
     <link rel="stylesheet" href="./node_modules/photoswipe/dist/photoswipe.css" type="text/css">
     <link rel="stylesheet" href="./node_modules/photoswipe/dist/default-skin/default-skin.css" type="text/css">
+    <script src="./language.js"></script>
     <script src="./node_modules/photoswipe/dist/photoswipe.js"></script>
     <script src="photoswipe-ui-custom.js"></script>
 
@@ -141,6 +142,10 @@ function getmyphotos(callback)
 
 function gallerysetup()
 {
+  getJSON('lang/nl.json', function(table) {
+    languageTable = table;
+    TranslateUI();
+  });
   var pswpElement = document.querySelector('#photoswipe');
   if (typeof cordova != "undefined") {
     //app-version
@@ -176,7 +181,7 @@ function gallerysetup()
             window.location = "main.html";
         }
       } else {
-          window.localStorage.storedMessage = "You have not yet uploaded any photos";
+          window.localStorage.storedMessage = __("You have not yet uploaded any photos");
           window.location = "main.html";
       }
     }
@@ -343,10 +348,10 @@ function deletephoto()
 <!-- dialog(s) -->
 <div id="deletedialog" class="modaldialog hidden">
   <div class="confirmdialog">
-      <h4>Delete this photo?</h4>
+      <h4><span class="translate">Delete this photo?</span></h4>
       <p>
-      <button id="cancelbutton" class="btn btn-danger"><svg class="icon"><use xlink:href="#cancel" /></svg>cancel</button>
-      <button id="deletebutton" class="btn btn-success pull-right"><svg class="icon"><use xlink:href="#delete" /></svg>delete</button>
+      <button id="cancelbutton" class="btn btn-danger"><svg class="icon"><use xlink:href="#cancel" /></svg><span class="translate">cancel</span></button>
+      <button id="deletebutton" class="btn btn-success pull-right"><svg class="icon"><use xlink:href="#delete" /></svg><span class="translate">delete</span></button>
       </p>
   </div>
 </div>

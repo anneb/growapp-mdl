@@ -13,6 +13,7 @@
     <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
     <link rel="stylesheet" href="./material.min.css">
     <script src="./node_modules/material-design-lite/material.min.js"></script>
+    <script src="./language.js"></script>
 
     <link rel="stylesheet" href="./iconfont/material-icons.css">
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
@@ -58,7 +59,7 @@
       };
 
       xhr.onerror = function () {
-        callback(true, 'failed to connect to ' + url);
+        callback(true, __('failed to connect to') + ' '+ url);
       };
 
       xhr.open("GET", url, true);
@@ -66,17 +67,21 @@
     }
 
     function setup() {
+      getJSON('lang/nl.json', function(table) {
+        languageTable = table;
+        TranslateUI();
+      });
       checkServerVersion(function(err, result) {
         var message = document.querySelector('#message');
         if (err) {
           message.classList.add('errormessage');
-          message.innerHTML = result+'<p>check connection, <a href="index.html">Try again</a> later or update the app if the problem persists</p>';
+          message.innerHTML = result+'<p>' + __('check connection') + ', <a href="index.html">'+__('Try again') + '</a> ' +__('later or update the app if the problem persists') + '</p>';
         }
         else {
           if (result.major && result.major > clientVersion.major) {
             // this client is too old
             message.classList.add('errormessage');
-            message.innerHTML = "App is no longer compatible, please update";
+            message.innerHTML = __('App is no longer compatible, please update');
             return;
           }
           if (typeof cordova != "undefined") {
@@ -151,10 +156,10 @@
 				    <h2 class="mdl-card__title-text"></h2>
 			    </div>
 			    <div class="center mdl-card__supporting-text"><h2>GrowApp</h2>
-					    Animate Your Environment!
+					    <span class="translate">Animate Your Environment!</span>
 			    </div>
 			    <div id="message" class="mdl-card__actions mdl-card--border">
-			      Loading...
+			      <span class="translate">Loading...</span>
 			    </div>
 			   </div>
 		     <div class="mdl-layout-spacer"></div>

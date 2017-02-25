@@ -1,7 +1,12 @@
 'use strict';
 /*
 app.js
-assumes openlayers.js and proj4.js are loaded
+assumes openlayers.js, proj4.js and language.js are loaded
+
+HTML5 only, no JQuery, Angular, Underscore, ReactJS etc.
+ECMAScript 5 for phone browser compatibility
+Targets Android 4.4+ (API 19+), iOS, web
+Should work with Crosswalk on Android 4.0 .. 4.399
 
 Main objects in this module:
 
@@ -181,7 +186,7 @@ var PhotoServer = function() {
                  var result = JSON.parse(xhr.responseText);
                  callback(null, result);
                } else {
-                 callback(true, 'Error retrieving photoset: ' + xhr.status + ' ' + xhr.statusText);
+                 callback(true, __('Error retrieving photoset') + ': ' + xhr.status + ' ' + xhr.statusText);
                  console.log ('Error : ' + xhr.status + ' ' + xhr.statusText);
                }
            }
@@ -230,7 +235,7 @@ var PhotoServer = function() {
                      if (done) {
                        done(false);
                      }
-                     console.log ('Error registering device: ' + xhr.statusText);
+                     console.log (__('Error registering device')+ ': ' + xhr.statusText);
                    }
                }
             };
@@ -329,9 +334,9 @@ var PhotoServer = function() {
         xhr.onreadystatechange = function (event) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    callback(false, 'mail sent, please check your email...');
+                    callback(false, __('mail sent, please check your email...'));
                 } else {
-                    callback(true, 'Error' + xhr.statusText);
+                    callback(true, __('Error') + xhr.statusText);
                 }
             }
         };
@@ -348,7 +353,7 @@ var PhotoServer = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     if (xhr.responseText.length !== 32) {
-                        callback (true, 'Validation failed: ' + xhr.responseText);
+                        callback (true, __('Validation failed') + ': ' + xhr.responseText);
                     } else {
                         var hash = xhr.responseText;
                         callback (false, hash);
@@ -659,6 +664,10 @@ var App = function() {
     var _app = this;
 
     this.init = function(server, mapId, isMobileDevice) {
+        getJSON('lang/nl.json', function(table) {
+          languageTable = table;
+          TranslateUI();
+        });
         // update account info in drawer if available
         if (window.localStorage.email && window.localStorage.email !== '') {
           var accountinfo = document.querySelector('#gapp_account_info');
@@ -771,10 +780,10 @@ var App = function() {
                 });
             } else if (layername === '#layerseason') {
                 [].forEach.call(legendmin, function (element) {
-                    element.innerHTML = 'January';
+                    element.innerHTML = __('January');
                 });
                 [].forEach.call(legendmax, function (element) {
-                    element.innerHTML = 'December';
+                    element.innerHTML = __('December');
                 });
             }
         }
@@ -861,7 +870,7 @@ var App = function() {
                 if (!_app.isMobileDevice) {
                     // web version
                     if (!localStorage.email || window.localStorage.email==='' || !localStorage.hash || window.localStorage.hash==='') {
-                        _app.showMessage('Web photo management requires user registration');
+                        _app.showMessage(__('Web photo management requires user registration'));
                         window.location.hash='';
                         return;
                     }
@@ -1024,7 +1033,7 @@ var App = function() {
                     _app.cameraPopup.show(url, photoid);
                 } else {
                     // device could not be registered, offline? no window.localStorage?
-                    _app.showMessage('device registration failed, try again later');
+                    _app.showMessage(__('device registration failed, try again later'));
                 }
             });
         });
@@ -1138,7 +1147,7 @@ var App = function() {
                     _app.cameraPopup.show();
                 } else {
                     // device could not be registered, offline? no window.localStorage?
-                    _app.showMessage('device registration failed, try again later');
+                    _app.showMessage(__('device registration failed, try again later'));
                 }
             });
         });
@@ -1234,7 +1243,7 @@ var App = function() {
         this.cameraPreviewPhotoFrame.show = function () {
             document.removeEventListener('backbutton', _app.cameraPopup.hide);
             document.addEventListener('backbutton', _app.cameraPreviewPhotoFrame.hide);
-            document.querySelector('#gapp_camera_photo_button_adddescription_text').innerHTML = 'Add description...';
+            document.querySelector('#gapp_camera_photo_button_adddescription_text').innerHTML = __('Add description...');
             _app.cameraPreviewPhotoFrame.resetPhotoForm();
             _app.buttonPreviewPhotoOk.removeAttribute('disabled');
             _app.cameraPreviewPhotoFrame.classList.remove('hidden');
@@ -1279,12 +1288,12 @@ var App = function() {
         this.buttonPreviewPhotoOk = document.querySelector('#gapp_camera_photo_ok');
         this.buttonPreviewPhotoOk.addEventListener('click', function() {
             _app.buttonPreviewPhotoOk.setAttribute('disabled', '');
-            _app.showMessage('uploading photo...');
+            _app.showMessage(__('uploading photo...'));
             var p = _app.cameraPreviewPhoto;
             photoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, _app.getFullPhotoDescription(), function(err, message) {
                 _app.buttonPreviewPhotoOk.removeAttribute('disabled');
                 if (err) {
-                    _app.showMessage('Upload failed: ' + message);
+                    _app.showMessage(__('Upload failed') + ': ' + message);
                 } else {
                     // success! Free memory and close dialog
                     p.rawdata = null;
@@ -1341,7 +1350,7 @@ var App = function() {
                   // takePicture fires cordova.plugins.camerapreview.setOnPictureTakenHandler
                   CameraPreview.takePicture();//({maxWidth: 640, maxHeight: 640});
                 } else {
-                  _app.showMessage ('Wrong camera orientation, please adjust');
+                  _app.showMessage (__('Wrong camera orientation, please adjust'));
                 }
             }
         });
