@@ -1084,6 +1084,15 @@ var App = function() {
             _app.cameraPopup.classList.add('hidden');
         };
 
+        this.cameraPopup.shutterEffect = function()
+        {
+          var cameraFrame = document.querySelector('#gapp_camera_frame');
+          cameraFrame.classList.add('shutteron');
+          setTimeout(function() {
+            cameraFrame.classList.remove('shutteron');
+          }, 300);
+        };
+
         this.cameraPopup.startCamera = function() {
             if (_app.isMobileDevice) {
                 var width = _app.cameraPopup.clientWidth;
@@ -1342,7 +1351,6 @@ var App = function() {
                 buttonTakePhoto.classList.remove('mdl-button--colored');
                 buttonTakePhoto.classList.add('mdl-color--white');
                 // todo: photo shutter animation
-                // check if photo orientation is same as overlay-picture orientation
                 var orientationOk = true;
                 var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
                 if (!cameraOverlayPictureFrame.classList.contains('hidden')) {
@@ -1358,6 +1366,7 @@ var App = function() {
                 if (orientationOk) {
                   // takePicture fires cordova.plugins.camerapreview.setOnPictureTakenHandler
                   CameraPreview.takePicture();//({maxWidth: 640, maxHeight: 640});
+                  _app.cameraPopup.shutterEffect();
                 } else {
                   _app.showMessage (__('Wrong camera orientation, please adjust'));
                 }
