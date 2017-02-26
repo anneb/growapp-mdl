@@ -1253,6 +1253,12 @@ var App = function() {
               }
             });
         };
+        this.cameraPhotoOverlay = document.querySelector('#gapp_camera_photo_overlay');
+        this.opacitySlider = document.querySelector('#gapp_opacity_slider');
+        this.opacitySlider.onchange = function() {
+          var opacity = _app.opacitySlider.value / 100;
+          _app.cameraPhotoOverlay.style.opacity = 1.0 - opacity;
+        };
         this.cameraPhotoFrame.overlay = document.querySelector('#gapp_camera_photo_overlay_frame');
         this.cameraPhotoFrame.overlay.show = function() {
           if (_app.overlayURL) {
@@ -1263,7 +1269,9 @@ var App = function() {
             destOverlay.style.top = srcOverlay.style.top;
             destOverlay.style.width = srcOverlay.style.width;
             destOverlay.style.height = srcOverlay.style.height;
-            destOverlay.querySelector('#gapp_camera_photo_overlay').src = _app.overlayURL;
+            _app.cameraPhotoOverlay.src = _app.overlayURL;
+            _app.cameraPhotoOverlay.style.opacity = 0.5;
+            _app.opacitySlider.value = 50;
             destOverlay.classList.remove('hidden');
           } else {
             _app.cameraPhotoFrame.overlay.hide();
@@ -1400,16 +1408,11 @@ var App = function() {
             var myLocation = olMap.geoLocation.getPosition();
             if (myLocation) {
                 _app.cameraPreviewPhoto.rawdata = result;
-                result = null; // free memory
                 _app.cameraPreviewPhoto.src = 'data:image/jpeg;base64,' + _app.cameraPreviewPhoto.rawdata;
                 myLocation = ol.proj.transform(myLocation, 'EPSG:3857', 'EPSG:4326');
                 var accuracy = olMap.geoLocation.getAccuracy();
                 _app.cameraPreviewPhoto.myLocation = myLocation;
                 _app.cameraPreviewPhoto.accuracy = accuracy;
-                /* bla
-                var rect = _app.fitRectangleToDisplay(cameraAspectRatio, width, height, true);
-                _app.setElementStyleToRect(_app.cameraPreviewFrame, rect);
-                */
                 _app.cameraPhoto.show();
             } else {
                 _app.showMessage('Required photo location unknown');

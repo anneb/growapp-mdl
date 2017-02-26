@@ -323,6 +323,26 @@
         position: relative;
         height: 80px;
       }
+      #gapp_camera_photo_opacity_bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 220px;
+        height: 24px;
+        background-color: lightgray;
+      }
+      #gapp_camera_photo_overlay_opacity_icon {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        color: gray;
+      }
+      #gapp_camera_photo_overlay_opacity {
+        position: absolute;
+        left: 24px;
+        top: 3px;
+        width: 180px;
+      }
       #gapp_scroll_down {
         position: absolute;
         bottom: 0;
@@ -499,6 +519,10 @@
               <img id="gapp_camera_photo_img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
               <div id="gapp_camera_photo_overlay_frame" class="hidden">
                 <img id="gapp_camera_photo_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                <div id="gapp_camera_photo_opacity_bar">
+                  <span id="gapp_camera_photo_overlay_opacity_icon"><i class="material-icons">opacity</i></span>
+                  <div id="gapp_camera_photo_overlay_opacity"><input id="gapp_opacity_slider" class="mdl-slider mdl-js-slider" type="range"  min="0" max="100" value="50" tabindex="0"></div>
+                </div>
               </div>
            </div>
            <div id="gapp_camera_photo_bar_bottom">

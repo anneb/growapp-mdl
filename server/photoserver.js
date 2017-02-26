@@ -798,7 +798,7 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                                             if (err) {
                                                               console.log('failed to create medium image');
                                                             }
-                                                          })
+                                                          });
                                                       }
                                                       fs.writeFile(filename.slice(0, -5) + ".dat", JSON.stringify({
                                                             latitude: req.body.latitude,
