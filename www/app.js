@@ -671,6 +671,7 @@ var App = function() {
           language = navigator.language || navigator.userLanguage;
         }
         languageProvider.setLanguage(language);
+        _app.language = language;
         // update account info in drawer if available
         if (window.localStorage.email && window.localStorage.email !== '') {
           var accountinfo = document.querySelector('#gapp_account_info');
@@ -1036,20 +1037,20 @@ var App = function() {
     /* camera window */
     this.cameraPopupInit = function () {
         this.cameraPopup = document.querySelector('#gapp_camera_popup');
-        this.cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_preview_frame img');
+        this.cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_img');
         this.cameraPopup.show = function(overlayURL, photoid) {
             if (typeof StatusBar !== 'undefined') {
                StatusBar.hide();
             }
-            setTimeout(function() {
+            setTimeout(function() { // wait for hidden statusBar
               if (typeof overlayURL === 'undefined') {
                   overlayURL = null;
                   photoid = 0;
               }
               _app.cameraPreviewPhoto.photoid = photoid;
-              var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+              var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_frame');
               if (overlayURL) {
-                  var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay_picture');
+                  var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay');
                   cameraOverlayPicture.src = overlayURL;
                   cameraOverlayPictureFrame.classList.remove('hidden');
               } else {
@@ -1082,6 +1083,8 @@ var App = function() {
           }, 300);
         };
 
+        this.cameraPhotoFrame = document.querySelector('#gapp_camera_photo_frame');
+
         this.cameraPopup.startCamera = function() {
             if (_app.isMobileDevice) {
                 var width = _app.cameraPopup.clientWidth;
@@ -1101,11 +1104,14 @@ var App = function() {
                   var cameraFrame = document.querySelector('#gapp_camera_frame');
                   _app.setElementStyleToRect(cameraFrame, camRect);
 
+                  /* prepare preview photo */
+                  _app.setElementStyleToRect(_app.cameraPhotoFrame, camRect);
+
                   if (_app.overlayURL) {
                     var overlayRect = _app.fitRectangleToDisplay(
                       _app.activeFeature.get('width') / _app.activeFeature.get('height'),
                       camRect.width, camRect.height, false);
-                    var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+                    var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_frame');
                     _app.setElementStyleToRect(overlayPictureFrame, overlayRect);
                   }
                 }
@@ -1161,12 +1167,12 @@ var App = function() {
 
         /* Preview Photo taken by camera */
         /* todo: add toggle to show/hide overlay-picture with preview */
-        this.cameraPreviewPhotoFrame = document.querySelector('#gapp_camera_photo_preview_frame');
+        this.cameraPhoto = document.querySelector('#gapp_camera_photo');
 
-        this.cameraPreviewPhotoTagList = document.querySelector('#gapp_camera_photo_form_taglist');
-        this.cameraPreviewPhotoTagList.langcode = '';
-        this.cameraPreviewPhotoTagList.list = null;
-        this.cameraPreviewPhotoTagList.addEventListener('change', function() {
+        this.cameraPhotoTagList = document.querySelector('#gapp_camera_photo_form_taglist');
+        this.cameraPhotoTagList.language = '';
+        this.cameraPhotoTagList.list = null;
+        this.cameraPhotoTagList.addEventListener('change', function() {
           // this handler is triggered for every changed tag checkbox
           var boxes = document.querySelectorAll('.tagbox');
           for (var i = 0; i < boxes.length; i++) {
@@ -1193,7 +1199,7 @@ var App = function() {
           }
         });
 
-        this.cameraPreviewPhotoFrame.resetTagList = function(list) {
+        this.cameraPhoto.resetTagList = function(list) {
           // redraws all available tags and resets check to defaults
           var listContainer = document.querySelector('#gapp_camera_photo_form_taglist');
           var html = '<div id="gapp_camera_photo_form_tag_label">Tags <i class="material-icons">&#xE54E;<!--local_offer--></i></div>\n';
@@ -1207,23 +1213,23 @@ var App = function() {
         };
 
         this.getTagList = function(callback) {
-          if (_app.cameraPreviewPhotoTagList.list === null || _app.cameraPreviewPhotoTagList.langcode !== _app.langcode) {
+          if (_app.cameraPhotoTagList.list === null || _app.cameraPhotoTagList.language !== _app.language) {
             // get new tag list
-            photoServer.getTagList(_app.langcode, function(err, list) {
+            photoServer.getTagList(_app.language, function(err, list) {
               if (err) {
                 callback(err, list);
               } else {
-                _app.cameraPreviewPhotoTagList.list = list;
-                _app.cameraPreviewPhotoTagList.langcode = _app.langcode;
+                _app.cameraPhotoTagList.list = list;
+                _app.cameraPhotoTagList.language = _app.language;
                 callback(false, list);
               }
             });
           } else {
-            callback(false, _app.cameraPreviewPhotoTagList.list);
+            callback(false, _app.cameraPhotoTagList.list);
           }
         };
 
-        this.cameraPreviewPhotoFrame.resetPhotoForm = function () {
+        this.cameraPhoto.resetPhotoForm = function () {
             // hide the form
             document.querySelector('#gapp_camera_photo_form').classList.add('hidden');
             // scroll back to top
@@ -1243,26 +1249,48 @@ var App = function() {
             _app.getTagList(function(err, list) {
               if (!err) {
                 // reset the tag list
-                _app.cameraPreviewPhotoFrame.resetTagList(list);
+                _app.cameraPhoto.resetTagList(list);
               }
             });
         };
-        this.cameraPreviewPhotoFrame.show = function () {
+        this.cameraPhotoFrame.overlay = document.querySelector('#gapp_camera_photo_overlay_frame');
+        this.cameraPhotoFrame.overlay.show = function() {
+          if (_app.overlayURL) {
+            // copy settings from cam overlay
+            var srcOverlay = document.querySelector('#gapp_camera_overlay_frame');
+            var destOverlay = _app.cameraPhotoFrame.overlay;
+            destOverlay.style.left = srcOverlay.style.left;
+            destOverlay.style.top = srcOverlay.style.top;
+            destOverlay.style.width = srcOverlay.style.width;
+            destOverlay.style.height = srcOverlay.style.height;
+            destOverlay.querySelector('#gapp_camera_photo_overlay').src = _app.overlayURL;
+            destOverlay.classList.remove('hidden');
+          } else {
+            _app.cameraPhotoFrame.overlay.hide();
+          }
+        };
+        this.cameraPhotoFrame.overlay.hide = function() {
+          _app.cameraPhotoFrame.overlay.classList.add('hidden');
+        };
+        this.cameraPhoto.show = function () {
             document.removeEventListener('backbutton', _app.cameraPopup.hide);
-            document.addEventListener('backbutton', _app.cameraPreviewPhotoFrame.hide);
+            document.addEventListener('backbutton', _app.cameraPhoto.hide);
             document.querySelector('#gapp_camera_photo_button_adddescription_text').innerHTML = __('Add description...');
-            _app.cameraPreviewPhotoFrame.resetPhotoForm();
-            _app.buttonPreviewPhotoOk.removeAttribute('disabled');
-            _app.cameraPreviewPhotoFrame.classList.remove('hidden');
+            _app.cameraPhoto.resetPhotoForm();
+            _app.buttonSendPhoto.removeAttribute('disabled');
+            _app.cameraPhoto.classList.remove('hidden');
+            _app.cameraPhotoFrame.overlay.show();
         };
-        this.cameraPreviewPhotoFrame.hide = function () {
-            _app.cameraPreviewPhotoFrame.classList.add('hidden');
-            document.removeEventListener('backbutton', _app.cameraPreviewPhotoFrame.hide);
+        this.cameraPhoto.hide = function () {
+            _app.cameraPhoto.classList.add('hidden');
+            document.removeEventListener('backbutton', _app.cameraPhoto.hide);
             document.addEventListener('backbutton', _app.cameraPopup.hide);
+            _app.cameraPhotoFrame.overlay.hide();
         };
-        this.buttonPreviewPhotoClose = document.querySelector('#gapp_camera_photo_close');
-        this.buttonPreviewPhotoClose.addEventListener('click', function() {
-            _app.cameraPreviewPhotoFrame.hide();
+        this.buttonPhotoClose = document.querySelector('#gapp_camera_photo_close');
+        this.buttonPhotoClose.addEventListener('click', function() {
+            _app.cameraPhoto.hide();
+            /* todo: camera still running while viewing photo? */
             _app.cameraPopup.resetCamera(true);
         });
         var buttonAddDescription = document.querySelector('#gapp_camera_photo_button_adddescription');
@@ -1292,22 +1320,23 @@ var App = function() {
           };
         };
 
-        this.buttonPreviewPhotoOk = document.querySelector('#gapp_camera_photo_ok');
-        this.buttonPreviewPhotoOk.addEventListener('click', function() {
-            _app.buttonPreviewPhotoOk.setAttribute('disabled', '');
+        this.buttonSendPhoto = document.querySelector('#gapp_camera_photo_send');
+        this.buttonSendPhoto.addEventListener('click', function() {
+            _app.buttonSendPhoto.setAttribute('disabled', '');
             _app.showMessage(__('uploading photo...'));
             var p = _app.cameraPreviewPhoto;
             photoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, _app.getFullPhotoDescription(), function(err, message) {
-                _app.buttonPreviewPhotoOk.removeAttribute('disabled');
+                _app.buttonSendPhoto.removeAttribute('disabled');
                 if (err) {
                     _app.showMessage(__('Upload failed') + ': ' + message);
                 } else {
                     // success! Free memory and close dialog
                     p.rawdata = null;
-                    _app.cameraPreviewPhoto.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-                    _app.cameraPreviewPhotoFrame.hide();
+                    _app.cameraPhoto.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+                    _app.cameraPhoto.hide();
                     _app.cameraPopup.hide();
                     setTimeout (function() {
+                      /* todo: spinner while waiting for update? */
                       photoServer.resetCacheTime(); // reset cache
                       _app.photoSource = photoServer.updatePhotos();
                       olMap.clusterLayer.setSource(new ol.source.Cluster({
@@ -1339,11 +1368,11 @@ var App = function() {
             if (buttonTakePhoto.classList.contains('mdl-button--colored')) {
                 buttonTakePhoto.classList.remove('mdl-button--colored');
                 buttonTakePhoto.classList.add('mdl-color--white');
-                // todo: photo shutter animation
+
                 var orientationOk = true;
-                var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_picture_frame');
+                var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_frame');
                 if (!cameraOverlayPictureFrame.classList.contains('hidden')) {
-                  var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay_picture');
+                  var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay');
                   if (window.innerWidth > window.innerHeight) {
                     if (cameraOverlayPicture.width < cameraOverlayPicture.height) {
                       orientationOk = false;
@@ -1377,7 +1406,11 @@ var App = function() {
                 var accuracy = olMap.geoLocation.getAccuracy();
                 _app.cameraPreviewPhoto.myLocation = myLocation;
                 _app.cameraPreviewPhoto.accuracy = accuracy;
-                _app.cameraPreviewPhotoFrame.show();
+                /* bla
+                var rect = _app.fitRectangleToDisplay(cameraAspectRatio, width, height, true);
+                _app.setElementStyleToRect(_app.cameraPreviewFrame, rect);
+                */
+                _app.cameraPhoto.show();
             } else {
                 _app.showMessage('Required photo location unknown');
             }

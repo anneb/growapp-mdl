@@ -114,6 +114,9 @@ app.post('/photoserver/getphotoset', cors(), function(req, res) {
   var sql = 'select id, accuracy, filename, time, width, height, description, tags from photo where rootid=$1 or id=$1 order by time';
   dbPool.query(sql, [photoid])
     .then(function(result){
+      result.rows.forEach(function(row){
+        row.tags = tagStringToArray(row.tags);
+      });
       res.json(result.rows);
       res.end();
     })
@@ -229,7 +232,7 @@ app.post('/photoserver/rotatemyphoto', cors(), function(req, res) {
                         } else {
                           res.end('image rotated');
                         }
-                      });                      
+                      });
                     }
                   });
                 });

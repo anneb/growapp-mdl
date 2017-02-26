@@ -188,7 +188,7 @@
         background: #333;
         background: rgba(0,0,0,0.18);
       }
-      #gapp_camera_popup {
+      #gapp_camera_popup, #gapp_camera_photo {
         position: absolute;
         max-height: 100%;
         max-width: 100%;
@@ -199,7 +199,12 @@
         left: 0;
         right: 0;
         margin: auto;
+      }
+      #gapp_camera_popup {
         background-color: transparent;
+      }
+      #gapp_camera_photo {
+        background-color: black;
       }
       #gapp_camera_takephoto {
         position: absolute;
@@ -220,13 +225,13 @@
       .shutteron {
         box-shadow: inset 0 0 0 20px white;
       }
-      #gapp_camera_overlay_picture_frame {
-            position: relative;
+      #gapp_camera_overlay_frame, #gapp_camera_photo_overlay_frame {
+            position: absolute;
             height: 100%;
             width: auto;
       }
-      #gapp_camera_overlay_picture {
-        position: relative;
+      #gapp_camera_overlay, #gapp_camera_photo_overlay {
+        position: absolute;
         left: auto;
         right: auto;
         top: auto;
@@ -235,30 +240,12 @@
         opacity: 0.5;
         border: 0;
       }
-      #gapp_camera_photo_preview_frame {
+      #gapp_camera_photo_frame {
         position: absolute;
-        max-height: 100%;
-        max-width: 100%;
-        width: auto;
-        height: auto;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-        background-color: black;
       }
-      #gapp_camera_photo_preview_frame img {
-        max-height: 100%;
-        max-width: 100%;
-        width: auto;
-        height: auto;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
+      #gapp_camera_photo_img {
+        width: 100%;
+        height: 100%;
       }
       #gapp_camera_photo_bar_top {
         position: absolute;
@@ -277,7 +264,7 @@
         background-color: black;
         background-color: rgba(0, 0, 0, 0.5);
       }
-      #gapp_camera_photo_ok {
+      #gapp_camera_photo_send {
         position: absolute;
         bottom: 20px;
         right: 20px;
@@ -497,8 +484,8 @@
       </div>
       <div id="gapp_camera_popup" class="hidden">
          <div id="gapp_camera_frame">
-           <div id="gapp_camera_overlay_picture_frame" class="hidden">
-             <img id="gapp_camera_overlay_picture" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+           <div id="gapp_camera_overlay_frame" class="hidden">
+             <img id="gapp_camera_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
            </div>
          </div>
          <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab mdl-color--white">
@@ -507,48 +494,52 @@
          <button id="gapp_camera_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent">
            <i class="material-icons">close</i>
          </button>
-
-         <div id="gapp_camera_photo_preview_frame" class="hidden">
-            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-            <div id="gapp_camera_photo_bar_bottom">
-              <div id="gapp_camera_photo_button_adddescription"><i class="material-icons">description</i><span id="gapp_camera_photo_button_adddescription_text"> <span class="translate">Add description...</span></span></div>
-              <button id="gapp_camera_photo_ok" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
-                  <i class="material-icons">send</i>
-              </button>
-            </div>
-            <div id="gapp_camera_photo_bar_top">
-              <button id="gapp_camera_photo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast">
-                  <i class="material-icons">close</i>
-              </button>
-            </div>
-            <div id="gapp_camera_photo_form" class="mdl-shadow--2dp hidden">
-              <button id="gapp_camera_photo_form_close" class="mdl-button mdl-js-button mdl-button--icon">
-                  <i class="material-icons">close</i>
-              </button>
-              <div class="mdl-card__title">
-                <h2 class="mdl-card__title-text"><span class="translate">Photo info</span></h2>
+         <div id="gapp_camera_photo" class="hidden">
+           <div id="gapp_camera_photo_frame">
+              <img id="gapp_camera_photo_img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+              <div id="gapp_camera_photo_overlay_frame" class="hidden">
+                <img id="gapp_camera_photo_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
               </div>
-              <div id="gapp_camera_photo_form_fields" class="mdl-card__supporting-text">
-                <form action="#">
-                    <div id="gapp_camera_photo_form_description" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                        <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_form_input_description">
-                        <label class="mdl-textfield__label" for="gapp_camera_photo_form_input_description"><span class="translate">Description (optional)</span></label>
-                        <span class="mdl-textfield__error translate">Input is not a valid description</span>
-                        <i class="material-icons mdl-textfield__label__icon">description<!--local_offer--></i>
-                    </div>
-                    <div id="gapp_camera_photo_form_taglist">
-                    </div>
-                    <div id="gapp_camera_photo_form_circumference" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label hidden">
-                        <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_form_input_circumference" pattern="([0-9|.|,])*">
-                        <label class="mdl-textfield__label" for="gapp_camera_photo_form_input_circumference"><span class="translate">Tree circumference (cm)</span></label>
-                        <span class="mdl-textfield__error translate">Input is not a valid circumference</span>
-                        <i class="material-icons mdl-textfield__label__icon">&#xE40C;<!--panorama_fish_eye--></i>
-                    </div>
-                    <div id="gapp_camera_photo_form_spacer"></div>
-                </form>
-              </div>
-              <div id="gapp_scroll_down"><i class="material-icons">&#xE5CF;<!--expand_more--></i></div>
-            </div>
+           </div>
+           <div id="gapp_camera_photo_bar_bottom">
+             <div id="gapp_camera_photo_button_adddescription"><i class="material-icons">description</i><span id="gapp_camera_photo_button_adddescription_text"> <span class="translate">Add description...</span></span></div>
+             <button id="gapp_camera_photo_send" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                 <i class="material-icons">send</i>
+             </button>
+           </div>
+           <div id="gapp_camera_photo_bar_top">
+             <button id="gapp_camera_photo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast">
+                 <i class="material-icons">close</i>
+             </button>
+           </div>
+           <div id="gapp_camera_photo_form" class="mdl-shadow--2dp hidden">
+             <button id="gapp_camera_photo_form_close" class="mdl-button mdl-js-button mdl-button--icon">
+                 <i class="material-icons">close</i>
+             </button>
+             <div class="mdl-card__title">
+               <h2 class="mdl-card__title-text"><span class="translate">Photo info</span></h2>
+             </div>
+             <div id="gapp_camera_photo_form_fields" class="mdl-card__supporting-text">
+               <form action="#">
+                   <div id="gapp_camera_photo_form_description" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                       <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_form_input_description">
+                       <label class="mdl-textfield__label" for="gapp_camera_photo_form_input_description"><span class="translate">Description (optional)</span></label>
+                       <span class="mdl-textfield__error translate">Input is not a valid description</span>
+                       <i class="material-icons mdl-textfield__label__icon">description<!--local_offer--></i>
+                   </div>
+                   <div id="gapp_camera_photo_form_taglist">
+                   </div>
+                   <div id="gapp_camera_photo_form_circumference" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label hidden">
+                       <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_form_input_circumference" pattern="([0-9|.|,])*">
+                       <label class="mdl-textfield__label" for="gapp_camera_photo_form_input_circumference"><span class="translate">Tree circumference (cm)</span></label>
+                       <span class="mdl-textfield__error translate">Input is not a valid circumference</span>
+                       <i class="material-icons mdl-textfield__label__icon">&#xE40C;<!--panorama_fish_eye--></i>
+                   </div>
+                   <div id="gapp_camera_photo_form_spacer"></div>
+               </form>
+             </div>
+             <div id="gapp_scroll_down"><i class="material-icons">&#xE5CF;<!--expand_more--></i></div>
+           </div>
          </div>
       </div>
       <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
