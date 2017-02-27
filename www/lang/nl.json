@@ -57,5 +57,6 @@
   "Upload failed" : "Versturen mislukt",
   "Wrong camera orientation, please adjust" : "Verkeerde cameraoriëntatie, draai halve slag",
   "GrowApp - About" : "Over GrowApp",
-  "help.html" : "help-nl.html"
+  "help.html" : "help-nl.html",
+  "info.html" : "info-nl.html"
 }

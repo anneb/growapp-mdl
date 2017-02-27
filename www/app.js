@@ -893,7 +893,7 @@ var App = function() {
                 break;
             case '#info':
                 window.location.hash='';
-                window.location = 'info.html';
+                window.location = __('info.html');
                 break;
         }
     };
@@ -1061,6 +1061,7 @@ var App = function() {
               document.addEventListener('backbutton', _app.cameraPopup.hide);
               window.addEventListener('orientationchange', _app.cameraPopup.resetCamera);
               document.querySelector('#mainUI').classList.add('hidden');
+              document.querySelector('body').style.backgroundColor = 'transparent';
               _app.cameraPopup.classList.remove('hidden');
               _app.cameraPopup.startCamera();
             }, 100);
@@ -1073,6 +1074,7 @@ var App = function() {
                 StatusBar.show();
             }
             document.querySelector('#mainUI').classList.remove('hidden');
+            document.querySelector('body').style.backgroundColor = 'lightgray';
             _app.cameraPopup.classList.add('hidden');
         };
 
