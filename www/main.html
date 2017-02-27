@@ -323,25 +323,28 @@
         position: relative;
         height: 80px;
       }
-      #gapp_camera_photo_opacity_bar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 220px;
-        height: 24px;
-        background-color: lightgray;
-      }
-      #gapp_camera_photo_overlay_opacity_icon {
+      #gapp_camera_overlay_opacity_bar {
         position: absolute;
         left: 0px;
         top: 0px;
-        color: gray;
+        width: 112px;
       }
-      #gapp_camera_photo_overlay_opacity {
+      #gapp_camera_photo_overlay_opacity100 {
         position: absolute;
-        left: 24px;
-        top: 3px;
-        width: 180px;
+        top: 10px;
+        left: 10px;
+      }
+      #gapp_camera_photo_overlay_opacity50 {
+        position: absolute;
+        top: 10px;
+        left: 44px;
+        opacity: 0.5;
+      }
+      #gapp_camera_photo_overlay_opacity20 {
+        position: absolute;
+        top: 10px;
+        left: 78px;
+        opacity: 0.2;
       }
       #gapp_scroll_down {
         position: absolute;
@@ -531,9 +534,16 @@
              <button id="gapp_camera_photo_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast">
                  <i class="material-icons">close</i>
              </button>
-             <div id="gapp_camera_photo_opacity_bar" class="hidden">
-               <span id="gapp_camera_photo_overlay_opacity_icon"><i class="material-icons">opacity</i></span>
-               <div id="gapp_camera_photo_overlay_opacity"><input id="gapp_opacity_slider" class="mdl-slider mdl-js-slider" type="range"  min="0" max="100" value="50" tabindex="0"></div>
+             <div id="gapp_camera_overlay_opacity_bar" class="hidden">
+               <button id="gapp_camera_photo_overlay_opacity100" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast">
+                 <i class="material-icons">opacity</i>
+               </button>
+               <button id="gapp_camera_photo_overlay_opacity50" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast">
+                 <i class="material-icons">opacity2</i>
+               </button>
+               <button id="gapp_camera_photo_overlay_opacity20" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast">
+                 <i class="material-icons">opacity3</i>
+               </button>
              </div>
            </div>
            <div id="gapp_camera_photo_form" class="mdl-shadow--2dp hidden">
