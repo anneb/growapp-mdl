@@ -55,5 +55,6 @@
   "Web photo management requires user registration" : "Registreer voor het beheren van foto's via de browser",
   "device registration failed, try again later" : "apparaatkoppeling mislukt, probeer later opnieuw",
   "Upload failed" : "Versturen mislukt",
-  "Wrong camera orientation, please adjust" : "Verkeerde cameraoriëntatie, draai halve slag"
+  "Wrong camera orientation, please adjust" : "Verkeerde cameraoriëntatie, draai halve slag",
+  "GrowApp - About" : "Over GrowApp"
 }

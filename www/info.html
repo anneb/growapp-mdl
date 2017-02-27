@@ -13,6 +13,7 @@
     <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
     <link rel="stylesheet" href="./material.min.css">
     <script src="./node_modules/material-design-lite/material.min.js"></script>
+    <script src="./language.js"></script>
 
     <link rel="stylesheet" href="./iconfont/material-icons.css">
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
@@ -70,6 +71,13 @@
                 // warning: history keeps track of hashchanges
                 window.history.back();
             }, false);
+            var language;
+            if (window.localStorage && window.localStorage.language) {
+              language = window.localStorage.language;
+            } else {
+              language = navigator.language || navigator.userLanguage;
+            }
+            languageProvider.setLanguage(language);
         }
     </script>
 </head>
@@ -82,7 +90,7 @@
         </div>
         <div class="mdl-layout__header-row">
             <!-- Title -->
-            <span class="mdl-layout-title"> GrowApp - About</span>
+            <span class="mdl-layout-title"> <span class="translate">GrowApp - About</span></span>
         </div>
     </header>
 

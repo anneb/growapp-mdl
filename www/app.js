@@ -18,7 +18,9 @@ App: UI and handler hooks into OLMap
 */
 
 /* global window, document, console, ol, Image, CameraPreview, StatusBar,
-   localStorage, XMLHttpRequest, setTimeout, screen */
+   localStorage, XMLHttpRequest, setTimeout, __, navigator, languageProvider,
+   escape
+*/
 
 Number.prototype.toRad = function() { // helper
     return this * Math.PI / 180;
@@ -1113,11 +1115,6 @@ var App = function() {
                     _app.cameraPhoto.camRect.width/_app.cameraPhoto.camRect.height,
                     width, height, true);
                   _app.setElementStyleToRect(_app.cameraPhotoFrame, frameRect);
-                  frameRect = _app.fitRectangleToDisplay(
-                    _app.activeFeature.get('width') / _app.activeFeature.get('height'),
-                    frameRect.width, frameRect.height, true);
-
-                  _app.setElementStyleToRect(document.querySelector('#gapp_camera_photo_overlay_frame'), frameRect);
 
                   if (_app.overlayURL) {
                     var overlayRect = _app.fitRectangleToDisplay(
@@ -1125,6 +1122,7 @@ var App = function() {
                       camRect.width, camRect.height, false);
                     var overlayPictureFrame = document.querySelector('#gapp_camera_overlay_frame');
                     _app.setElementStyleToRect(overlayPictureFrame, overlayRect);
+                    _app.setElementStyleToRect(document.querySelector('#gapp_camera_photo_overlay_frame'), overlayRect);
                   }
                 }
                 CameraPreview.startCamera({x: camRect.left, y: camRect.top, width: camRect.width, height: camRect.height, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
