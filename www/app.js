@@ -1083,6 +1083,7 @@ var App = function() {
           }, 300);
         };
 
+        this.cameraPhoto = document.querySelector('#gapp_camera_photo');
         this.cameraPhotoFrame = document.querySelector('#gapp_camera_photo_frame');
 
         this.cameraPopup.startCamera = function() {
@@ -1104,8 +1105,19 @@ var App = function() {
                   var cameraFrame = document.querySelector('#gapp_camera_frame');
                   _app.setElementStyleToRect(cameraFrame, camRect);
 
-                  /* prepare preview photo */
-                  _app.setElementStyleToRect(_app.cameraPhotoFrame, camRect);
+                  /* update preview photo rect */
+                  if (_app.cameraPhoto.classList.contains('hidden')) {
+                    _app.cameraPhoto.camRect = camRect; // store current camera width/height
+                  }
+                  var frameRect = _app.fitRectangleToDisplay(
+                    _app.cameraPhoto.camRect.width/_app.cameraPhoto.camRect.height,
+                    width, height, true);
+                  _app.setElementStyleToRect(_app.cameraPhotoFrame, frameRect);
+                  frameRect = _app.fitRectangleToDisplay(
+                    _app.activeFeature.get('width') / _app.activeFeature.get('height'),
+                    frameRect.width, frameRect.height, true);
+
+                  _app.setElementStyleToRect(document.querySelector('#gapp_camera_photo_overlay_frame'), frameRect);
 
                   if (_app.overlayURL) {
                     var overlayRect = _app.fitRectangleToDisplay(
@@ -1166,9 +1178,6 @@ var App = function() {
         });
 
         /* Preview Photo taken by camera */
-        /* todo: add toggle to show/hide overlay-picture with preview */
-        this.cameraPhoto = document.querySelector('#gapp_camera_photo');
-
         this.cameraPhotoTagList = document.querySelector('#gapp_camera_photo_form_taglist');
         this.cameraPhotoTagList.language = '';
         this.cameraPhotoTagList.list = null;
@@ -1259,6 +1268,10 @@ var App = function() {
           var opacity = _app.opacitySlider.value / 100;
           _app.cameraPhotoOverlay.style.opacity = 1.0 - opacity;
         };
+        this.opacitySlider.oninput = function() {
+          var opacity = _app.opacitySlider.value / 100;
+          _app.cameraPhotoOverlay.style.opacity = 1.0 - opacity;
+        };
         this.cameraPhotoFrame.overlay = document.querySelector('#gapp_camera_photo_overlay_frame');
         this.cameraPhotoFrame.overlay.show = function() {
           if (_app.overlayURL) {
@@ -1270,15 +1283,17 @@ var App = function() {
             destOverlay.style.width = srcOverlay.style.width;
             destOverlay.style.height = srcOverlay.style.height;
             _app.cameraPhotoOverlay.src = _app.overlayURL;
-            _app.cameraPhotoOverlay.style.opacity = 0.5;
-            _app.opacitySlider.value = 50;
+            _app.cameraPhotoOverlay.style.opacity = 0;
+            _app.opacitySlider.value = 100;
             destOverlay.classList.remove('hidden');
+            document.querySelector('#gapp_camera_photo_opacity_bar').classList.remove('hidden');
           } else {
             _app.cameraPhotoFrame.overlay.hide();
           }
         };
         this.cameraPhotoFrame.overlay.hide = function() {
           _app.cameraPhotoFrame.overlay.classList.add('hidden');
+          document.querySelector('#gapp_camera_photo_opacity_bar').classList.add('hidden');
         };
         this.cameraPhoto.show = function () {
             document.removeEventListener('backbutton', _app.cameraPopup.hide);
