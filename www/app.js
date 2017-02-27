@@ -889,7 +889,7 @@ var App = function() {
                 break;
             case '#help':
                 window.location.hash='';
-                window.location = 'help.html';
+                window.location = __('help.html');
                 break;
             case '#info':
                 window.location.hash='';

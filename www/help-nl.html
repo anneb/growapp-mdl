@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>growapp-mdl</title>
+    <meta charset="utf-8">
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+    <meta http-equiv="content-type" content="text/html; charset=UTF8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes"/>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+
+    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+
+    <link rel="stylesheet" href="./iconfont/material-icons.css">
+    <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', 'Noto', sans-serif;
+        }
+		main {
+			background-color: #fff;
+			background-color: color: rgba(255, 255, 255, 0.56);
+		}
+        .content {
+            padding: 10px;
+        }
+        .page-content {
+            width: 80%;
+            max-width: 512px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+        .gapp-header .mdl-layout__header-row {
+            padding-left: 40px;
+        }
+
+        .gapp-container {
+            max-width: 1600px;
+            width: calc(100% - 16px);
+            margin: 0 auto;
+        }
+
+        .gapp-content {
+            border-radius: 2px;
+            padding: 80px 56px;
+            margin-bottom: 80px;
+        }
+
+        .gapp-layout.is-small-screen .gapp-content {
+            padding: 40px 28px;
+        }
+
+        .gapp-content h3 {
+            margin-top: 48px;
+        }
+
+        .gapp-footer {
+            padding-left: 40px;
+        }
+
+        .gapp-footer .mdl-mini-footer--link-list a {
+            font-size: 13px;
+        }
+    </style>
+    <script>
+        function init() {
+            document.querySelector('#backbutton').addEventListener('click', function () {
+                window.history.back();
+            }, false);
+        }
+    </script>
+</head>
+<body onload="init();">
+<div class="mdl-layout__container">
+    <!-- Always shows a header, even in smaller screens. -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header is-casting-shadow">
+            <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i>
+            </div>
+            <div class="mdl-layout__header-row">
+                <!-- Title -->
+                <span class="mdl-layout-title"> GrowApp - Help</span>
+            </div>
+        </header>
+
+        <main class="mdl-layout__content">
+            <div class="gapp-container mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+                <div class="gapp-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+                    <div id="content" class="mdl-color-text--grey-500">
+                    <div>
+                        <h4>Doel</h4>
+                        <p>Deze app heeft als doel het bijhouden en tonen van veranderingen aan het uiterlijk van bomen en planten, de 'fenologie'. Het uiterlijk van een bepaalde boom of plant op een bepaald tijdstip
+                            wordt op een met deze app gemaakte foto vastgelegd in de GrowApp database. De app toont de fotolocaties op een kaart met alle foto's die door de GrowApp gebruikers gemaakt zijn.
+                            Een foto wordt zichtbaar als je de bijbehorende fotolocatie aantikt. Als de fotolocatie vlak in de buurt van de gebruiker is, kan een nieuwe foto aan de bestaande foto worden toegevoegd
+                            zodat veranderingen zichtbaar worden. Tijdens het toevoegen toont de app de originele foto transparant over het camerabeeld zodat origneel en nieuwe foto door de gebruiker kunnen worden
+                            uitgelijnd. Als er meer dan één foto van hetzelfde onderwerp genomen is, maakt de app automatisch een animatie van de foto's. Als er gedurende langere tijd meerdere foto's zijn gemaakt
+                            van hetzelfde onderwerp, zullen de animaties duidelijk laten zien hoe het uiterlijk van bomen en planten met de tijd veranderen.
+
+                        <h4>User Interface</h4>
+                        <dl class="dl-horizontal">
+
+                            <dt><h4></h4><img src="help-map.png"> Map</h4></dt>
+                            <dd>Use pinch to zoom in and out, swipe to pan. Red rectangles indicate photo locations, tap to show photo. Tap photo to enlarge photo</dd>
+
+                            <dt><h4><i class="material-icons">menu</i> Menu</h4></dt>
+                            <dd>Toggles popup-menu for additional features</dd>
+
+                            <dt><h4>Kaartlagen</h4></dt>
+                            <dd>Toggles list of additional map layers.
+                                <dl>
+                                    <dt><i class="material-icons">&#xE545;<!-- local florist--></i> <i>Start of Season</i></dt>
+                                    <dd>layer shows when the vegetation season begins</dd>
+
+                                    <dt><i class="material-icons">&#xE6E1;<!-- show-chart --></i> <i>Vegetation trend</i></dt>
+                                    <dd>layer shows how much vegetation has changed since last year.</dd>
+
+                                    <dt><i class="mdi mdi-thermometer-lines mdi-24px"></i> <i>Yesterday's temperature</i></dt>
+                                    <dd>displays the surface temperature (not air temperature) for yesterday where available</dd>
+                                </dl>
+
+
+                            <dt><h4><i class="material-icons">&#xE55C;</i> Location tracking</h4></dt>
+                            <dd>When activated, the map stays automatically centered at the currently tracked location until user manually pans to a different location</dd>
+
+                            <dt><h4><i class="material-icons">&#xE412;</i> Take picture</h4></dt>
+                            <dd>Starts the camera view to take a picture. Not available in the web-site version (app only)</dd>
+
+                            <dt><h4><i class="material-icons">&#xE439;</i> Add an additional photo</h4></dt>
+                            <dd>Only available in previously taken photos at or near your current location. Click to add a new picture of the same subject. Added photos are inserted into an automatically created time lapse animation</dd>
+
+                        </dl>
+
+                        <h4>Requirements</h4>
+                        Currently this app should work well with newer Android (version 4.4+) devices with GPS and camera enabled. The app requires an available mobile internet connection.
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>
