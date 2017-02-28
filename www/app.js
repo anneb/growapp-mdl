@@ -522,6 +522,14 @@ var OLMap = function() {
         console.warn('unhandled geolocation Changed handler');
     };
 
+    this.zoom = function(levels) {
+      var zoomlevel = _olMap.olmap.getView().getZoom();
+      if (typeof zoomlevel !== undefined) {
+        zoomlevel += levels;
+      }
+      _olMap.olmap.getView().setZoom(zoomlevel);
+    };
+
     this.initGeoLocation = function ()
     {
         // geolocation
@@ -674,6 +682,14 @@ var App = function() {
         }
         languageProvider.setLanguage(language);
         _app.language = language;
+
+        // store setup for mobile device or web
+        this.isMobileDevice = isMobileDevice;
+        if (isMobileDevice) {
+          // hide zoombuttons
+          document.querySelector('#gapp_map_zoom_bar').classList.add('hidden');
+        }
+
         // update account info in drawer if available
         if (window.localStorage.email && window.localStorage.email !== '') {
           var accountinfo = document.querySelector('#gapp_account_info');
@@ -684,8 +700,6 @@ var App = function() {
           }
         }
 
-        // store setup for mobile device or web
-        this.isMobileDevice = isMobileDevice;
 
         this.featureInfoPopupInit();
         this.cameraPopupInit();
@@ -703,6 +717,12 @@ var App = function() {
         olMap.init(mapId, 'filename');
         this.buttonLocation = document.querySelector('#gapp_button_location');
         this.buttonLocation.addEventListener('click', function(){_app.setMapTracking(!olMap.mapTracking);});
+        document.querySelector('#gapp_map_zoom_in').addEventListener('click', function() {
+          olMap.zoom(1);
+        });
+        document.querySelector('#gapp_map_zoom_out').addEventListener('click', function() {
+          olMap.zoom(-1);
+        });
 
         window.addEventListener('hashchange', this.navigate.bind(this), false);
         this.showStoredMessage();

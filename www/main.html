@@ -69,6 +69,25 @@
         background-color: transparent;
         pointer-events: none;
       }
+      #gapp_map_zoom_bar {
+        position: absolute;
+        bottom: 150px;
+        right: 10px;
+        width: 44px;
+        height: 150px;
+        /* background: rgba(127,127,127,0.4); */
+        border-radius: 5px;
+      }
+      #gapp_map_zoom_in {
+        position: absolute;
+        bottom: 70px;
+        right: 0;
+      }
+      #gapp_map_zoom_out {
+        position: absolute;
+        bottom: 0px;
+        right: 0;
+      }
       #gapp_button_location {
         position: absolute;
         bottom: 80px;
@@ -489,6 +508,10 @@
                 <div id="gapp_legendhorizontal" class="hidden">
                   <span class="legendleft legendmin legendwhite"></span><span class="legendright legendmax legendwhite"></span>
                   <img src="layertemperatureh.png" id="legendimageh" width="365" height="34">
+                </div>
+                <div id="gapp_map_zoom_bar">
+                  <button id="gapp_map_zoom_in" class="mdl-button mdl-js-button mdl-button--fab mdl-color--white"><i class="material-icons">&#xE8FF;</i><!--zoom_in--></button>
+                  <button id="gapp_map_zoom_out" class="mdl-button mdl-js-button mdl-button--fab mdl-color--white"><i class="material-icons">&#xE900;</i><!--zoom_out--></button>
                 </div>
               </div>
           </main>
