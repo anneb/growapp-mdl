@@ -65,8 +65,8 @@ var _utils = {
         return R * c;
     },
     escapeHTML: function(str) {
-     str = str + "";
-     var out = "";
+     str = str + '';
+     var out = '';
      for(var i=0; i<str.length; i++) {
          if(str[i] === '<') {
              out += '&lt;';
@@ -117,12 +117,12 @@ var PhotoServer = function() {
 
   this.getGeoJSON = function (url, callback){
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", url);
+    xhr.open('GET', url);
     xhr.onreadystatechange = function() {
-      if (xhr.readyState != 4) {
+      if (xhr.readyState !== 4) {
         return;
       }
-      if (xhr.status == 200 || xhr.status == 304) {
+      if (xhr.status === 200 || xhr.status === 304) {
         callback(JSON.parse(xhr.response));
       }
     };
@@ -201,7 +201,7 @@ var PhotoServer = function() {
   // return url to large version of photo
   this.fullPhotoUrl = function(photofile, size) {
     // size expected to be either 'small' or 'medium' or 'full'
-    if (photofile.substr(-4, 4) == '.gif') {
+    if (photofile.substr(-4, 4) === '.gif') {
       photofile = photofile.substr(0, photofile.length - 4) + '.jpg';
     }
     if (size === 'medium' || size === 'small' ) {
@@ -846,15 +846,15 @@ var App = function() {
     };
 
     // always display legend on longest side of screen
-    window.addEventListener("orientationchange", function() {
-      var legendvertical = document.querySelector("#gapp_legendvertical");
-      var legendhorizontal = document.querySelector("#gapp_legendhorizontal");
-      if (!legendvertical.classList.contains("hidden")) {
-        legendvertical.classList.add("hidden");
-        legendhorizontal.classList.remove("hidden");
-      } else if (!legendhorizontal.classList.contains("hidden")) {
-        legendhorizontal.classList.add("hidden");
-        legendvertical.classList.remove("hidden");
+    window.addEventListener('orientationchange', function() {
+      var legendvertical = document.querySelector('#gapp_legendvertical');
+      var legendhorizontal = document.querySelector('#gapp_legendhorizontal');
+      if (!legendvertical.classList.contains('hidden')) {
+        legendvertical.classList.add('hidden');
+        legendhorizontal.classList.remove('hidden');
+      } else if (!legendhorizontal.classList.contains('hidden')) {
+        legendhorizontal.classList.add('hidden');
+        legendvertical.classList.remove('hidden');
       }
     });
 
@@ -997,8 +997,8 @@ var App = function() {
             document.removeEventListener('backbutton', _app.fullscreenphotopopup.hide);
             document.addEventListener('backbutton', _app.featureInfoPopup.hide);
             _app.animationTargetElement = _app.featureInfoPopup;
-            if (app.animating) {
-              app.playAnimation();
+            if (_app.animating) {
+              _app.playAnimation();
             }
             _app.fullscreenphotopopup.classList.add('hidden');
         };
@@ -1345,10 +1345,10 @@ var App = function() {
               tags: [].slice.call(document.querySelectorAll('.tagbox:checked')).map(
                   function(box){
                     var obj = {};
-                    if (box.value=="5") {
+                    if (box.value==='5') {
                       obj[box.value] = document.querySelector('#gapp_camera_photo_form_input_circumference').value.replace(',', '.');
                     } else {
-                      obj[box.value] = "";
+                      obj[box.value] = '';
                     }
                     return obj;
                   })
@@ -1548,7 +1548,7 @@ var App = function() {
 
       var errorInfo = document.querySelector('#gapp_featureinfo_error');
       var photo = new Image();
-      var image = photoframe.querySelector("img");
+      var image = photoframe.querySelector('img');
       photo.onload = function() {
         errorInfo.classList.add('hidden');
         _app.setInfoText(infoText);
@@ -1601,7 +1601,7 @@ var App = function() {
         nextFeature = photoset[photoIndex];
         _app.NextFeatureInfo(nextFeature, photoIndex + 1, function(infoText){
           var fullUrl;
-          if (_app.animationTargetElement == _app.featureInfoPopup) {
+          if (_app.animationTargetElement === _app.featureInfoPopup) {
             fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'small');
           } else {
             if (_app.isMobileDevice) {
