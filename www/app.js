@@ -649,7 +649,7 @@ var OLMap = function() {
         } else {
             return false; // try next feature
         }
-      });
+      }, {hitTolerance: 5}); // forEachFeatureAtPixel
       return resultfeature;
     };
 
