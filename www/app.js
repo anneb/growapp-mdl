@@ -1165,9 +1165,7 @@ var App = function() {
                     var bestPreviewAspect = 0;
                     var difference = 1000;
                     CameraPreview.getSupportedPreviewSizes(function(sizes){
-                        console.log('Preview sizes:');
                         sizes.forEach(function(size){
-                            console.log(size.width + 'x' + size.height + "," + size.width/size.height);
                             var previewAspect = (size.width / size.height);
                             var nextDifference = Math.abs(clientAspect - previewAspect);
                             if (nextDifference < difference) {
@@ -1176,9 +1174,7 @@ var App = function() {
                             }
                         });
                         window.localStorage.cameraAspectRatio = bestPreviewAspect;
-                        console.log('best preview aspect: ' + bestPreviewAspect);
                         CameraPreview.getSupportedPictureSizes(function(sizes){
-                          console.log('Picture sizes:');
                           sizes.forEach(function(size){
                               var supported;
                               if (Math.abs(bestPreviewAspect - (size.width/size.height)) < 0.01) {
@@ -1186,7 +1182,7 @@ var App = function() {
                               } else {
                                 supported = 'not supported';
                               }
-                              console.log(size.width + 'x' + size.height+ "," + size.width/size.height + ',' + supported);
+                              //console.log(size.width + 'x' + size.height+ "," + size.width/size.height + ',' + supported);
                           });
                           _app.cameraPopup.resetCamera(true);
                         });
