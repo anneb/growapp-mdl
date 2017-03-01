@@ -1157,11 +1157,48 @@ var App = function() {
 
                 if (!window.localStorage.cameraAspectRatio) {
                   // camera aspect not yet known, read from camera when started
+                  setTimeout(function() {
+                    var clientAspect = width / height;
+                    if (clientAspect < 1) {
+                      clientAspect = 1 / clientAspect;
+                    }
+                    var bestPreviewAspect = 0;
+                    var difference = 1000;
+                    CameraPreview.getSupportedPreviewSizes(function(sizes){
+                        console.log('Preview sizes:');
+                        sizes.forEach(function(size){
+                            console.log(size.width + 'x' + size.height + "," + size.width/size.height);
+                            var previewAspect = (size.width / size.height);
+                            var nextDifference = Math.abs(clientAspect - previewAspect);
+                            if (nextDifference < difference) {
+                              difference = nextDifference;
+                              bestPreviewAspect = previewAspect;
+                            }
+                        });
+                        window.localStorage.cameraAspectRatio = bestPreviewAspect;
+                        console.log('best preview aspect: ' + bestPreviewAspect);
+                        CameraPreview.getSupportedPictureSizes(function(sizes){
+                          console.log('Picture sizes:');
+                          sizes.forEach(function(size){
+                              var supported;
+                              if (Math.abs(bestPreviewAspect - (size.width/size.height)) < 0.01) {
+                                supported = 'supported';
+                              } else {
+                                supported = 'not supported';
+                              }
+                              console.log(size.width + 'x' + size.height+ "," + size.width/size.height + ',' + supported);
+                          });
+                          _app.cameraPopup.resetCamera(true);
+                        });
+                      });
+                  }, 1000);
+
+                /*
                   setTimeout(function() {CameraPreview.getPreviewSize(function(size){
                     cameraAspectRatio = size.width / size.height;
                     window.localStorage.cameraAspectRatio = cameraAspectRatio;
                     _app.cameraPopup.resetCamera(true);
-                  });}, 1000);
+                  });}, 1000); */
                 }
             }
         };
