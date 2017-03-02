@@ -681,7 +681,7 @@ var App = function() {
           language = navigator.language || navigator.userLanguage;
         }
         languageProvider.setLanguage(language);
-        _app.language = language;
+        _app.langCode = languageProvider.langCode;
 
         // store setup for mobile device or web
         this.isMobileDevice = isMobileDevice;
@@ -1275,14 +1275,14 @@ var App = function() {
         };
 
         this.getTagList = function(callback) {
-          if (_app.cameraPhotoTagList.list === null || _app.cameraPhotoTagList.language !== _app.language) {
+          if (_app.cameraPhotoTagList.list === null || _app.cameraPhotoTagList.language !== _app.langCode) {
             // get new tag list
-            photoServer.getTagList(_app.language, function(err, list) {
+            photoServer.getTagList(_app.langCode, function(err, list) {
               if (err) {
                 callback(err, list);
               } else {
                 _app.cameraPhotoTagList.list = list;
-                _app.cameraPhotoTagList.language = _app.language;
+                _app.cameraPhotoTagList.language = _app.langCode;
                 callback(false, list);
               }
             });
