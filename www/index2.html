@@ -4,20 +4,18 @@
     <title>growapp-mdl</title>
     <meta charset="utf-8">
     <meta name="description" content="growapp-mdl create vegetation time-lapses">
-    <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="icon" href="favicon.ico" type="image/ico">
 
-    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
     <link rel="stylesheet" href="./material.min.css">
     <script src="./node_modules/material-design-lite/material.min.js"></script>
 
     <link rel="stylesheet" href="./iconfont/material-icons.css">
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
 
-    <link rel="stylesheet" href="./openlayers-3.11.2/ol.css">
+    <link rel="stylesheet" href="./openlayers-4.0.1/ol.css">
     <script src="./openlayers-4.0.1/ol.js"></script>
     <script src="./node_modules/proj4/dist/proj4.js"></script>
     <script src="./language.js"></script>
@@ -461,7 +459,7 @@
               </div>
           </header>
           <div class="mdl-layout__drawer">
-              <img src="xxxhdpi.png" style="margin-top: 10px; width:239px; height:239px">
+              <img src="xxxhdpi.png" alt="growapp logo" style="margin-top: 10px; width:239px; height:239px">
               <nav class="mdl-navigation">
                   <a class="mdl-navigation__link" href="#account"><i class="material-icons">&#xE853;</i> <span id="gapp_account_info" class="translate">Register account</span></a>
                   <hr>
@@ -489,7 +487,7 @@
                 <div id="gapp_map_attribution">© OpenStreetMap contributors</div>
                 <div id="gapp_featureinfo" class="hidden">
                   <div class="gapp_photo_frame">
-                    <img id="gapp_featureinfo_photo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                    <img alt="photo on map" id="gapp_featureinfo_photo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
                   </div>
                   <div id="gapp_featureinfo_infotext" class="hidden"></div>
                   <button id="gapp_featureinfo_addphoto" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored" disabled><i class="material-icons">&#xE439;</i></button>
@@ -501,11 +499,11 @@
                 </div>
                 <div id="gapp_legendvertical" class="hidden">
                   <span class="legendtop legendmin legendwhite"></span><span class="legendbottom legendmax legendwhite"></span>
-                  <img src="layertemperaturev.png" id="legendimagev" width="35" height="401">
+                  <img alt="map legend for temperature" src="layertemperaturev.png" id="legendimagev" width="35" height="401">
                 </div>
                 <div id="gapp_legendhorizontal" class="hidden">
                   <span class="legendleft legendmin legendwhite"></span><span class="legendright legendmax legendwhite"></span>
-                  <img src="layertemperatureh.png" id="legendimageh" width="365" height="34">
+                  <img alt="map legend for temperature" src="layertemperatureh.png" id="legendimageh" width="365" height="34">
                 </div>
                 <div id="gapp_map_zoom_bar">
                   <button id="gapp_map_zoom_in" class="mdl-button mdl-js-button mdl-button--fab mdl-color--white"><i class="material-icons">&#xE8FF;</i><!--zoom_in--></button>
@@ -517,7 +515,7 @@
       <div id="gapp_fullscreenphotopopup" class="hidden">
         <div id="gapp_fullscreenphotopop_frame_container">
           <div class="gapp_photo_frame">
-            <img id="gapp_fullscreenphoto" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+            <img alt="fullscreen map photo" id="gapp_fullscreenphoto" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
           </div>
         </div>
         <div id="gapp_fullscreenphotopopup_infotext" class="hidden"></div>
@@ -529,7 +527,7 @@
       <div id="gapp_camera_popup" class="hidden">
          <div id="gapp_camera_frame">
            <div id="gapp_camera_overlay_frame" class="hidden">
-             <img id="gapp_camera_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+             <img alt="transparent overlay photo" id="gapp_camera_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
            </div>
          </div>
          <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab mdl-color--white">
@@ -540,9 +538,9 @@
          </button>
          <div id="gapp_camera_photo" class="hidden">
            <div id="gapp_camera_photo_frame">
-              <img id="gapp_camera_photo_img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+              <img alt="new photo preview" id="gapp_camera_photo_img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
               <div id="gapp_camera_photo_overlay_frame" class="hidden">
-                <img id="gapp_camera_photo_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                <img alt="transparent overlay photo" id="gapp_camera_photo_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
               </div>
            </div>
            <div id="gapp_camera_photo_bar_bottom">
