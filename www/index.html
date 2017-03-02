@@ -132,10 +132,14 @@
                   }
                 };
                 permissions.hasPermission(permissions.ACCESS_FINE_LOCATION, checkPermissionFineLocationCallback, null);
+              } else {
+                // no cordova.permissions
+                window.location.replace("main.html");
               }
             }, false);
           }
           else {
+            // cordova not avaible, this is a web-application
             window.location.replace("main.html");
           }
         }
