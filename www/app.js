@@ -1114,8 +1114,8 @@ var App = function() {
             if (_app.isMobileDevice) {
                 var width = _app.cameraPopup.clientWidth;
                 var height = _app.cameraPopup.clientHeight;
-                var tapEnabled = true;
-                var dragEnabled = true;
+                var tapEnabled = false;
+                var dragEnabled = false;
                 var toBack = true; // camera z-value can either be completely at the back or completey on top
                 var cameraAspectRatio;
                 var containerAspectRatio = width / height;
@@ -1164,17 +1164,21 @@ var App = function() {
                     }
                     var bestPreviewAspect = 0;
                     var difference = 1000;
-                    CameraPreview.getSupportedPreviewSizes(function(sizes){
-                        sizes.forEach(function(size){
+                    CameraPreview.getSupportedPreviewSize(function(sizes){
+                          if (typeof sizes !== 'string') {
                             var previewAspect = (size.width / size.height);
                             var nextDifference = Math.abs(clientAspect - previewAspect);
                             if (nextDifference < difference) {
                               difference = nextDifference;
                               bestPreviewAspect = previewAspect;
                             }
+                          }
+                          if (bestPreviewAspect === 0) {
+                            bestPreviewAspect = 4 / 3;
+                          }
+                          window.localStorage.cameraAspectRatio = bestPreviewAspect;
                         });
-                        window.localStorage.cameraAspectRatio = bestPreviewAspect;
-                        CameraPreview.getSupportedPictureSizes(function(sizes){
+                        CameraPreview.getSupportedPictureSize(function(sizes){
                           sizes.forEach(function(size){
                               var supported;
                               if (Math.abs(bestPreviewAspect - (size.width/size.height)) < 0.01) {
@@ -1186,7 +1190,6 @@ var App = function() {
                           });
                           _app.cameraPopup.resetCamera(true);
                         });
-                      });
                   }, 1000);
 
                 /*
@@ -1471,7 +1474,8 @@ var App = function() {
                 }
                 if (orientationOk) {
                   // takePicture fires cordova.plugins.camerapreview.setOnPictureTakenHandler
-                  CameraPreview.takePicture();//({maxWidth: 640, maxHeight: 640});
+                  CameraPreview.takePicture();//{maxWidth: 640, maxHeight: 640});
+                  //CameraPreview.takePicture({maxWidth: window.device.width, maxHeight: window.device.height});
                   _app.cameraPopup.shutterEffect();
                 } else {
                   _app.showMessage (__('Wrong camera orientation, please adjust'));
@@ -1484,6 +1488,9 @@ var App = function() {
     };
 
     this.cordovaDeviceReady = function () {
+        if (typeof CameraPreview === 'undefined') {
+          window.CameraPreview = cordova.plugins.camerapreview;
+        }
         CameraPreview.setOnPictureTakenHandler(function(result){
             var myLocation = olMap.geoLocation.getPosition();
             if (myLocation) {
@@ -1771,6 +1778,7 @@ var App = function() {
                 _app.featureInfoPhoto.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
                 _app.featureInfoPhoto.url = picture_url;
                 _app.featureInfoPhoto.photoid = feature.get('id');
+                spinner.classList.remove('hidden');
                 spinner.classList.add('is-active');
 
                 _app.getFeatureInfoText(feature.get('description'), feature.get('tags'), feature.get('time'), null, function(err, infoText){
@@ -1808,6 +1816,7 @@ var App = function() {
                 var photo = new Image();
                 photo.onload = function() {
                     spinner.classList.remove('is-active');
+                    spinner.classList.add('hidden');
                     _app.featureInfoPhoto.src = _app.featureInfoPhoto.url; // not: this.src, may show delayed loading picture
                     if (photoset && photoset.length > 0) {
                       _app.animationTargetElement = _app.featureInfoPopup;
