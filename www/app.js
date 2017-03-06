@@ -993,6 +993,7 @@ var App = function() {
         this.fullscreenphotopopup.show = function() {
             if (typeof StatusBar !== 'undefined') {
                 StatusBar.hide();
+                StatusBar.overlaysWebView(true);
             }
             _app.fullscreenphoto = document.querySelector('#gapp_fullscreenphoto');
             if (_app.isMobileDevice) {
@@ -1012,6 +1013,7 @@ var App = function() {
 
         this.fullscreenphotopopup.hide = function() {
             if (typeof StatusBar !== 'undefined') {
+                StatusBar.overlaysWebView(false);
                 StatusBar.show();
             }
             document.removeEventListener('backbutton', _app.fullscreenphotopopup.hide);
@@ -1061,36 +1063,38 @@ var App = function() {
         this.cameraPopup = document.querySelector('#gapp_camera_popup');
         this.cameraPreviewPhoto = document.querySelector('#gapp_camera_photo_img');
         this.cameraPopup.show = function(overlayURL, photoid) {
-            if (typeof StatusBar !== 'undefined') {
+          document.querySelector('#mainUI').classList.add('hidden');
+          if (typeof StatusBar !== 'undefined') {
                StatusBar.hide();
-            }
-            setTimeout(function() { // wait for hidden statusBar
-              if (typeof overlayURL === 'undefined') {
-                  overlayURL = null;
-                  photoid = 0;
-              }
-              _app.cameraPreviewPhoto.photoid = photoid;
-              var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_frame');
-              if (overlayURL) {
-                  var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay');
-                  cameraOverlayPicture.src = overlayURL;
-                  cameraOverlayPictureFrame.classList.remove('hidden');
-              } else {
-                  cameraOverlayPictureFrame.classList.add('hidden');
-              }
-              document.addEventListener('backbutton', _app.cameraPopup.hide);
-              window.addEventListener('orientationchange', _app.cameraPopup.resetCamera);
-              document.querySelector('#mainUI').classList.add('hidden');
-              document.querySelector('body').style.backgroundColor = 'transparent';
-              _app.cameraPopup.classList.remove('hidden');
-              _app.cameraPopup.startCamera();
-            }, 100);
+               StatusBar.overlaysWebView(true);
+          }
+          if (typeof overlayURL === 'undefined') {
+              overlayURL = null;
+              photoid = 0;
+          }
+          _app.cameraPreviewPhoto.photoid = photoid;
+          var cameraOverlayPictureFrame = document.querySelector('#gapp_camera_overlay_frame');
+          if (overlayURL) {
+              var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay');
+              cameraOverlayPicture.src = overlayURL;
+              cameraOverlayPictureFrame.classList.remove('hidden');
+          } else {
+              cameraOverlayPictureFrame.classList.add('hidden');
+          }
+          document.addEventListener('backbutton', _app.cameraPopup.hide);
+          window.addEventListener('orientationchange', _app.cameraPopup.resetCamera);
+          document.querySelector('body').style.backgroundColor = 'transparent';
+          setTimeout(function() { // wait for hidden statusBar
+            _app.cameraPopup.classList.remove('hidden');
+            _app.cameraPopup.startCamera();
+          }, 100);
         };
         this.cameraPopup.hide = function() {
             document.removeEventListener('backbutton', _app.cameraPopup.hide);
             window.removeEventListener('orientationchange', _app.cameraPopup.resetCamera);
             _app.cameraPopup.stopCamera();
             if (typeof StatusBar !== 'undefined') {
+                StatusBar.overlaysWebView(false);
                 StatusBar.show();
             }
             document.querySelector('#mainUI').classList.remove('hidden');
@@ -1459,7 +1463,6 @@ var App = function() {
                 if (orientationOk) {
                   // takePicture fires cordova.plugins.camerapreview.setOnPictureTakenHandler
                   CameraPreview.takePicture();//{maxWidth: 640, maxHeight: 640});
-                  //CameraPreview.takePicture({maxWidth: window.device.width, maxHeight: window.device.height});
                   _app.cameraPopup.shutterEffect();
                 } else {
                   _app.showMessage (__('Wrong camera orientation, please adjust'));
