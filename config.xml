@@ -49,7 +49,7 @@
     <plugin name="cordova-plugin-android-permissions" spec="~0.10.0" />
     <plugin name="cordova-plugin-geolocation" spec="~2.4.1" />
     <plugin name="cordova-plugin-statusbar" spec="~2.2.1" />
-    <plugin name="cordova-plugin-camera-preview" spec="https://github.com/anneb/cordova-plugin-camera-preview.git#develop" />
+    <plugin name="cordova-plugin-camera-preview" spec="https://github.com/anneb/cordova-plugin-camera-preview.git" />
     <engine name="android" spec="~6.0.0" />
     <plugin name="cordova-plugin-insomnia" spec="https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git" />
 </widget>
