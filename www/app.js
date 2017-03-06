@@ -1162,42 +1162,26 @@ var App = function() {
                     if (clientAspect < 1) {
                       clientAspect = 1 / clientAspect;
                     }
-                    var bestPreviewAspect = 0;
+                    var bestPictureAspect = 0;
                     var difference = 1000;
-                    CameraPreview.getSupportedPreviewSize(function(sizes){
-                          if (typeof sizes !== 'string') {
-                            var previewAspect = (size.width / size.height);
-                            var nextDifference = Math.abs(clientAspect - previewAspect);
-                            if (nextDifference < difference) {
-                              difference = nextDifference;
-                              bestPreviewAspect = previewAspect;
-                            }
-                          }
-                          if (bestPreviewAspect === 0) {
-                            bestPreviewAspect = 4 / 3;
-                          }
-                          window.localStorage.cameraAspectRatio = bestPreviewAspect;
-                        });
-                        CameraPreview.getSupportedPictureSize(function(sizes){
-                          sizes.forEach(function(size){
-                              var supported;
-                              if (Math.abs(bestPreviewAspect - (size.width/size.height)) < 0.01) {
-                                supported = 'supported';
-                              } else {
-                                supported = 'not supported';
-                              }
-                              //console.log(size.width + 'x' + size.height+ "," + size.width/size.height + ',' + supported);
-                          });
-                          _app.cameraPopup.resetCamera(true);
-                        });
-                  }, 1000);
 
-                /*
-                  setTimeout(function() {CameraPreview.getPreviewSize(function(size){
-                    cameraAspectRatio = size.width / size.height;
-                    window.localStorage.cameraAspectRatio = cameraAspectRatio;
-                    _app.cameraPopup.resetCamera(true);
-                  });}, 1000); */
+                    CameraPreview.getSupportedPictureSizes(function(sizes){
+                      sizes.forEach(function(size){
+                          var pictureAspect = (size.width / size.height);
+                          var nextDifference = Math.abs(clientAspect - previewAspect);
+                          if (nextDifference < difference) {
+                            difference = nextDifference;
+                            bestPreviewAspect = previewAspect;
+                          }
+                          if (bestPictureAspect === 0) {
+                            // none found, assume 4 : 3
+                            bestPictureAspect = 4 / 3;
+                          }
+                          window.localStorage.cameraAspectRatio = bestPictureAspect;
+                          _app.cameraPopup.resetCamera(true);
+                      });
+                    });
+                  }, 1000);
                 }
             }
         };
