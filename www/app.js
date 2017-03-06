@@ -1172,10 +1172,10 @@ var App = function() {
                     CameraPreview.getSupportedPictureSizes(function(sizes){
                       sizes.forEach(function(size){
                           var pictureAspect = (size.width / size.height);
-                          var nextDifference = Math.abs(clientAspect - previewAspect);
+                          var nextDifference = Math.abs(clientAspect - pictureAspect);
                           if (nextDifference < difference) {
                             difference = nextDifference;
-                            bestPreviewAspect = previewAspect;
+                            bestPictureAspect = pictureAspect;
                           }
                           if (bestPictureAspect === 0) {
                             // none found, assume 4 : 3
