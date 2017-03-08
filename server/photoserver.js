@@ -111,7 +111,7 @@ app.get('/photoserver/getphotos', cors(), function(req, res) {
   } else {
     sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo where visible=true and rootid=0';
   }
-  dbPool.query(sql, hashtags)
+  dbPool.query(sql, [hashtags])
     .then(function(result) {
       res.json(createCollection (result.rows, null, null));
       res.end();
