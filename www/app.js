@@ -98,6 +98,11 @@ var PhotoServer = function() {
       window.localStorage.cacheTime = Date.now();
   };
 
+  this.resetHashTags = function(hashtags) {
+    _photoServer.resetCacheTime();
+    _photoServer.hashTags = hashtags;
+  };
+
   // get cache time, updated to now if older then 10 minutes
   this.getCacheTime = function() {
     var now = Date.now();
@@ -158,7 +163,11 @@ var PhotoServer = function() {
         loader: function () {
           var format = new ol.format.GeoJSON();
           var source = this;
-          _photoServer.getGeoJSON(_photoServer.server + '/photoserver/getphotos?' + _photoServer.getCacheTime(), function(response){
+          var params = '';
+          if (_photoServer.hashTags && _photoServer.hashTags != '') {
+            params = "hashtags=" + encodeURIComponent(photoServer.hashTags) + "&";
+          }
+          _photoServer.getGeoJSON(_photoServer.server + '/photoserver/getphotos?' + params + _photoServer.getCacheTime(), function(response){
             var features = format.readFeatures(response, { featureProjection: 'EPSG:3857'});
             _photoServer.featureFilter(features, function(filteredFeatures){
               source.addFeatures(filteredFeatures);
@@ -879,7 +888,7 @@ var App = function() {
     });
 
     this.navigate = function() {
-        switch (window.location.hash) {
+        switch (window.location.hash.split('=')[0]) {
             case '#managephoto':
                 _app.hideDrawer();
                 if (!_app.isMobileDevice) {
@@ -915,6 +924,15 @@ var App = function() {
                 window.location.hash='';
                 window.location = __('info.html');
                 break;
+            case '#hashtags':
+                var hashtags = decodeURIComponent(window.location.hash.split('=')[1]);
+                photoServer.resetHashTags(hashtags);
+                _app.photoSource = photoServer.updatePhotos();
+                olMap.clusterLayer.setSource(new ol.source.Cluster({
+                    distance: 40,
+                    source: _app.photoSource
+                  }));
+                window.location.hash='';
         }
     };
 
