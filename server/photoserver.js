@@ -95,8 +95,23 @@ function createCollection(features, message, errno) {
 
 app.get('/photoserver/getphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getphotos');
-  var sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo where visible=true and rootid=0';
-  dbPool.query(sql)
+  var hashtags = req.query.hashtags;
+  if (hashtags) {
+    if (RegExp(/[^a-zA-Z\d\s#,]/).test(hashtags)) {
+      // invalid characters in hashtags
+      res.json(createCollection([], null, null));
+      res.end();
+      return;
+    }
+    hashtags = hashtags.replace(' ', '').split(',').filter(function(hashtag) {return hashtag.substr(0,1) == '#';}).join('|');
+  }
+  var sql;
+  if (hashtags && hashtags != '') {
+    sql = 'with tab as (select distinct case when rootid <> 0 then rootid else id end id from photo where description similar to $1) select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo,tab where tab.id=photo.id and visible=true;';
+  } else {
+    sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo where visible=true and rootid=0';
+  }
+  dbPool.query(sql, hashtags)
     .then(function(result) {
       res.json(createCollection (result.rows, null, null));
       res.end();
