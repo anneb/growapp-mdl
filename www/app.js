@@ -734,6 +734,7 @@ var App = function() {
         });
 
         window.addEventListener('hashchange', this.navigate.bind(this), false);
+        this.navigate(); // handle any hashes passed to the URL
         this.showStoredMessage();
     };
 
