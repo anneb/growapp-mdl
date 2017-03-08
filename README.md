@@ -65,3 +65,7 @@ Manually copy or move:<br>
 ```platforms/android/res/ ```
 
 <br>and rebuild the app.
+
+
+## API
+see the [growapp wiki](https://github.com/anneb/growapp-mdl/wiki)
