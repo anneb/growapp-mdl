@@ -103,11 +103,11 @@ app.get('/photoserver/getphotos', cors(), function(req, res) {
       res.end();
       return;
     }
-    hashtags = hashtags.replace(' ', '').split(',').filter(function(hashtag) {return hashtag.substr(0,1) == '#';}).join('|');
+    hashtags = hashtags.replace(' ', '').split(',').filter(function(hashtag) {return hashtag.substr(0,1) == '#';}).map(function(hashtag){return hashtag+'\\y';}).join('|');
   }
   var sql;
   if (hashtags && hashtags != '') {
-    sql = 'with tab as (select distinct case when rootid <> 0 then rootid else id end foundid from photo where description similar to $1) select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo,tab where tab.foundid=photo.id and visible=true;';
+    sql = 'with tab as (select distinct case when rootid <> 0 then rootid else id end foundid from photo where description ~* $1) select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo,tab where tab.foundid=photo.id and visible=true;';
     dbPool.query(sql, [hashtags])
       .then(function(result) {
         res.json(createCollection (result.rows, null, null));
