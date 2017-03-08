@@ -107,7 +107,7 @@ app.get('/photoserver/getphotos', cors(), function(req, res) {
   }
   var sql;
   if (hashtags && hashtags != '') {
-    sql = 'with tab as (select distinct case when rootid <> 0 then rootid else id end id from photo where description similar to $1) select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo,tab where tab.id=photo.id and visible=true;';
+    sql = 'with tab as (select distinct case when rootid <> 0 then rootid else id end foundid from photo where description similar to $1) select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo,tab where tab.foundid=photo.id and visible=true;';
   } else {
     sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, case when animationfilename is null then filename else animationfilename end filename, time, width, height, description, tags from photo where visible=true and rootid=0';
   }
