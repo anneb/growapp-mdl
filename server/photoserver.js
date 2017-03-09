@@ -93,6 +93,29 @@ function createCollection(features, message, errno) {
         return featureCollection;
 }
 
+app.get('/photoserver/getallphotos', cors(), function(req, res) {
+  console.log('GET /photoserver/getallphotos');
+  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  if (ip != '80.113.1.130') {
+    res.writeHead(403, {'Content-Type': 'text/html'});
+    res.end('error: access denied');
+    return;
+  }
+  var page = req.query.page;
+  var pageSize = 200;
+  var sql = 'select id, filename, deviceid, time from photo order by time desc limit $1 offset $2';
+  dbPool.query(sql, [pageSize, pageSize*page])
+    .then(function(result) {
+      res.json(result.rows);
+      res.end();
+    })
+    .catch(function(reason) {
+      console.log(reason);
+      res.writeHead(500, {'Content-Type': 'text/html'});
+      res.end('error: ' + reason);
+    });
+});
+
 app.get('/photoserver/getphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getphotos');
   var hashtags = req.query.hashtags;
