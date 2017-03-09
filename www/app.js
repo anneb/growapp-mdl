@@ -1480,8 +1480,7 @@ var App = function() {
                   }
                 }
                 if (orientationOk) {
-                  // takePicture fires cordova.plugins.camerapreview.setOnPictureTakenHandler
-                  CameraPreview.takePicture();//{maxWidth: 640, maxHeight: 640});
+                  CameraPreview.takePicture(_app.takePictureHandler);//{maxWidth: 640, maxHeight: 640});
                   _app.cameraPopup.shutterEffect();
                 } else {
                   _app.showMessage (__('Wrong camera orientation, please adjust'));
@@ -1493,24 +1492,23 @@ var App = function() {
         cameraClose.addEventListener('click', _app.cameraPopup.hide);
     };
 
+    this.takePictureHandler = function(base64PictureData) {
+      var myLocation = olMap.geoLocation.getPosition();
+      if (myLocation) {
+          _app.cameraPreviewPhoto.rawdata = base64PictureData;
+          _app.cameraPreviewPhoto.src = 'data:image/jpeg;base64,' + _app.cameraPreviewPhoto.rawdata;
+          myLocation = ol.proj.transform(myLocation, 'EPSG:3857', 'EPSG:4326');
+          var accuracy = olMap.geoLocation.getAccuracy();
+          _app.cameraPreviewPhoto.myLocation = myLocation;
+          _app.cameraPreviewPhoto.accuracy = accuracy;
+          _app.cameraPhoto.show();
+      } else {
+          _app.showMessage('Required photo geo-location unknown');
+      }
+    };
+
     this.cordovaDeviceReady = function () {
-        if (typeof CameraPreview === 'undefined') {
-          window.CameraPreview = cordova.plugins.camerapreview;
-        }
-        CameraPreview.setOnPictureTakenHandler(function(result){
-            var myLocation = olMap.geoLocation.getPosition();
-            if (myLocation) {
-                _app.cameraPreviewPhoto.rawdata = result;
-                _app.cameraPreviewPhoto.src = 'data:image/jpeg;base64,' + _app.cameraPreviewPhoto.rawdata;
-                myLocation = ol.proj.transform(myLocation, 'EPSG:3857', 'EPSG:4326');
-                var accuracy = olMap.geoLocation.getAccuracy();
-                _app.cameraPreviewPhoto.myLocation = myLocation;
-                _app.cameraPreviewPhoto.accuracy = accuracy;
-                _app.cameraPhoto.show();
-            } else {
-                _app.showMessage('Required photo location unknown');
-            }
-        });
+
     };
 
     this.geoLocationErrorHandler = function(message) {
