@@ -66,6 +66,8 @@ Manually copy or move:<br>
 
 <br>and rebuild the app.
 
+After adding platform ios, the ios launch screen images have to be copied to the ios project manually:  
+```cp res/screen/ios/* platforms/ios/GrowApp/Images.xcassets//LaunchImage.launchimage/ ```
 
 ## API
 see the [growapp wiki](https://github.com/anneb/growapp-mdl/wiki)
