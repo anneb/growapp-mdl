@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>growapp photolist</title>
+    <meta charset="utf-8">
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="icon" href="favicon.ico" type="image/ico">
+
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+
+    <link rel="stylesheet" href="./iconfont/material-icons.css">
+    <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
+
+
+    <style>
+      .card-image {
+        background-color: gray;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+      .card-image__info {
+        color: white;
+        text-shadow: 0 1px black;
+      }
+    </style>
+    <script>
+      var getJSON = function (url, callback){
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState !== 4) {
+            return;
+          }
+          if (xhr.status === 200 || xhr.status === 304) {
+            callback(JSON.parse(xhr.response));
+          }
+        };
+        xhr.send();
+      };
+
+      var cardTemplate = '<div class="mdl-cell mdl-cell--4-col">' +
+                         ' <div class="card-image mdl-card mdl-shadow--2dp" style="background-image: url(\'https://phenology.geodan.nl/uploads/small/$1\');">\n' +
+                         ' <div class="mdl-card__title mdl-card--expand"></div>\n' +
+                         '  <div class="mdl-card__actions">\n' +
+                         '   <span class="card-image__info">$2</span>\n' +
+                         '  </div>\n'+
+                         ' </div>\n' +
+                         '</div>\n';
+
+      var init = function() {
+        getJSON('https://phenology.geodan.nl/photoserver/getallphotos?page=0', function(photolist) {
+          var content = document.querySelector('.page-content');
+          var html = "";
+          content.innerHTML = html;
+          var photocounter = 0;
+          var row='';
+          photolist.forEach(function(photo){
+            row += cardTemplate.replace('$1', photo.filename).replace('$2', photo.time);
+            photocounter++;
+            if (photocounter == 3) {
+              photocounter = 0;
+              html += '<div class="mdl-grid">\n' + row + '</div>\n';
+              row='';
+            }
+          });
+          if (photocounter > 0) {
+            html += '<div class="mdl-grid">\n' + row + '</div>\n';
+          }
+          content.innerHTML = html;
+        });
+      };
+    </script>
+  </head>
+  <body onload="init()">
+      <!-- Always shows a header, even in smaller screens. -->
+      <div id="mainUI" class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+          <header class="mdl-layout__header">
+              <div class="mdl-layout__header-row">
+                  <!-- Title -->
+                  <span class="mdl-layout-title translate">GrowApp - Photos</span>
+                  <!-- Add spacer, to align navigation to the right -->
+                  <div class="mdl-layout-spacer"></div>
+              </div>
+          </header>
+          <div class="mdl-layout__drawer">
+              <img src="xxxhdpi.png" alt="growapp logo" style="margin-top: 10px; width:239px; height:239px">
+              <nav class="mdl-navigation">
+                  <a class="mdl-navigation__link" href="#account"><i class="material-icons">&#xE853;</i> <span id="gapp_account_info" class="translate">Register account</span></a>
+                  <hr>
+                  <a class="mdl-navigation__link" href="#managephoto"><i class="material-icons">collections</i> <span class="translate">Manage photos</span></a>
+                  <hr>
+                  <a id="gapp_layer_season" class="mdl-navigation__link" href="#layerseason"><i class="material-icons">&#xE545;<!-- local florist--></i> <span class="translate">Start of season</span></a>
+                  <a id="gapp_layer_trend" class="mdl-navigation__link" href="#layertrend"><i class="material-icons">&#xE6E1;<!-- show-chart --></i> <span class="translate">Vegetation trend</span></a>
+                  <!--a id="gapp_layer_temperature" class="mdl-navigation__link" href="#layertemperature"><svg class="svg-24px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M17,3H21V5H17V3M17,7H21V9H17V7M17,11H21V13H17.75L17,12.1V11M21,15V17H19C19,16.31 18.9,15.63 18.71,15H21M17,17A5,5 0 0,1 12,22A5,5 0 0,1 7,17C7,15.36 7.79,13.91 9,13V5A3,3 0 0,1 12,2A3,3 0 0,1 15,5V13C16.21,13.91 17,15.36 17,17M11,8V14.17C9.83,14.58 9,15.69 9,17A3,3 0 0,0 12,20A3,3 0 0,0 15,17C15,15.69 14.17,14.58 13,14.17V8H11M7,3V5H3V3H7M7,7V9H3V7H7M7,11V12.1L6.25,13H3V11H7M3,15H5.29C5.1,15.63 5,16.31 5,17H3V15Z" /></svg> Yesterday's day temperature</a -->
+                  <a id="gapp_layer_temperature" class="mdl-navigation__link" href="#layertemperature"><i class="mdi mdi-thermometer-lines mdi-24px"></i> <span class="translate">Yesterday's day temperature</span></a>
+                  <hr>
+                  <a class="mdl-navigation__link" href="#language"><i class="material-icons">language</i> <span class="translate">Language</span></a>
+                  <a class="mdl-navigation__link" href="#help"><i class="material-icons">help</i> <span class="translate">Help</span></a>
+                  <a class="mdl-navigation__link" href="#info"><i class="material-icons">info</i> <span class="translate">About GrowApp</span></a>
+              </nav>
+          </div>
+          <main class="mdl-layout__content">
+              <div class="page-content">
+            INHOUD!
+              </div>
+          </main>
+      </div>
+      <div id="gapp-snackbar" class="mdl-js-snackbar mdl-snackbar">
+            <div class="mdl-snackbar__text">hallo</div>
+            <button class="mdl-snackbar__action" type="button"></button>
+      </div>
+  </body>
+</html>
