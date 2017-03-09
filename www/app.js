@@ -1062,11 +1062,15 @@ var App = function() {
         document.querySelector('#gapp_fullscreenphotopopup_previous').onclick = function() {
           if (_app.photoIndex > 0) {
             _app.photoIndex--;
+          } else {
+            _app.photoIndex = _app.activeFeature.get('photoset').length -1;
           }
         };
         document.querySelector('#gapp_fullscreenphotopopup_next').onclick = function() {
           if (_app.photoIndex < _app.activeFeature.get('photoset').length - 1) {
             _app.photoIndex++;
+          } else {
+            _app.photoIndex = 0;
           }
         };
         document.querySelector('#gapp_fullscreenphotopopup_last').onclick = function() {
