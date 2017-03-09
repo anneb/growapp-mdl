@@ -1056,6 +1056,23 @@ var App = function() {
         var gappFullScreenPhotoInfo = document.querySelector('#gapp_fullscreenphotopopup_info');
         gappFullScreenPhotoInfo.addEventListener('click', _app.featureInfoPopup.toggleInfo);
 
+        document.querySelector('#gapp_fullscreenphotopopup_first').onclick = function() {
+          _app.photoIndex = 0;
+        };
+        document.querySelector('#gapp_fullscreenphotopopup_previous').onclick = function() {
+          if (_app.photoIndex > 0) {
+            _app.photoIndex--;
+          }
+        };
+        document.querySelector('#gapp_fullscreenphotopopup_next').onclick = function() {
+          if (_app.photoIndex < _app.activeFeature.get('photoset').length - 1) {
+            _app.photoIndex++;
+          }
+        };
+        document.querySelector('#gapp_fullscreenphotopopup_last').onclick = function() {
+          _app.photoIndex = _app.activeFeature.get('photoset').length - 1;
+        };
+
         var gappFeatureInfoFullScreenClose = document.querySelector('#gapp_fullscreenphotopopup_close');
         gappFeatureInfoFullScreenClose.addEventListener('click', _app.fullscreenphotopopup.hide);
 
@@ -1073,7 +1090,9 @@ var App = function() {
                 }
             });
         });
+
         this.playButton = document.querySelector('#gapp_fullscreenphotopopup_play');
+        this.playBar = document.querySelector('#gapp_fullscreenphotopopup_play_bar');
         this.pauseButton = document.querySelector('#gapp_fullscreenphotopopup_pause');
     };
 
@@ -1578,12 +1597,12 @@ var App = function() {
 
     this.pauseAnimation = function() {
       _app.pauseButton.classList.add('hidden');
-      _app.playButton.classList.remove('hidden');
+      _app.playBar.classList.remove('hidden');
       _app.animationPaused = true;
     };
 
     this.playAnimation = function() {
-      _app.playButton.classList.add('hidden');
+      _app.playBar.classList.add('hidden');
       _app.pauseButton.classList.remove('hidden');
       _app.animationPaused = false;
     };
@@ -1595,7 +1614,7 @@ var App = function() {
         _app.pauseButton.addEventListener('click', _app.pauseAnimation);
         _app.playButton.addEventListener('click', _app.playAnimation);
       } else {
-        _app.playButton.classList.add('hidden');
+        _app.playBar.classList.add('hidden');
         _app.pauseButton.classList.add('hidden');
         _app.pauseButton.removeEventListener('click', _app.pauseAnimation);
         _app.playButton.removeEventListener('click', _app.playAnimation);
@@ -1646,7 +1665,7 @@ var App = function() {
       if (!photoset || photoset.length === 0) {
         return;
       }
-      var photoIndex = -1;
+      _app.photoIndex = -1;
       var nextFeature;
 
       function loopPhotos() {
@@ -1657,13 +1676,13 @@ var App = function() {
           return;
         }
         if (!_app.animationPaused) {
-          photoIndex++;
+          _app.photoIndex++;
         }
-        if (photoIndex >= photoset.length || photoIndex < 0) {
-          photoIndex = 0;
+        if (_app.photoIndex >= photoset.length || _app.photoIndex < 0) {
+          _app.photoIndex = 0;
         }
-        nextFeature = photoset[photoIndex];
-        _app.NextFeatureInfo(nextFeature, photoIndex + 1, function(infoText){
+        nextFeature = photoset[_app.photoIndex];
+        _app.NextFeatureInfo(nextFeature, _app.photoIndex + 1, function(infoText){
           var fullUrl;
           if (_app.animationTargetElement === _app.featureInfoPopup) {
             fullUrl = photoServer.fullPhotoUrl(nextFeature.filename, 'small');
