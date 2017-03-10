@@ -1545,7 +1545,7 @@ var App = function() {
             _app.buttonLocation.removeAttribute('disabled');
             _app.buttonLocation.classList.add('mdl-color--white');
             _app.buttonLocation.classList.add('mdl-color-text--blue-700');
-
+            olMap.olmap.getView().setZoom(16); // default start zoom level for geoLocation
             if (_app.isMobileDevice) {
                 // enable camera button
                 var cameraButton = document.querySelector('#gapp_button_camera');
