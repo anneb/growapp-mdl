@@ -185,11 +185,37 @@
         top: 10px;
         right: 50px;
       }
-      #gapp_fullscreenphotopopup_play, #gapp_fullscreenphotopopup_pause {
+      #gapp_fullscreenphotopopup_pause {
         position: absolute;
         bottom: 20px;
         left: 50%;
         margin-left: -12px;
+      }
+      #gapp_fullscreenphotopopup_play_bar {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        margin-left: -92px;
+        width: 184px;
+      }
+      #gapp_fullscreenphotopopup_first, #gapp_fullscreenphotopopup_previous, #gapp_fullscreenphotopopup_play, #gapp_fullscreenphotopopup_next, #gapp_fullscreenphotopopup_last {
+        position: absolute;
+        bottom: 0px;
+      }
+      #gapp_fullscreenphotopopup_first {
+        left: 0px;
+      }
+      #gapp_fullscreenphotopopup_previous {
+        left: 40px;
+      }
+      #gapp_fullscreenphotopopup_play {
+        left: 80px;
+      }
+      #gapp_fullscreenphotopopup_next {
+        left: 120px;
+      }
+      #gapp_fullscreenphotopopup_last {
+        left: 160px;
       }
       #gapp_fullscreenphotopopup_infotext {
         position: absolute;
@@ -521,8 +547,14 @@
         <div id="gapp_fullscreenphotopopup_infotext" class="hidden"></div>
         <button id="gapp_fullscreenphotopopup_close" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">close</i></button>
         <button id="gapp_fullscreenphotopopup_info" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE88F;<!--info_outline--></i></button>
-        <button id="gapp_fullscreenphotopopup_pause" class="hidden mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">pause</i></button>
-        <button id="gapp_fullscreenphotopopup_play" class="hidden mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE037;<!--play_arrow--></i></button>
+        <div id="gapp_fullscreenphotopopup_play_bar" class="hidden">
+          <button id="gapp_fullscreenphotopopup_first" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE5DC;<!--first_page--></i></button>
+          <button id="gapp_fullscreenphotopopup_previous" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE5CB;<!--chevron_left--></i></button>
+          <button id="gapp_fullscreenphotopopup_play" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE037;<!--play_arrow--></i></button>
+          <button id="gapp_fullscreenphotopopup_next" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE5CC;<!--chevron_right--></i></button>
+          <button id="gapp_fullscreenphotopopup_last" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">&#xE5DD;<!--last_page--></i></button>
+        </div>
+        <button id="gapp_fullscreenphotopopup_pause" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">pause</i></button>
       </div>
       <div id="gapp_camera_popup" class="hidden">
          <div id="gapp_camera_frame">
