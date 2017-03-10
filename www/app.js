@@ -517,8 +517,8 @@ var OLMap = function() {
             controls: [],
             view: new ol.View({
                 projection: 'EPSG:3857',
-                center: ol.proj.transform([4.913024, 52.34223], 'EPSG:4326', 'EPSG:3857'), //Geodan Amsterdam
-                zoom: 16
+                center: ol.proj.transform([7.913024, 52.34223], 'EPSG:4326', 'EPSG:3857'),
+                zoom: 4
             })
         });
     };/* initMap */
