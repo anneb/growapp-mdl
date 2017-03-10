@@ -1166,8 +1166,9 @@ var App = function() {
                 var cameraAspectRatio;
                 var containerAspectRatio = width / height;
                 var camRect = {left: 0, top: 0, width: width, height: height};
-                if (window.localStorage.cameraAspectRatio) {
-                  cameraAspectRatio = window.localStorage.cameraAspectRatio;
+                //if (window.localStorage.cameraAspectRatio) {
+                  //cameraAspectRatio = window.localStorage.cameraAspectRatio;
+                  cameraAspectRatio = 4/3;
                   if ((cameraAspectRatio > 1 && containerAspectRatio < 1) || (cameraAspectRatio < 1 && containerAspectRatio > 1)) {
                     cameraAspectRatio = 1 / cameraAspectRatio;
                   }
@@ -1192,7 +1193,7 @@ var App = function() {
                     _app.setElementStyleToRect(overlayPictureFrame, overlayRect);
                     _app.setElementStyleToRect(document.querySelector('#gapp_camera_photo_overlay_frame'), overlayRect);
                   }
-                }
+                //}
                 CameraPreview.startCamera({x: camRect.left, y: camRect.top, width: camRect.width, height: camRect.height, camera: 'back', tapPhoto: tapEnabled, previewDrag: dragEnabled, toBack: toBack});
                 //CameraPreview.setZoom(0);
 
@@ -1200,7 +1201,7 @@ var App = function() {
                 // force css recalculation
                 document.body.style.zoom=1.00001;
                 setTimeout(function(){document.body.style.zoom=1;}, 50);
-
+/*
                 if (!window.localStorage.cameraAspectRatio) {
                   // camera aspect not yet known, read from camera when started
                   setTimeout(function() {
@@ -1229,6 +1230,7 @@ var App = function() {
                     });
                   }, 1000);
                 }
+*/
             }
         };
         this.cameraPopup.stopCamera = function() {
