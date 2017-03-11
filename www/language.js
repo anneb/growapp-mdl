@@ -25,7 +25,7 @@ var languageProvider = new function()
       if (xhr.readyState != 4) {
         return;
       }
-      if (xhr.status == 200 || xhr.status == 304) {
+      if (xhr.status == 200 || xhr.status == 304 || xhr.status == 0 /* iOs file */) {
         callback(JSON.parse(xhr.response));
       } else {
         callback({});
