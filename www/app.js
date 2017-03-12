@@ -1887,6 +1887,8 @@ var App = function() {
                     if (photoset && photoset.length > 0) {
                       _app.animationTargetElement = _app.featureInfoPopup;
                       _app.doAnimation(feature);
+                    } else {
+                      _app.enablePlayPause(false);
                     }
                 };
                 photo.onerror = function() {
