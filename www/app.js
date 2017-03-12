@@ -1538,7 +1538,10 @@ var App = function() {
                   }
                 }
                 if (orientationOk) {
-                  CameraPreview.takePicture(_app.takePictureHandler);//{maxWidth: 640, maxHeight: 640});
+                  CameraPreview.takePicture({width: 2048, height: 2048}, _app.takePictureHandler, function(reason)
+                  {
+                      _app.showMessage(reason);
+                  });
                   _app.cameraPopup.shutterEffect();
                 } else {
                   _app.showMessage (__('Wrong camera orientation, please adjust'));
