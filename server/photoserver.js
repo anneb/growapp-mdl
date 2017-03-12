@@ -947,7 +947,7 @@ app.post('/photoserver/createdevice', cors(), function (req, res){
 app.get('/photoserver/taglist', cors(), function(req, res){
     console.log('/photoserver/taglist');
     var langcode = req.query.langcode;
-    var sql = 'select tagid, tagtext from tags where langcode=$1 and active=TRUE';
+    var sql = 'select tagid, tagtext, active from tags where langcode=$1';
     dbPool.query(sql, [langcode])
       .then (function (result){
           if (result.rows) {
