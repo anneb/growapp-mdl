@@ -1148,6 +1148,10 @@ var App = function() {
               var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay');
               cameraOverlayPicture.src = overlayURL;
               cameraOverlayPictureFrame.classList.remove('hidden');
+              // load medium resolution overlay
+              var image = new Image();
+              image.onload = function () {cameraOverlayPicture.src = image.src;};
+              image.src = photoServer.fullPhotoUrl(_app.activeFeature.get('filename'), 'medium');
           } else {
               cameraOverlayPictureFrame.classList.add('hidden');
           }
