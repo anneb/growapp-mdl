@@ -1174,6 +1174,7 @@ var App = function() {
             document.querySelector('#mainUI').classList.remove('hidden');
             document.querySelector('body').style.backgroundColor = 'lightgray';
             _app.cameraPopup.classList.add('hidden');
+            olMap.olmap.updateSize();
         };
 
         this.cameraPopup.shutterEffect = function()
