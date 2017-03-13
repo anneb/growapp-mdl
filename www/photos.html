@@ -88,8 +88,7 @@
         xhr.onreadystatechange = function (event) {
            if (xhr.readyState === 4) {
                if (xhr.status === 200) {
-                 var result = JSON.parse(xhr.responseText);
-                 callback(false, result);
+                 callback(false, xhr.responseText);
                } else {
                  callback(xhr.status + ' ' + xhr.statusText);
                }
@@ -108,7 +107,24 @@
                          '</div>\n';
 
       var init = function() {
-        getJSON('https://phenology.geodan.nl/photoserver/getallphotos?page=0', function(photolist) {
+        var page = window.location.search.slice(1).split('&').filter(function(keyval){return keyval.split('=')[0] === 'page';});
+        if (page.length) {
+          page = parseInt(page[0].split('=')[1]);
+        } else {
+          page = 0;
+        }
+        var buttonPrev = document.querySelector('#button_previous_page');
+        if (page > 0) {
+          buttonPrev.removeAttribute('disabled');
+          buttonPrev.addEventListener('click', function(){
+            window.location = window.location.href.split('?')[0] + "?page=" + (page-1);
+          });
+        }
+        var buttonNext = document.querySelector('#button_next_page');
+        buttonNext.addEventListener('click', function(){
+          window.location = window.location.href.split('?')[0] + "?page=" + (page+1);
+        });
+        getJSON('https://phenology.geodan.nl/photoserver/getallphotos?page=' + page + '&pagesize=40', function(photolist) {
           var content = document.querySelector('.page-content');
           var html = "";
           content.innerHTML = html;
@@ -198,6 +214,14 @@
           <main class="mdl-layout__content">
               <div class="page-content">
                 INHOUD!
+              </div>
+              <div>
+                <button id="button_previous_page" class="mdl-button mdl-js-button  mdl-button--raised mdl-js-ripple-effect" disabled>
+                  previous page
+                </button>
+                <button id="button_next_page" class="mdl-button mdl-js-button  mdl-button--raised mdl-js-ripple-effect">
+                  next page
+                </button>
               </div>
               <div id="photopopup" class = "hidden">
                 <img id="photopopup_img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">

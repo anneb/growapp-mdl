@@ -109,8 +109,11 @@ app.get('/photoserver/getallphotos', cors(), function(req, res) {
     res.end('error: access denied');
     return;
   }
-  var page = req.query.page;
-  var pageSize = 200;
+  var page = req.query.page ? parseInt(req.query.page) : 0;
+  var pageSize = req.query.pagesize ? parseInt(req.query.pagesize) : 200;
+  if (pageSize > 200) {
+    pageSize = 200;
+  }
   var sql = 'select id, filename, deviceid, time from photo order by time desc limit $1 offset $2';
   dbPool.query(sql, [pageSize, pageSize*page])
     .then(function(result) {
