@@ -17,7 +17,7 @@ var nodemailer = require('nodemailer');
 var gm = require('gm');
 
 var app = express();
-
+app.set('trust proxy', '127.0.0.1');
 
 var Pool = require('pg').Pool;
 var dbPool = new Pool({
@@ -98,7 +98,10 @@ function createCollection(features, message, errno) {
 
 app.get('/photoserver/getallphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getallphotos');
-  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  var ip = req.ip;
+  if (ip.substr(0,7) == '::ffff:') { // fix for if you have both ipv4 and ipv6
+        ip = ip.substr(7);
+  }
   if (trusted_ips.indexOf(ip) < 0) {
     res.writeHead(403, {'Content-Type': 'text/html'});
     res.end('error: access denied');
@@ -123,7 +126,10 @@ app.get('/photoserver/getallphotos', cors(), function(req, res) {
 
 app.post('/photoserver/tocsi', cors(), function(req, res) {
   console.log('POST /photoserver/tocsi');
-  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  var ip = req.ip;
+  if (ip.substr(0,7) == '::ffff:') { // fix for if you have both ipv4 and ipv6
+    ip = ip.substr(7);
+  }
   if (trusted_ips.indexOf(ip) < 0) {
     res.writeHead(403, {'Content-Type': 'text/html'});
     res.end('error: access denied');
@@ -956,7 +962,7 @@ app.post('/photoserver/createdevice', cors(), function (req, res){
   console.log('/photoserver/createdevice');
   var username = req.body.username;
   var hash = req.body.hash;
-  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  var ip = req.ip;
   if (ip.substr(0, 7) == "::ffff:") {
     ip = ip.substr(7);
   }
