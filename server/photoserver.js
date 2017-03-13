@@ -135,14 +135,13 @@ app.post('/photoserver/tocsi', cors(), function(req, res) {
       res.writeHead(500, { 'Content-Type': 'text/html'});
       res.end('error on copy, file ' + filename + ',' + err);
     } else {
-      filename = filename.substr(0, -4) + '.dat';
+      filename = filename.slice(0, -5) + '.dat';
       fs.copy('uploads/' + filename, 'csi/' + filename, function (err) {
         if (err) {
           res.writeHead(500, { 'Content-Type': 'text/html'});
           res.end('error on copy, file ' + filename + ',' + err);
         } else {
           res.json({"result": "ok"});
-          
         }
       });
     }
