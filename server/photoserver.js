@@ -135,18 +135,40 @@ app.post('/photoserver/tocsi', cors(), function(req, res) {
       res.writeHead(500, { 'Content-Type': 'text/html'});
       res.end('error on copy, file ' + filename + ',' + err);
     } else {
-      filename = filename.slice(0, -5) + '.dat';
-      fs.copy('uploads/' + filename, 'csi/' + filename, function (err) {
-        if (err) {
-          res.writeHead(500, { 'Content-Type': 'text/html'});
-          res.end('error on copy, file ' + filename + ',' + err);
-        } else {
-          res.json({"result": "ok"});
-        }
-      });
+      var sql = "select id, filename, accuracy, time, visible, rootid, animationfilename, deviceid, width, height, description, tags, isroot from photo where filename=$1";
+      dbPool.query(sql, [filename])
+        .then(function (result) {
+           filename = filename.slice(0, -4) + '.info';
+           if (result.rows.length > 0) {
+             fs.writeFile('csi/' + filename, JSON.stringify(result.rows[0]), function(err){
+               if (err) {
+                 console.log(err);
+               }
+             });
+           } else {
+             fs.writeFile('csi/' + filename, JSON.stringify({"error": "record not found for file: " + filename}), function(err){
+               if (err) {
+                 console.log(err);
+               }
+             });
+           }
+           filename = filename.slice(0, -6) + '.dat';
+           fs.copy('uploads/' + filename, 'csi/' + filename, function (err) {
+              if (err) {
+                res.writeHead(500, { 'Content-Type': 'text/html'});
+                res.end('error on copy, file ' + filename + ',' + err);
+              } else {
+                 res.json(result.rows);
+              }
+           });
+        })
+        .catch(function(reason) {
+          console.log(reason);
+          res.writeHead(500, {'Content-Type': 'text/html'});
+          res.end('error: ' + reason);
+        });
     }
   });
-  
 });
 
 app.get('/photoserver/getphotos', cors(), function(req, res) {
