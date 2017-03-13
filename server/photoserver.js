@@ -394,7 +394,7 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                   return;
               } else {
                 // trusted ip, allow deletion of any photo
-                sql = 'select p.id, p.animationfilename, p.rootid from photo where filename=$1';
+                sql = 'select p.id, p.animationfilename, p.rootid from photo p where filename=$1';
                 parameters = [filename];
               }
           } else {
