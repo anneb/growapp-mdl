@@ -80,6 +80,24 @@
         xhr.send();
       };
 
+      var postForm = function(url, formData, callback)
+      {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url);
+        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
+        xhr.onreadystatechange = function (event) {
+           if (xhr.readyState === 4) {
+               if (xhr.status === 200) {
+                 var result = JSON.parse(xhr.responseText);
+                 callback(false, result);
+               } else {
+                 callback(xhr.status + ' ' + xhr.statusText);
+               }
+           }
+        };
+        xhr.send(formData);
+      };
+
       var cardTemplate = '<div class="mdl-cell mdl-cell--4-col">' +
                          ' <div photoid="$0" class="card-image mdl-card mdl-shadow--2dp" style="background-image: url(\'https://phenology.geodan.nl/uploads/small/$1\');">\n' +
                          ' <div class="mdl-card__title mdl-card--expand"></div>\n' +
@@ -129,7 +147,12 @@
             document.querySelector('#photopopup_delete_confirm').classList.remove('hidden');
           });
           document.querySelector('#photopopup_delete_confirm').addEventListener('click', function() {
-            alert(document.querySelector('#photopopup').getAttribute('photoid'));
+            var filename = document.querySelector('#photopopup').style.backgroundImage.slice(5,-2).split('/').reverse()[0];
+            postForm('https://phenology.geodan.nl/photoserver/tocsi', 'filename=' + encodeURIComponent(filename), function(err){
+              if (err) {
+                alert(err);
+              }
+            })
           });
         });
       };
