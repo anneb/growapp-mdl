@@ -1,7 +1,9 @@
 "use strict";
 /* global require, console, __dirname, Promise, Buffer */
 
-var trusted_ips = require('./trusted_ips.json');
+// netconfig.json should look like:
+// {"trusted_proxies": "127.0.0.1, 2.2.2.2", "trusted_ips": ["1.1.1.1", "1.1.1.2"]}
+var netconfig = require('./netconfig.json');
 
 var express = require('express');
 var fs = require('fs-extra');
@@ -17,7 +19,7 @@ var nodemailer = require('nodemailer');
 var gm = require('gm');
 
 var app = express();
-app.set('trust proxy', '127.0.0.1');
+app.set('trust proxy', netconfig.trusted_proxies);
 
 var Pool = require('pg').Pool;
 var dbPool = new Pool({
@@ -102,7 +104,7 @@ app.get('/photoserver/getallphotos', cors(), function(req, res) {
   if (ip.substr(0,7) == '::ffff:') { // fix for if you have both ipv4 and ipv6
         ip = ip.substr(7);
   }
-  if (trusted_ips.indexOf(ip) < 0) {
+  if (netconfig.trusted_ips.indexOf(ip) < 0) {
     res.writeHead(403, {'Content-Type': 'text/html'});
     res.end('error: access denied');
     return;
@@ -130,7 +132,7 @@ app.post('/photoserver/tocsi', cors(), function(req, res) {
   if (ip.substr(0,7) == '::ffff:') { // fix for if you have both ipv4 and ipv6
     ip = ip.substr(7);
   }
-  if (trusted_ips.indexOf(ip) < 0) {
+  if (netconfig.trusted_ips.indexOf(ip) < 0) {
     res.writeHead(403, {'Content-Type': 'text/html'});
     res.end('error: access denied');
     return;
