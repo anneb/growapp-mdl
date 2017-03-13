@@ -151,6 +151,15 @@
             postForm('https://phenology.geodan.nl/photoserver/tocsi', 'filename=' + encodeURIComponent(filename), function(err){
               if (err) {
                 alert(err);
+              } else {
+                postForm('https://phenology.geodan.nl/photoserver/deletemyphoto', 'filename=' + encodeURIComponent(filename), function(err){
+                  if (err) {
+                    alert(err);
+                  } else {
+                    // photo deleted
+                    window.location.replace(window.location);
+                  }
+                })
               }
             })
           });

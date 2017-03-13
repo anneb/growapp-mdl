@@ -367,6 +367,12 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
     var devicehash = req.body.devicehash;
     var filename = req.body.filename;
 
+    if (!username) {
+      username = '';
+    }
+    if (!hash) {
+      hash = '';
+    }
     username = username.toLowerCase().trim().replace("'", '');
     hash = hash.trim().replace("'", '');
 
