@@ -19,7 +19,7 @@
     <style>
       .card-image {
         background-color: gray;
-        background-size: contain;
+        background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
       }
@@ -27,6 +27,43 @@
         color: white;
         text-shadow: 0 1px black;
       }
+      #page-content {
+        position: relative;
+        z-index: -1;
+      }
+      #photopopup {
+        position: fixed;
+        top: 80px;
+        left: 50px;
+        right: 50px;
+        bottom: 50px;
+        box-shadow: 2px 2px 2px #888888;
+        background-color: darkgray;
+        z-index: 100;
+        overflow-y: auto;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: left;
+      }
+      #photopopup_close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        color: white;
+      }
+      #photopopup_delete {
+        position: absolute;
+        right: 50px;
+        top: 10px;
+        color: white;
+      }
+      #photopopup_delete_confirm {
+        position: absolute;
+        right: 90px;
+        top: 10px;
+        color: white;
+      }
+
     </style>
     <script>
       var getJSON = function (url, callback){
@@ -44,7 +81,7 @@
       };
 
       var cardTemplate = '<div class="mdl-cell mdl-cell--4-col">' +
-                         ' <div class="card-image mdl-card mdl-shadow--2dp" style="background-image: url(\'https://phenology.geodan.nl/uploads/small/$1\');">\n' +
+                         ' <div photoid="$0" class="card-image mdl-card mdl-shadow--2dp" style="background-image: url(\'https://phenology.geodan.nl/uploads/small/$1\');">\n' +
                          ' <div class="mdl-card__title mdl-card--expand"></div>\n' +
                          '  <div class="mdl-card__actions">\n' +
                          '   <span class="card-image__info">$2</span>\n' +
@@ -60,7 +97,7 @@
           var photocounter = 0;
           var row='';
           photolist.forEach(function(photo){
-            row += cardTemplate.replace('$1', photo.filename).replace('$2', photo.time);
+            row += cardTemplate.replace('$0', photo.id).replace('$1', photo.filename).replace('$2', photo.time);
             photocounter++;
             if (photocounter == 3) {
               photocounter = 0;
@@ -71,7 +108,29 @@
           if (photocounter > 0) {
             html += '<div class="mdl-grid">\n' + row + '</div>\n';
           }
+          //html += '<div id="photopopup" class = "hidden"><img id="photopopup_img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></div>\n';
           content.innerHTML = html;
+          photos = document.querySelectorAll('.card-image');
+          [].forEach.call(photos, function(photo){
+            photo.addEventListener('click', function() {
+              var style = photo.currentStyle || window.getComputedStyle(photo, false);
+              var url = style.backgroundImage.slice(5, -2);
+              var filename = url.split('/').reverse()[0];
+              document.querySelector('#photopopup').style.backgroundImage = "url('https://phenology.geodan.nl/uploads/medium/" + filename + "')";
+              document.querySelector('#photopopup_delete_confirm').classList.add('hidden');
+              document.querySelector('#photopopup').classList.remove('hidden');
+              document.querySelector('#photopopup').setAttribute('photoid', photo.getAttribute('photoid'));
+            });
+          });
+          document.querySelector('#photopopup_close').addEventListener('click', function() {
+            document.querySelector('#photopopup').classList.add('hidden');
+          });
+          document.querySelector('#photopopup_delete').addEventListener('click', function() {
+            document.querySelector('#photopopup_delete_confirm').classList.remove('hidden');
+          });
+          document.querySelector('#photopopup_delete_confirm').addEventListener('click', function() {
+            alert(document.querySelector('#photopopup').getAttribute('photoid'));
+          });
         });
       };
     </script>
@@ -106,7 +165,19 @@
           </div>
           <main class="mdl-layout__content">
               <div class="page-content">
-            INHOUD!
+                INHOUD!
+              </div>
+              <div id="photopopup" class = "hidden">
+                <img id="photopopup_img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                <button id="photopopup_close" class="mdl-button mdl-js-button mdl-button--icon">
+                    <i class="material-icons">close</i>
+                </button>
+                <button id="photopopup_delete" class="mdl-button mdl-js-button mdl-button--icon">
+                    <i class="material-icons">delete</i>
+                </button>
+                <button id="photopopup_delete_confirm" class="mdl-button mdl-js-button hidden">
+                  confirm delete
+                </button>
               </div>
           </main>
       </div>

@@ -937,7 +937,7 @@ var App = function() {
         }
     };
 
-    this.fitRectangleToDisplay = function(rectangleAspect, displayWidth, displayHeight, fitInside)
+    this.fitRectangleToDisplay = function(rectangleAspect, displayWidth, displayHeight, fitInside, rectBefore, rectAfter)
     {
       var rectangle = {};
       var displayAspect = displayWidth / displayHeight;
@@ -952,6 +952,34 @@ var App = function() {
       }
       rectangle.left = Math.round((displayWidth - rectangle.width) / 2);
       rectangle.top = Math.round((displayHeight - rectangle.height) / 2);
+      if (rectangle.left > 0 && (rectBefore || rectAfter)) {
+        // fit rectBefore/rectAfter to height
+        if (rectBefore) {
+          rectBefore.left = 0;
+          rectBefore.top = 0;
+          rectBefore.width = rectangle.left;
+          rectBefore.height = displayHeight;
+        }
+        if (rectAfter) {
+          rectAfter.top = 0;
+          rectAfter.left = rectangle.left + rectangle.width;
+          rectAfter.width = rectangle.left;
+          rectAfter.height = displayHeight;
+        }
+      } else if (rectangle.top > 0 && (rectBefore || rectAfter)) {
+        if (rectBefore) {
+          rectBefore.top  = 0;
+          rectBefore.left = 0;
+          rectBefore.width = displayWidth;
+          rectBefore.height = rectangle.top;
+        }
+        if (rectAfter) {
+          rectAfter.top = rectangle.top + rectangle.height;
+          rectAfter.left = 0;
+          rectAfter.width = displayWidth;
+          rectAfter.height = rectangle.top;
+        }
+      }
       return rectangle;
     };
 
@@ -1120,6 +1148,10 @@ var App = function() {
               var cameraOverlayPicture = document.querySelector('#gapp_camera_overlay');
               cameraOverlayPicture.src = overlayURL;
               cameraOverlayPictureFrame.classList.remove('hidden');
+              // load medium resolution overlay
+              var image = new Image();
+              image.onload = function () {cameraOverlayPicture.src = image.src;};
+              image.src = photoServer.fullPhotoUrl(_app.activeFeature.get('filename'), 'medium');
           } else {
               cameraOverlayPictureFrame.classList.add('hidden');
           }
@@ -1142,6 +1174,7 @@ var App = function() {
             document.querySelector('#mainUI').classList.remove('hidden');
             document.querySelector('body').style.backgroundColor = 'lightgray';
             _app.cameraPopup.classList.add('hidden');
+            olMap.olmap.updateSize();
         };
 
         this.cameraPopup.shutterEffect = function()
@@ -1180,10 +1213,13 @@ var App = function() {
                   if (_app.cameraPhoto.classList.contains('hidden')) {
                     _app.cameraPhoto.camRect = camRect; // store current camera width/height
                   }
+                  var rectBefore = {}, rectAfter = {};
                   var frameRect = _app.fitRectangleToDisplay(
                     _app.cameraPhoto.camRect.width/_app.cameraPhoto.camRect.height,
-                    width, height, true);
+                    width, height, true, rectBefore, rectAfter);
                   _app.setElementStyleToRect(_app.cameraPhotoFrame, frameRect);
+                  _app.setElementStyleToRect(document.querySelector('#gapp_camera_bar_before'), rectBefore);
+                  _app.setElementStyleToRect(document.querySelector('#gapp_camera_bar_after'), rectAfter);
 
                   if (_app.overlayURL) {
                     var overlayRect = _app.fitRectangleToDisplay(
@@ -1301,10 +1337,12 @@ var App = function() {
           var listContainer = document.querySelector('#gapp_camera_photo_form_taglist');
           var html = '<div id="gapp_camera_photo_form_tag_label">Tags <i class="material-icons">&#xE54E;<!--local_offer--></i></div>\n';
           for (var i = 0; i < list.length; i++) {
-            html += '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-' + i + '">\n' +
-               '<input type="checkbox" id="checkbox-' + i + '" class="tagbox mdl-checkbox__input" value="'+list[i].tagid+'">\n' +
-               '<span class="mdl-checkbox__label">'+list[i].tagtext+'</span>\n' +
-               '</label>';
+            if (list[i].active) {
+              html += '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-' + i + '">\n' +
+                 '<input type="checkbox" id="checkbox-' + i + '" class="tagbox mdl-checkbox__input" value="'+list[i].tagid+'">\n' +
+                 '<span class="mdl-checkbox__label">'+list[i].tagtext+'</span>\n' +
+                 '</label>';
+            }
           }
           listContainer.innerHTML = html;
         };
@@ -1505,7 +1543,10 @@ var App = function() {
                   }
                 }
                 if (orientationOk) {
-                  CameraPreview.takePicture(_app.takePictureHandler);//{maxWidth: 640, maxHeight: 640});
+                  CameraPreview.takePicture({width: 2048, height: 2048}, _app.takePictureHandler, function(reason)
+                  {
+                      _app.showMessage(reason);
+                  });
                   _app.cameraPopup.shutterEffect();
                 } else {
                   _app.showMessage (__('Wrong camera orientation, please adjust'));
@@ -1851,6 +1892,8 @@ var App = function() {
                     if (photoset && photoset.length > 0) {
                       _app.animationTargetElement = _app.featureInfoPopup;
                       _app.doAnimation(feature);
+                    } else {
+                      _app.enablePlayPause(false);
                     }
                 };
                 photo.onerror = function() {

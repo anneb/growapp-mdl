@@ -259,12 +259,28 @@
         right: 10px;
         top: 10px;
       }
+      #gapp_camera_bar_before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0px;
+        background-color: black;
+      }
       #gapp_camera_frame {
         position: absolute;
         transition: all 0.1s ease;
       }
       .shutteron {
         box-shadow: inset 0 0 0 20px white;
+      }
+      #gapp_camera_bar_after {
+        position: absolute;
+        bottom: 0;
+        lef: 0;
+        width: 100%;
+        height: 0px;
+        background-color: black;
       }
       #gapp_camera_overlay_frame, #gapp_camera_photo_overlay_frame {
             position: absolute;
@@ -557,6 +573,8 @@
         <button id="gapp_fullscreenphotopopup_pause" class="mdl-button mdl-js-button mdl-button--icon mdl-color-text--primary-contrast gapp_color_gray_transparent"><i class="material-icons">pause</i></button>
       </div>
       <div id="gapp_camera_popup" class="hidden">
+         <div id="gapp_camera_bar_before"></div>
+         <div id="gapp_camera_bar_after"></div>
          <div id="gapp_camera_frame">
            <div id="gapp_camera_overlay_frame" class="hidden">
              <img alt="transparent overlay photo" id="gapp_camera_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
