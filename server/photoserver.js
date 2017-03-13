@@ -1,7 +1,10 @@
 "use strict";
 /* global require, console, __dirname, Promise, Buffer */
+
+var trusted_ips = require('./trusted_ips.json');
+
 var express = require('express');
-var fs = require('fs');
+var fs = require('fs-extra');
 var bodyParser = require('body-parser');
 var multer = require('multer'); // for  enctype="multipart/form-data"
 //var im = require('imagemagick');
@@ -96,7 +99,7 @@ function createCollection(features, message, errno) {
 app.get('/photoserver/getallphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getallphotos');
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  if (ip != '80.113.1.130') {
+  if (trusted_ips.indexOf(ip) < 0) {
     res.writeHead(403, {'Content-Type': 'text/html'});
     res.end('error: access denied');
     return;
@@ -114,6 +117,37 @@ app.get('/photoserver/getallphotos', cors(), function(req, res) {
       res.writeHead(500, {'Content-Type': 'text/html'});
       res.end('error: ' + reason);
     });
+});
+
+
+
+app.post('/photoserver/tocsi', cors(), function(req, res) {
+  console.log('POST /photoserver/tocsi');
+  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  if (trusted_ips.indexOf(ip) < 0) {
+    res.writeHead(403, {'Content-Type': 'text/html'});
+    res.end('error: access denied');
+    return;
+  }
+  var filename = req.body.filename;
+  fs.copy('uploads/' + filename, 'csi/' + filename, function (err) {
+    if (err) {
+      res.writeHead(500, { 'Content-Type': 'text/html'});
+      res.end('error on copy, file ' + filename + ',' + err);
+    } else {
+      filename = filename.substr(0, -4) + '.dat';
+      fs.copy('uploads/' + filename, 'csi/' + filename, function (err) {
+        if (err) {
+          res.writeHead(500, { 'Content-Type': 'text/html'});
+          res.end('error on copy, file ' + filename + ',' + err);
+        } else {
+          res.json({"result": "ok"});
+          
+        }
+      });
+    }
+  });
+  
 });
 
 app.get('/photoserver/getphotos', cors(), function(req, res) {
