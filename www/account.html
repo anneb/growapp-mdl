@@ -122,7 +122,7 @@
                     // check code
                     var code = document.querySelector('#verifycode').value;
                     if (isValidCode(code)) {
-                        photoServer.validateuser(emailaddress, code, localStorage.deviceid, localStorage.devicehash, document.querySelector('#checkallowmailing').cehcked, function(err, result) {
+                        photoServer.validateuser(emailaddress, code, localStorage.deviceid, localStorage.devicehash, document.querySelector('#checkallowmailing').checked, function(err, result) {
                             if (err) {
                                 app.showMessage(result);
                             } else {
