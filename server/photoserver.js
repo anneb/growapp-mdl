@@ -2,7 +2,7 @@
 /* global require, console, __dirname, Promise, Buffer */
 
 // netconfig.json should look like:
-// {"trusted_proxies": "127.0.0.1, 2.2.2.2", "trusted_ips": ["1.1.1.1", "1.1.1.2"]}
+// {"trusted_proxies": "127.0.0.1, 2.2.2.2", "trusted_ips": ["1.1.1.1", "1.1.1.2"], "smtpserver": "host.domain.tld", "smtpport": "25", "smtpuser": "user", "smtppassword": "password", "smtpdomain": "domain.tld"}
 var netconfig = require('./netconfig.json');
 
 var express = require('express');
@@ -19,7 +19,9 @@ var nodemailer = require('nodemailer');
 var gm = require('gm');
 
 var app = express();
-app.set('trust proxy', netconfig.trusted_proxies);
+if (netconfig.trusted_proxies && netconfig.trusted_proxies !== '') {
+  app.set('trust proxy', netconfig.trusted_proxies);
+}
 
 var Pool = require('pg').Pool;
 var dbPool = new Pool({
@@ -565,25 +567,25 @@ function getValidationCode(email, callback) {
 
 function emailValidationCode  (email, validationcode, callback) {
   var transporter = nodemailer.createTransport({
-    host: 'localhost',
-    port: 25,
-    /*auth: {
-        user: user,
-        pass: pass
+    host: netconfig.smtpserver,
+    port: netconfig.smtpport,
+    auth: {
+        user: netconfig.smtpuser,
+        pass: netconfig.smtppassword
     },
     tls:{
         rejectUnauthorized: false
-    }*/
-    domain : 'localhost',            // domain used by client to identify itself to server
+    },
+    domain : netconfig.smtpdomain,            // domain used by client to identify itself to server
     secure : false,
     ignoreTLS: true,
     authentication: false
   });
   transporter.sendMail({
     to : email,
-    from : 'anne.blankert@geodan.nl',
-    subject : 'Validation code for locophoto app',
-    text: 'validatiecode is: ' + validationcode,
+    from : 'no-reply@growapp.today',
+    subject : 'Validation code for GrowApp',
+    text: 'validationcode is: ' + validationcode,
     html: '<h1>'+validationcode+'</h1>'
   },
   function(err, info){
