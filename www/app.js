@@ -354,10 +354,10 @@ var PhotoServer = function() {
         xhr.send(formData);
     };
 
-    this.validateuser = function(email, code, deviceid, devicehash, callback)
+    this.validateuser = function(email, code, deviceid, devicehash, allowmailing, callback)
     {
         var xhr = new XMLHttpRequest();
-        var formData = 'email=' + encodeURIComponent(email) + '&validationcode=' + encodeURIComponent(code)  + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + '&devicehash=' + encodeURIComponent(localStorage.devicehash);
+        var formData = 'email=' + encodeURIComponent(email) + '&validationcode=' + encodeURIComponent(code)  + '&deviceid=' + encodeURIComponent(localStorage.deviceid) + '&devicehash=' + encodeURIComponent(localStorage.devicehash) + '&allowmailing=' + encodeURIComponent(allowmailing);
         xhr.open('POST', _photoServer.server+'/photoserver/validateuser');
         xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
         xhr.onreadystatechange = function (event) {
@@ -1510,6 +1510,7 @@ var App = function() {
                           _app.activeFeature.set('isroot', true);
                         }
                         _app.clickFeatureHandler(_app.activeFeature); // reload feature
+                        _app.showMessage(__('Photo is now publicly visible on map'), 5000);
                       }, 1000);
                     }, 5000);
                 }

@@ -635,6 +635,12 @@ app.post('/photoserver/validateuser', cors(), multer().array(), function(req, re
     console.log('POST /photoserver/validateuser');
     var username = req.body.email;
     var validationcode = req.body.validationcode;
+    var allowmailing = req.body.allowmailing;
+    if (!allowmailing) {
+      allowmailing = false;
+    } else {
+      allowmailing = (allowmailing === 'true');
+    }
 
     if (!username || username === '' || !validationcode || validationcode === '') {
         res.writeHead(500, {
@@ -667,29 +673,33 @@ app.post('/photoserver/validateuser', cors(), multer().array(), function(req, re
                 } else {
                     // check validationcode
                     if (validationcode == result.rows[0].validationcode) {
-                        if (result.rows[0].hash && result.rows[0].hash !== '') {
-                          // hash already created
-                          res.end(result.rows[0].hash);
-                          linkUserToDevice(username, req.body.deviceid, req.body.devicehash);
-                        } else {
-                          // generate new hash
-                          crypto.pseudoRandomBytes(16, function(err, raw) {
-                              if (err) {
+                        // correct validationcode entered
+                        sql = 'update photouser set validated=true, retrycount=0, allowmailing=$1';
+                        dbPool.query(sql, [allowmailing]).then(function(result2){
+                          if (result.rows[0].hash && result.rows[0].hash !== '') {
+                            // hash already created
+                            res.end(result.rows[0].hash);
+                            linkUserToDevice(username, req.body.deviceid, req.body.devicehash);
+                          } else {
+                            // generate new hash
+                            crypto.pseudoRandomBytes(16, function(err, raw) {
+                                if (err) {
 
-                              } else {
-                                  // store hash
-                                  var hash = raw.toString('hex');
-                                  sql = 'update photouser set hash=$1, retrycount=0 where email=$2';
-                                  dbPool.query(sql, [hash, username])
-                                      .then(function(result) {
-                                          // return hash
-                                          //res.json({"hash" : hash});
-                                          res.end(hash);
-                                          linkUserToDevice(username, req.body.deviceid, req.body.devicehash);
-                                      });
-                              }
-                          }); // crypto
-                        }
+                                } else {
+                                    // store hash
+                                    var hash = raw.toString('hex');
+                                    sql = 'update photouser set hash=$1, retrycount=0 where email=$2';
+                                    dbPool.query(sql, [hash, username])
+                                        .then(function(result) {
+                                            // return hash
+                                            //res.json({"hash" : hash});
+                                            res.end(hash);
+                                            linkUserToDevice(username, req.body.deviceid, req.body.devicehash);
+                                        });
+                                }
+                            }); // crypto
+                          }
+                        });
                     } else {
                         // wrong code, increment retrycount
                         sql = 'update photouser set retrycount=retrycount+1 where email=$1';
@@ -984,7 +994,7 @@ app.post('/photoserver/createdevice', cors(), function (req, res){
   var username = req.body.username;
   var hash = req.body.hash;
   var ip = req.ip;
-  if (ip.substr(0, 7) == '::ffff:') {
+  if (ip.substr(0, 7) === '::ffff:') {
     ip = ip.substr(7);
   }
   getUserid(username, hash)
