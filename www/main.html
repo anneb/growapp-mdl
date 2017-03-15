@@ -240,6 +240,10 @@
         left: 0;
         right: 0;
         margin: auto;
+        user-select: none;
+      }
+      #gapp_camera_popup::selection, #gapp_camera_photo::selection {
+        background: transparent;
       }
       #gapp_camera_popup {
         background-color: transparent;
@@ -626,7 +630,7 @@
                <form action="#">
                    <div id="gapp_camera_photo_form_description" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                        <input class="mdl-textfield__input" type="text" id="gapp_camera_photo_form_input_description">
-                       <label class="mdl-textfield__label" for="gapp_camera_photo_form_input_description"><span class="translate">Description (optional)</span></label>
+                       <label class="mdl-textfield__label" for="gapp_camera_photo_form_input_description"><span class="translate">Description / #tags (optional)</span></label>
                        <span class="mdl-textfield__error translate">Input is not a valid description</span>
                        <i class="material-icons mdl-textfield__label__icon">description<!--local_offer--></i>
                    </div>
