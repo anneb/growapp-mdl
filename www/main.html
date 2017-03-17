@@ -301,6 +301,30 @@
         opacity: 0.5;
         border: 0;
       }
+      #gapp_camera_opacity_bar {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 112px;
+      }
+      #gapp_camera_overlay_opacity80 {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        opacity: 0.7;
+      }
+      #gapp_camera_overlay_opacity50 {
+        position: absolute;
+        top: 10px;
+        left: 44px;
+        opacity: 0.5;
+      }
+      #gapp_camera_overlay_opacity20 {
+        position: absolute;
+        top: 10px;
+        left: 78px;
+        opacity: 0.3;
+      }
       #gapp_camera_photo_frame {
         position: absolute;
       }
@@ -583,6 +607,17 @@
            <div id="gapp_camera_overlay_frame" class="hidden">
              <img alt="transparent overlay photo" id="gapp_camera_overlay" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
            </div>
+         </div>
+         <div id="gapp_camera_opacity_bar" class="hidden">
+           <button id="gapp_camera_overlay_opacity80" class="mdl-button mdl-button--icon mdl-color-text--primary-contrast">
+             <i class="material-icons">opacity</i>
+           </button>
+           <button id="gapp_camera_overlay_opacity50" class="mdl-button mdl-button--icon mdl-color-text--primary-contrast">
+             <i class="material-icons">opacity2</i>
+           </button>
+           <button id="gapp_camera_overlay_opacity20" class="mdl-button mdl-button--icon mdl-color-text--primary-contrast">
+             <i class="material-icons">opacity3</i>
+           </button>
          </div>
          <button id="gapp_camera_takephoto" class="mdl-button ml-js-button mdl-button--fab mdl-color--white">
            <i class="material-icons">&#xE412;</i>
