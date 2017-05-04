@@ -602,21 +602,28 @@ var OLMap = function() {
     };
 
     this.initDragHandler = function() {
-      this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental
+      this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental          
           if (!_olMap.dragStart) {
             _olMap.dragStart = true;
             _olMap.dragStartPixel = _olMap.dragPrevPixel = event.pixel;
             _olMap.dragHandler('dragstart', event.pixel, event.pixel);
+            console.log(event.pixel[0] + "," + event.pixel[1]);
           } else {
             _olMap.dragHandler('dragging', event.pixel, _olMap.dragPrevPixel);
             _olMap.dragPrevPixel = event.pixel;
+            console.log('dragging ' + event.pixel[0] + "," + event.pixel[1]);
           }
       });
       this.olmap.on('moveend', function (event){
           if (_olMap.dragStart) {
+            console.log('moveend ' + _olMap.dragPrevPixel[0] + "," + _olMap.dragPrevPixel[1]);
+          } else {
+            console.log('moveend');
+          }
+          if (_olMap.dragStart) {
               _olMap.dragStart = false;
               _olMap.dragHandler('dragend', _olMap.dragPrevPixel, _olMap.dragPrevPixel);
-          } else {
+          } else {            
             _olMap.dragHandler('moveend', null, null);
           }
       });
@@ -669,7 +676,10 @@ var OLMap = function() {
     this.initClickFeatureHandler = function(featureFieldName) {
         this.olmap.on('click', function(event){
             if (!event.dragging) {
+                console.log('click!');
                 _olMap.clickFeatureHandler(_olMap.getFeatureFromPixel(_olMap.olmap.getEventPixel(event.originalEvent), featureFieldName));
+            } else {
+                console.log('Not clicked, dragging');
             }
         });
     };
@@ -1640,6 +1650,7 @@ var App = function() {
             case 'dragend':
             case 'moveend':
                 // handle end of kinetic effect after drag
+                
                 if (_app.activeFeature) {
                     var geometry = _app.activeFeature.getGeometry();
                     var coordinates = geometry.getCoordinates();
