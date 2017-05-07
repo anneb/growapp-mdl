@@ -605,7 +605,7 @@ var OLMap = function() {
     };
 
     this.initDragHandler = function() {
-      this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental          
+      this.olmap.on('pointerdrag', function (event){ // pointerdrag is OL3 experimental
           if (!_olMap.dragStart) {
             _olMap.dragStart = true;
             _olMap.dragStartPixel = _olMap.dragPrevPixel = event.pixel;
@@ -625,7 +625,7 @@ var OLMap = function() {
               } else {
                 _olMap.dragHandler('dragend', _olMap.dragPrevPixel, _olMap.dragPrevPixel);
               }
-          } else {            
+          } else {
             _olMap.dragHandler('moveend', null, null);
           }
       });
@@ -1317,7 +1317,7 @@ var App = function() {
                         return true;
                     }
                     //console.log('feature ' + i + " distance: " + distance);
-                }                            
+                }
                 return false;
             } else {
                 return false;
@@ -1336,13 +1336,13 @@ var App = function() {
                             if (_app.hasNearbyFeatures()) {
                                 _app.showMessage(__('Creating a new photo set. To append to an existing photo set, use "camera+" button on nearby photo locations'), 10000)
                                 warningCount++;
-                                window.localStorage.warningCount = warningCount;                            
+                                window.localStorage.warningCount = warningCount;
                             }
                         }
                     }
                     _app.overlayURL = null;
                     _app.cameraPopup.show();
-                    
+
                 } else {
                     // device could not be registered, offline? no window.localStorage?
                     _app.showMessage(__('device registration failed, try again later'));
@@ -1687,7 +1687,7 @@ var App = function() {
             case 'dragend':
             case 'moveend':
                 // handle end of kinetic effect after drag
-                
+
                 if (_app.activeFeature) {
                     var geometry = _app.activeFeature.getGeometry();
                     var coordinates = geometry.getCoordinates();
