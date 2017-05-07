@@ -64,6 +64,9 @@ var _utils = {
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     },
+    pythagoras: function (pos1, pos2) {
+        return Math.sqrt((pos2[0]-pos1[0])*(pos2[0]-pos1[0]) + (pos2[1] - pos1[1])*(pos2[1] - pos1[1]));
+    },
     escapeHTML: function(str) {
      str = str + '';
      var out = '';
@@ -622,7 +625,12 @@ var OLMap = function() {
           }
           if (_olMap.dragStart) {
               _olMap.dragStart = false;
-              _olMap.dragHandler('dragend', _olMap.dragPrevPixel, _olMap.dragPrevPixel);
+              var distance = _utils.pythagoras (_olMap.dragPrevPixel, _olMap.dragStartPixel);
+              if (distance < 10) {
+                _olMap.clickFeatureHandler(_olMap.getFeatureFromPixel(_olMap.dragPrevPixel, _olMap.featureFieldName));
+              } else {
+                _olMap.dragHandler('dragend', _olMap.dragPrevPixel, _olMap.dragPrevPixel);
+              }
           } else {            
             _olMap.dragHandler('moveend', null, null);
           }
@@ -674,6 +682,7 @@ var OLMap = function() {
     };
 
     this.initClickFeatureHandler = function(featureFieldName) {
+        _olMap.featureFieldName = featureFieldName;
         this.olmap.on('click', function(event){
             if (!event.dragging) {
                 console.log('click!');
