@@ -610,23 +610,17 @@ var OLMap = function() {
             _olMap.dragStart = true;
             _olMap.dragStartPixel = _olMap.dragPrevPixel = event.pixel;
             _olMap.dragHandler('dragstart', event.pixel, event.pixel);
-            console.log(event.pixel[0] + "," + event.pixel[1]);
           } else {
             _olMap.dragHandler('dragging', event.pixel, _olMap.dragPrevPixel);
             _olMap.dragPrevPixel = event.pixel;
-            console.log('dragging ' + event.pixel[0] + "," + event.pixel[1]);
           }
       });
       this.olmap.on('moveend', function (event){
           if (_olMap.dragStart) {
-            console.log('moveend ' + _olMap.dragPrevPixel[0] + "," + _olMap.dragPrevPixel[1]);
-          } else {
-            console.log('moveend');
-          }
-          if (_olMap.dragStart) {
               _olMap.dragStart = false;
               var distance = _utils.pythagoras (_olMap.dragPrevPixel, _olMap.dragStartPixel);
               if (distance < 10) {
+                // handle this drag-end as click
                 _olMap.clickFeatureHandler(_olMap.getFeatureFromPixel(_olMap.dragPrevPixel, _olMap.featureFieldName));
               } else {
                 _olMap.dragHandler('dragend', _olMap.dragPrevPixel, _olMap.dragPrevPixel);
