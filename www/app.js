@@ -677,9 +677,8 @@ var OLMap = function() {
 
     this.initClickFeatureHandler = function(featureFieldName) {
         _olMap.featureFieldName = featureFieldName;
-        this.olmap.on('click', function(event){
+        this.olmap.on('singleclick', function(event){
             if (!event.dragging) {
-                console.log('click!');
                 _olMap.clickFeatureHandler(_olMap.getFeatureFromPixel(_olMap.olmap.getEventPixel(event.originalEvent), featureFieldName));
             } else {
                 console.log('Not clicked, dragging');
@@ -1303,12 +1302,47 @@ var App = function() {
               window.addEventListener('resize', waitForResize);
             }
         };
+        this.hasNearbyFeatures = function() {
+            var userLocation = olMap.geoLocation.getPosition();
+            if (userLocation) {
+                // get photoLocations nearest to userLocation
+                var clusterFeature = olMap.clusterLayer.getSource().getClosestFeatureToCoordinate(userLocation);
+                var photoLocations = clusterFeature.get('features');
+                for (var i = 0; i < photoLocations.length; i++ ) {
+                    var feature = photoLocations[i];
+                    var geometry = feature.getGeometry();
+                    var coordinates = geometry.getCoordinates();
+                    var distance = _utils.calculateDistance(ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326'), ol.proj.transform(userLocation, 'EPSG:3857', 'EPSG:4326'));
+                    if (distance < 0.08) {
+                        return true;
+                    }
+                    //console.log('feature ' + i + " distance: " + distance);
+                }                            
+                return false;
+            } else {
+                return false;
+            }
+        };
         var cameraButton = document.querySelector('#gapp_button_camera');
         cameraButton.addEventListener('click', function() {
             photoServer.ensureDeviceRegistration(function(result) {
                 if (result) {
+                    if (window.localStorage) {
+                        var warningCount = 0;
+                        if (window.localStorage.warningCount) {
+                            warningCount = window.localStorage.warningCount;
+                        }
+                        if (warningCount < 5) {
+                            if (_app.hasNearbyFeatures()) {
+                                _app.showMessage(__('Creating a new photo set. To append to an existing photo set, use "camera+" button on nearby photo locations'), 10000)
+                                warningCount++;
+                                window.localStorage.warningCount = warningCount;                            
+                            }
+                        }
+                    }
                     _app.overlayURL = null;
                     _app.cameraPopup.show();
+                    
                 } else {
                     // device could not be registered, offline? no window.localStorage?
                     _app.showMessage(__('device registration failed, try again later'));
