@@ -61,5 +61,8 @@
   "info.html" : "info-nl.html",
   "Photo is now publicly visible on map" : "Foto is openbaar gepubliceerd op de kaart",
   "Keep me updated about research campaigns that are organized with GrowApp" : "Houd me op de hoogte van GrowApp onderzoekscampagnes",
-  "Creating a new photo set. To append to an existing photo set, use \"camera+\" button on nearby photo locations" : "Begint nieuwe fotoset. Gebruik de \"camera+\" knop op nabije fotolocaties voor toevoegen aan bestaande fotosets"
+  "Creating a new photo set. To append to an existing photo set, use \"camera+\" button on nearby photo locations" : "Begint nieuwe fotoset. Gebruik de \"camera+\" knop op nabije fotolocaties voor toevoegen aan bestaande fotosets",
+  "conifer carbon weight": "naaldboon koolstof gewicht",
+  "deciduous carbon weight" :  "loofboom koolstof gewicht",
+  "phone battery charges" : "aantal telefoon opladingen"
 }

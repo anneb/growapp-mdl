@@ -1871,8 +1871,8 @@ var App = function() {
             // calculate CO2 content based on tree circumference
             var conifer_carbon = Math.round((Math.pow((circumference/Math.PI), 2.397)*0.111)/2);
             var deciduous_carbon = Math.round((Math.pow((circumference/Math.PI), 2.14)*0.41354)/2);
-            tagtext += 'conifer carbon weight: ' + conifer_carbon + ' kg, deciduous carbon weight: ' + deciduous_carbon + ' kg<br>';
-            tagtext += 'phone battery charges: ' + Math.round(conifer_carbon / 0.00272) + ' | ' + Math.round(deciduous_carbon / 0.00272) + '<br>';
+            tagtext += __('conifer carbon weight') + ': ' + conifer_carbon + ' kg, ' + __('deciduous carbon weight') + ': ' + deciduous_carbon + ' kg<br>';
+            tagtext += __('phone battery charges') + ': ' + Math.round(conifer_carbon / 0.00272) + ' | ' + Math.round(deciduous_carbon / 0.00272) + '<br>';
           }
           var date = new Date();
           date.setTime(Date.parse(time));
