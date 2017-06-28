@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
 
     <script>
-      var supportedLanguages = ['en', 'nl'];
+      var supportedLanguages = ['cz', 'en', 'nl'];
       function init() {
           var language;
           if (window.localStorage && window.localStorage.language) {
@@ -105,6 +105,12 @@
                 <div class="mdl-card__supporting-text">
                     <form name="languageform" action="#">
                         <ul class="mdl-list">
+                            <li class="mdl-list__item">
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="cz">
+                            <input type="radio" id="cz" class="mdl-radio__button" name="languages" value="cz" checked>
+                            <span class="mdl-radio__label">Čeština</span>
+                        </label>
+                            </li>
                             <li class="mdl-list__item">
                         <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="en">
                             <input type="radio" id="en" class="mdl-radio__button" name="languages" value="en" checked>
