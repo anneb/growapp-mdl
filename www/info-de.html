@@ -1,0 +1,176 @@
+﻿<!doctype html>
+<html lang="nl">
+<head>
+    <title>growapp-mdl</title>
+    <meta charset="utf-8">
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes"/>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+
+    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+
+    <link rel="stylesheet" href="./iconfont/material-icons.css">
+    <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', 'Noto', sans-serif;
+            background-color: white;
+        }
+        .content {
+            padding: 10px;
+        }
+        .page-content {
+            width: 80%;
+            max-width: 512px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .gapp-header .mdl-layout__header-row {
+            padding-left: 40px;
+        }
+
+        .gapp-container {
+            max-width: 1600px;
+            width: calc(100% - 16px);
+            margin: 0 auto;
+        }
+
+        .gapp-content {
+            border-radius: 2px;
+            padding: 80px 20px;
+            margin-bottom: 80px;
+        }
+
+        .gapp-layout.is-small-screen .gapp-content {
+            padding: 40px 28px;
+        }
+
+        .gapp-content h3 {
+            margin-top: 48px;
+        }
+
+        .gapp-footer {
+            padding-left: 40px;
+        }
+
+        .gapp-footer .mdl-mini-footer--link-list a {
+            font-size: 13px;
+        }
+    </style>
+    <script>
+        function init() {
+            document.querySelector('#backbutton').addEventListener('click', function () {
+                // warning: history keeps track of hashchanges
+                window.history.back();
+            }, false);
+        }
+    </script>
+</head>
+<body onload="init();">
+<div class="mdl-layout__container">
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header is-casting-shadow">
+        <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i>
+        </div>
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title"> GrowApp - Übersicht</span>
+        </div>
+    </header>
+
+    <main class="mdl-layout__content">
+        <div class="gapp-container mdl-grid">
+            <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+            <div class="gapp-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+                <div id="content" class="mdl-color-text--grey-500">
+                  <h4>Die Umwelt im Zeitraffer</h4>
+                  <p>GrowApp ermöglicht es, Zeitraffer-Animationen von Bäumen, Gärten und ganzen Landschaften mit Ihrem Smartphone zu machen. Die App stellt die von Ihnen gemachten Fotos in einer Zeitraffer-Animation zusammen und zeigt damit die Veränderungen der Vegetation im Jahreszeitenverlauf oder sogar über Jahre hinweg. Es macht nicht nur Spaß diese Animationen anzufertigen und zu betrachten, die Daten helfen Wissenschaftlern/Wissenschaftlerinnen auch, den Einfluss des Klimawandels auf die Umwelt besser zu verstehen.</p>
+<h4>Sieben Baumarten stehen im Fokus</h4>Helfen Sie der Klimaforschung besonders durch die Beobachtung dieser 7 Baumarten:<br>
+<img src="treetypes.jpg" style="width:100%; height: auto;">
+Wenn Sie Fotos machen, geben Sie bitte den richtigen #tag im Feld “Beschreibung” an:
+<ol>
+<li><b>Stieleiche </b> (Quercus robur), <b>#oak</b></li>
+<li><b>Gemeine Hasel </b> (Corylus avellana), <b>#hazel</b></li>
+<li><b>Rotbuche</b> (Fagus sylvatica), <b>#beech</b></li>
+<li><b>Hänge-Birke </b> (Betula pendula), <b>#birch</b></li>
+<li><b>Sauerkirsche</b> (Prunus cerasus), <b>#cherry</b></li>
+<li><b>Winterlinde</b> (Tilia cordata), <b>#lime</b></li><li><b>Feige</b> (Ficus carica), <b>#fig</b></li>
+</ol>
+
+<h4>Mehr Information</h4>
+Sie finden mehr Information und eine interaktive Karte mit allen Animationen unter: 
+<a href="https://www.growapp.today">www.growapp.today</a>
+
+<h4>Schulen </h4>Einen besonderen Zugang für Schulen finden Sie unter  <a href="https://www.globe.gov/web/european-phenology-campaign/overview">GLOBE phenology campaign.</a>.
+
+<h4>Entwicklung</h4>
+Diese App basiert auf einer Idee von “The GLOBE Netherlands Foundation”. Die technische Entwicklung der App und der Website wurde von  <a href="http://www.geodan.nl">Geodan</a> und <a href="http://www.forgetthe.fish/">Forget the fish</a> realisiert. 
+
+<h4>Kontakt</h4>
+info@growapp.today
+
+<h4>Support</h4>Die App wurde finanziell gefördert und unterstützt von dem Konsortium folgender Partner:<br>
+<p><img alt="logo globe programma" src="globe-program-logo.png"></p>
+<p><img alt="logo nature today" src="naturetoday.png"></p>
+<p><img alt="logo europese unie" src="logo-eu.png"/></p>
+<p><img alt="logo mygeoss" src="logo-mygeoss.png"/></p>
+<p><img alt="logo ministerie van infrastructuur en milieu" src="Ministry-of-Infrastructure-and-the-Enviroment-logo-2.png"></p>
+<p><img alt="logo universiteit van Wageningen" src="wur.png"></p>
+<p><img alt="logo geodan" src="Geodan_logo_rgb.png"></p>
+<p><img alt="logo forget-the-fish" src="forgetthefish.png"></p>
+                <div>
+                    <h4>Unterstützung von</h4>
+                    <dl class="dl-horizontal">
+                        <dt>Map client software</dt>
+                        <dd><a href="http://openlayers.org">OpenLayers 4.0</a>, <a
+                                href="http://proj4js.org">proj4</a></dd>
+                        <dt>Map server software</dt>
+                        <dd><a href="https://mapproxy.org/">Mapproxy</a></dd>
+                        <dt>Hintergrundkarte</dt>
+                        <dd><a href="http://www.openstreetmap.org">Openstreetmap</a>, <a href="http://www.openstreetmap.org/copyright">license</a></dd>
+                        <dt>Bildbearbeitung und Animation</dt>
+                        <dd><a href="http://www.graphicsmagick.org/">GraphicsMagic</a> und <a
+                                href="http://aheckmann.github.io/gm/">GM for nodejs</a></dd>
+                        <dt>Photo browsing</dt>
+                        <dd><a href="http://photoswipe.com">Photoswipe</a></dd>
+                        <dt>Weitere Kartenlayers</dt>
+                        <dd><a href="https://worldview.earthdata.nasa.gov">Nasa worldview</a></dd>
+                        <dt>Layout und Icons</dt>
+                        <dd><a href="https://getmdl.io/">Material Design Lite</a> und <a href="https://materialdesignicons.com/">Material Design Icons</a></dd>
+                        <dt>Native app framework</dt>
+                        <dd><a href="https://cordova.apache.org/">Apache cordova</a> und <a
+                                href="https://developer.android.com">Android SDK</a> und <a
+                                href="https://github.com/cordova-plugin-camera-preview/cordova-plugin-camera-preview">community
+                            camera plugin</a></dd>
+                        <dt>Datenbank</dt>
+                        <dd><a href="https://www.postgresql.org/">Postgres</a> und <a href="http://www.postgis.org">PostGIS</a>
+                        </dd>
+                        <dt>Custom Server</dt>
+                        <dd><a href="https://nodejs.org">NodeJs</a></dd>
+                        <dt>Logo</dt>
+                        <dd>Basierend auf <a href="http://www.freevector.com/tree-world">diesem Design</a></dd>
+                    </dl>
+                </div>
+            </div>
+            <footer class="gapp-footer mdl-mini-footer">
+                <div class="mdl-mini-footer--left-section">
+                    <ul class="mdl-mini-footer--link-list">
+                        <li>&copy; 2017 Globe, NatureToday, Geodan</li>
+                    </ul>
+                </div>
+            </footer>
+        </div>
+
+        </div>
+    </main>
+</div>
+</div>
+</body>
+</html>

@@ -2,8 +2,8 @@ var languageProvider = new function()
 {
   var _languageProvider = this;
   this.languageTable = null;
-  this.langCode = 'nl'; // default to best language
-  this.countryCode = 'NL'; //https://www.youtube.com/watch?v=ELD2AwFN9Nc pos 1:06
+  this.langCode = 'nl'; // default to best language: https://www.youtube.com/watch?v=ELD2AwFN9Nc pos 1:06
+  this.countryCode = 'NL'; 
 
   this.setLanguage = function(bcp47_language)
   {

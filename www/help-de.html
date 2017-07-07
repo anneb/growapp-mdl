@@ -1,0 +1,160 @@
+﻿<!doctype html>
+<html lang="nl">
+<head>
+    <title>growapp-mdl</title>
+    <meta charset="utf-8">
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes"/>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+
+    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+
+    <link rel="stylesheet" href="./iconfont/material-icons.css">
+    <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', 'Noto', sans-serif;
+        }
+		main {
+			background-color: #fff;
+			background-color: color: rgba(255, 255, 255, 0.56);
+		}
+        .content {
+            padding: 10px;
+        }
+        .page-content {
+            width: 80%;
+            max-width: 512px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+        .gapp-header .mdl-layout__header-row {
+            padding-left: 40px;
+        }
+
+        .gapp-container {
+            max-width: 1600px;
+            width: calc(100% - 16px);
+            margin: 0 auto;
+        }
+
+        .gapp-content {
+            border-radius: 2px;
+            padding: 80px 56px;
+            margin-bottom: 80px;
+        }
+
+        .gapp-layout.is-small-screen .gapp-content {
+            padding: 40px 28px;
+        }
+
+        .gapp-content h3 {
+            margin-top: 48px;
+        }
+
+        .gapp-footer {
+            padding-left: 40px;
+        }
+
+        .gapp-footer .mdl-mini-footer--link-list a {
+            font-size: 13px;
+        }
+    </style>
+    <script>
+        function init() {
+            document.querySelector('#backbutton').addEventListener('click', function () {
+                window.history.back();
+            }, false);
+        }
+    </script>
+</head>
+<body onload="init();">
+<div class="mdl-layout__container">
+    <!-- Always shows a header, even in smaller screens. -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header is-casting-shadow">
+            <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i>
+            </div>
+            <div class="mdl-layout__header-row">
+                <!-- Title -->
+                <span class="mdl-layout-title"> GrowApp - Hilfe</span>
+            </div>
+        </header>
+
+        <main class="mdl-layout__content">
+            <div class="gapp-container mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+                <div class="gapp-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+                    <div id="content" class="mdl-color-text--grey-500">
+                    <div>
+                        <h4>So benutzen Sie die App?</h4>
+                        <p>Diese App hilft Ihnen, die jahreszeitliche Entwicklung von Bäumen und anderer Vegetation zu visualisieren. Das Erscheinungsbild eines bestimmten Baumes, also sein phänologischer Zustand, wird durch ein Foto, das Sie von einem bestimmten Standort aus machen, dokumentiert und auf der GrowApp Karte dargestellt. Um die Animation für einen bestimmten Standort zu sehen, klicken Sie einfach auf das Icon auf der Karte. Um ein Foto zu Ihrem Standort hinzuzufügen, zentrieren Sie die Karte auf Ihren Standort, klicken auf das Symbol auf der Karte für Ihren Standort und dann auf das +Kamera-Icon. Zur Aufnahme zeigt die App das vorherige Foto als halbtransparentes Bild. So kann die neue Aufnahme exakt über die vorherige Aufnahme platziert werden und eine flüssige Animation entsteht. Sobald mehr als ein Foto aufgenommen wurde, wird automatisch eine Animation erzeugt. Wenn ausreichend Bilder vorhanden sind kann die phänologische Entwicklung der Vegetation und die Veränderung der Landschaft mit der Zeit leicht sichtbar gemacht werden.</p>
+
+
+                        <h4>Nutzerinterface</h4>
+                        <dl class="dl-horizontal">
+
+                            <dt><img alt="voorbeeldafbeelding kaart" src="help-map.png"> <h4>Karte</h4></dt>
+                            <dd>Mit dem Zangengriff “pinch” können Sie herein- und herauszoomen. Durch Wischen können Sie die Karte verschieben. Farb-Icons zeigen die Standorte mit Fotos an.</dd>
+
+                            <dt><h4>Fotostandorte</h4></dt>
+                            <dd>
+                                <dl>
+                                    <dt><svg xml:space="preserve" width="21px" height="21px" viewBox="0 0 21 21" style="width:21px;height:21px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch --><title>singlemarker copy 7</title><desc>Created with Sketch.</desc><defs><circle id="path-1" cx="4.5" cy="4.5" r="4.5"></circle><filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-2"><feMorphology radius="1.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology><feOffset dx="0" dy="0" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset><feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur><feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite><feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.364470109 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix></filter></defs><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="iPad-Portrait-Copy" transform="translate(-588.000000, -521.000000)"><g id="Mappoints" transform="translate(126.000000, 321.000000)"><g id="Green-map-icons"><g id="Mapmarkers"><g id="singlemarker" transform="translate(468.000000, 206.000000)"><g id="Oval-Copy-19"><use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use><use stroke="#FFFFFF" stroke-width="2" fill="#44C783" fill-rule="evenodd" xlink:href="#path-1"></use></g></g></g></g></g></g></g></svg> Einzelfoto </dt>
+                                    <dd>Klicken, um einzelne Fotos zu sehen</dd>
+
+                                    <dt><svg xml:space="preserve" width="33px" height="33px" viewBox="0 0 33 33" style="width:33px;height:33px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch --><title>playmarker</title><desc>Created with Sketch.</desc><defs><circle id="path-1" cx="10.5" cy="10.5" r="10.5"></circle><filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-2"><feMorphology radius="2" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology><feOffset dx="0" dy="1" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset><feGaussianBlur stdDeviation="1.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur><feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite><feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1856601 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix></filter></defs><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="iPad-Portrait-Copy" transform="translate(-428.000000, -583.000000)"><g id="Mappoints" transform="translate(126.000000, 321.000000)"><g id="Green-map-icons"><g id="Playmarkers-Copy-4" transform="translate(302.000000, 262.000000)"><g id="playmarker" transform="translate(6.000000, 5.000000)"><g id="Group-Copy-3"><g id="Oval-Copy-5"><use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use><use stroke="#FFFFFF" stroke-width="2" fill="#44C783" fill-rule="evenodd" xlink:href="#path-1"></use></g><path d="M8.12080168,13.9766451 C7.91278232,13.9766451 7.744128,13.8079907 7.744128,13.5999714 L7.744128,7.00823495 C7.744128,6.80021558 7.91278232,6.63157895 8.12080168,6.63157895 L14.241696,10.0215891 C14.241696,10.0215891 14.5242013,10.3040943 14.241696,10.5866173 C13.9591907,10.8691048 8.12080168,13.9766451 8.12080168,13.9766451 Z" id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path></g></g></g></g></g></g></g></svg> Animation</dt>
+                                    <dd>Klicken, um die Animation zu sehen</dd>
+
+                                    <dt><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24">
+  <circle cx="12" cy="10" r="10" fill="green"/><text x="9" y="13" font-size="10" fill="white">2</text></svg> 2 kombinierte Fotostandorte </dt>
+                                    <dd>Hereinzoomen, um einzelne Standorte zu unterscheiden oder Anklicken, um durch alle Standorte zu schalten</dd>
+                                </dl>
+                            </dd>
+
+                            <dt><h4><i class="material-icons">menu</i> Menü</h4></dt>
+                            <dd>Zeigt Pop-up-Menü für weitere Menüpunkte.</dd>
+
+                            <dt><h4>Karten layer</h4></dt>
+                            <dd>Zeigt Liste zusätzlicher Kartenebenen an.                            <dl>
+                                    <dt><i class="material-icons">&#xE545;<!-- local florist--></i> <i>Start der Jahreszeit</i></dt>
+                                    <dd>Diese Ebene zeigt, wann die Vegetationszeit beginnt.</dd>
+
+                                    <dt><i class="material-icons">&#xE6E1;<!-- show-chart --></i> <i> Vegetationstrend</i></dt>
+                                    <dd>Diese Ebene zeigt, wie stark sich die Vegetation seit dem letzten Jahr verändert hat.</dd>
+
+                                    <dt><i class="mdi mdi-thermometer-lines mdi-24px"></i> <i>Temperatur von gestern</i></dt>
+                                    <dd>Zeigt - soweit verfügbar - die Oberflächentemperatur (nicht die Lufttemperatur) von gestern an.</dd>
+                                </dl>
+                            </dd>
+
+
+                            <dt><h4><i class="material-icons">&#xE55C;</i> Nachführung des Standorts</h4></dt>
+                            <dd>Wenn diese Funktion aktiviert wurde, bleibt die Karte automatisch auf den jeweils aktuellen Standort zentriert, bis der Nutzer die Karte manuell auf einen anderen Standort verschiebt. </dd>
+
+                            <dt><h4><i class="material-icons">&#xE412;</i> Aufnahme machen</h4></dt>
+                            <dd>Startet die Kamera, um eine Aufnahme zu machen. Nicht verfügbar für die Webseite (nur Smartphone App).</dd>
+
+                            <dt><h4><i class="material-icons">&#xE439;</i> Zusätzliches Bild hinzufügen</h4></dt>
+                            <dd>Nur verfügbar, wenn bereits ein Foto an dem Standort gemacht wurde. Klicken Sie auf Foto hinzufügen, um das gleiche Objekt aufzunehmen. Zusätzliche Fotos werden automatisch zur Zeitraffer-Animation hinzugefügt.                 </dd>
+
+                        </dl>
+
+                        <h4>Systemvoraussetzungen</h4>
+                        Die aktuelle App sollte problemlos auf neueren Android Systemen (Version 4.4+) mit GPS und Kamera laufen. Die App erfordert eine verfügbare mobile Internetverbindung.                    </div>
+                </div>
+              </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

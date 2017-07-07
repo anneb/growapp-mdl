@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
 
     <script>
-      var supportedLanguages = ['cz', 'en', 'nl'];
+      var supportedLanguages = ['cz', 'de', 'fr', 'en', 'lv', 'mk' , 'nl', 'ua'];
       function init() {
           var language;
           if (window.localStorage && window.localStorage.language) {
@@ -111,16 +111,46 @@
                             <span class="mdl-radio__label">Čeština</span>
                         </label>
                             </li>
+                                <li class="mdl-list__item">
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="de">
+                            <input type="radio" id="de" class="mdl-radio__button" name="languages" value="de" checked>
+                            <span class="mdl-radio__label">Deutsch</span>
+                        </label>
+                            </li>                            
                             <li class="mdl-list__item">
                         <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="en">
                             <input type="radio" id="en" class="mdl-radio__button" name="languages" value="en" checked>
                             <span class="mdl-radio__label">English</span>
                         </label>
                             </li>
+                                <li class="mdl-list__item">
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="fr">
+                            <input type="radio" id="fr" class="mdl-radio__button" name="languages" value="fr" checked>
+                            <span class="mdl-radio__label">Français</span>
+                        </label>
+                            </li>
+                            <li class="mdl-list__item">
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="lv">
+                            <input type="radio" id="lv" class="mdl-radio__button" name="languages" value="lv" checked>
+                            <span class="mdl-radio__label">Latviešu</span>
+                        </label>
+                            </li>
+                            <li class="mdl-list__item">
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="mk">
+                            <input type="radio" id="mk" class="mdl-radio__button" name="languages" value="mk" checked>
+                            <span class="mdl-radio__label">Македонски</span>
+                        </label>
+                            </li>
                             <li class="mdl-list__item">
                         <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="nl">
                             <input type="radio" id="nl" class="mdl-radio__button" name="languages" value="nl">
                             <span class="mdl-radio__label">Nederlands</span>
+                        </label>
+                            </li>
+                            <li class="mdl-list__item">
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="ua">
+                            <input type="radio" id="ua" class="mdl-radio__button" name="languages" value="ua">
+                            <span class="mdl-radio__label">Українська</span>
                         </label>
                             </li>
                         </ul>

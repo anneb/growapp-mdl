@@ -1,0 +1,176 @@
+﻿<!doctype html>
+<html lang="nl">
+<head>
+    <title>growapp-mdl</title>
+    <meta charset="utf-8">
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes"/>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+
+    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+
+    <link rel="stylesheet" href="./iconfont/material-icons.css">
+    <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', 'Noto', sans-serif;
+            background-color: white;
+        }
+        .content {
+            padding: 10px;
+        }
+        .page-content {
+            width: 80%;
+            max-width: 512px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .gapp-header .mdl-layout__header-row {
+            padding-left: 40px;
+        }
+
+        .gapp-container {
+            max-width: 1600px;
+            width: calc(100% - 16px);
+            margin: 0 auto;
+        }
+
+        .gapp-content {
+            border-radius: 2px;
+            padding: 80px 20px;
+            margin-bottom: 80px;
+        }
+
+        .gapp-layout.is-small-screen .gapp-content {
+            padding: 40px 28px;
+        }
+
+        .gapp-content h3 {
+            margin-top: 48px;
+        }
+
+        .gapp-footer {
+            padding-left: 40px;
+        }
+
+        .gapp-footer .mdl-mini-footer--link-list a {
+            font-size: 13px;
+        }
+    </style>
+    <script>
+        function init() {
+            document.querySelector('#backbutton').addEventListener('click', function () {
+                // warning: history keeps track of hashchanges
+                window.history.back();
+            }, false);
+        }
+    </script>
+</head>
+<body onload="init();">
+<div class="mdl-layout__container">
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header is-casting-shadow">
+        <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i>
+        </div>
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title"> Par GrowApp</span>
+        </div>
+    </header>
+
+    <main class="mdl-layout__content">
+        <div class="gapp-container mdl-grid">
+            <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+            <div class="gapp-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+                <div id="content" class="mdl-color-text--grey-500">
+                  <h4>Veido animāciju par savu vidi</h4>
+                  <p>GrowApp ļauj tev veidot koku, dārzu un ainavu animācijas, uzņemot fotoattēlus ar saviem viedtālruņiem. Lietotne šos fotoattēlus pārvērš kustīgā bildē, kas parāda izmaiņas cauri gadalaikiem un pat cauri gadiem. Izklaidējoties, veidojot sava pagalma animācijas, tu palīdzēsi zinātniekiem labāk izprast klimata pārmaiņu ietekmi uz vidi.</p>
+<h4>Uzmanības centrā septiņi sugas</h4>Palīdzi klimata pētniekiem, fotografējot sekojošās 7 koku sugas:<br>
+<img src="treetypes.jpg" style="width:100%; height: auto;"> Uzņemtajai fotogrāfijai apraksta laukā lūdzu pievieno atbilstošo #tēmturi:
+<ol>
+<li><b>Parastais ozols </b> (Quercus robur), <b>#oak</b></li>
+<li><b>Parastā lazda </b> (Corylus avellana), <b>#hazel</b></li>
+<li><b>Eiropas dižskābardis </b> (Fagus sylvatica), <b>#beech</b></li>
+<li><b>Nokarenais bērzs </b> (Betula pendula), <b>#birch</b></li>
+<li><b>Parastais ķirsis </b> (Prunus cerasus), <b>#cherry</b></li>
+<li><b>Parastā liepa </b> (Tilia cordata), <b>#lime</b></li>
+<li><b>Grezni ietērpt  </b> (Ficus carica), <b>#fig</b></li>
+</ol>
+
+<h4>Vairāk informācijas</h4>Plašāka informācija un interaktīvā karte ar visām animācijām pieejama: 
+<a href="https://www.growapp.today">www.growapp.today</a>
+
+<h4>Skolas</h4>Skolas var pievienoties <a href="https://www.globe.gov/web/european-phenology-campaign/overview">GLOBE fenoloģijas kampaņai</a>.
+
+<h4>Izstrāde</h4>
+Lietotne balstīta uz The GLOBE Netherlands Foundation idejas. Lietotnes un tīmekļa vietnes tehnisko izstrādi īstenoja  <a href="http://www.geodan.nl">Geodan</a> un <a href="http://www.forgetthe.fish/">Forget the fish</a>
+
+<h4>Kontaktinformācija</h4>
+info@growapp.today
+
+<h4>Atbalsts</h4>
+Lietotni finansē un atbalsta partneru konsorcijs:<br>
+<p><img alt="logo globe programma" src="globe-program-logo.png"></p>
+<p><img alt="logo nature today" src="naturetoday.png"></p>
+<p><img alt="logo europese unie" src="logo-eu.png"/></p>
+<p><img alt="logo mygeoss" src="logo-mygeoss.png"/></p>
+<p><img alt="logo ministerie van infrastructuur en milieu" src="Ministry-of-Infrastructure-and-the-Enviroment-logo-2.png"></p>
+<p><img alt="logo universiteit van Wageningen" src="wur.png"></p>
+<p><img alt="logo geodan" src="Geodan_logo_rgb.png"></p>
+<p><img alt="logo forget-the-fish" src="forgetthefish.png"></p>
+                <div>
+                    <h4>Autori</h4>
+                    <dl class="dl-horizontal">
+                        <dt>Kartes programmatūra</dt>
+                        <dd><a href="http://openlayers.org">OpenLayers 4.0</a>, <a
+                                href="http://proj4js.org">proj4</a></dd>
+                        <dt>Kartes servera programma</dt>
+                        <dd><a href="https://mapproxy.org/">Mapproxy</a></dd>
+                        <dt>Fona karte</dt>
+                        <dd><a href="http://www.openstreetmap.org">Openstreetmap</a>, <a href="http://www.openstreetmap.org/copyright">license</a></dd>
+                        <dt>Attēlu apstrāde un animāciju veidošana</dt>
+                        <dd><a href="http://www.graphicsmagick.org/">GraphicsMagic</a> un <a
+                                href="http://aheckmann.github.io/gm/">GM for nodejs</a></dd>
+                        <dt>Fotoattēlu pārlūkošana</dt>
+                        <dd><a href="http://photoswipe.com">Photoswipe</a></dd>
+                        <dt>Kartes papildu slāņi</dt>
+                        <dd><a href="https://worldview.earthdata.nasa.gov">Nasa worldview</a></dd>
+                        <dt>Izkārtojums un ikonas</dt>
+                        <dd><a href="https://getmdl.io/">Material Design Lite</a> un <a href="https://materialdesignicons.com/">Material Design Icons</a></dd>
+                        <dt>Lietojumprogrammas struktūra</dt>
+                        <dd><a href="https://cordova.apache.org/">Apache cordova</a> un <a
+                                href="https://developer.android.com">Android SDK</a> en <a
+                                href="https://github.com/cordova-plugin-camera-preview/cordova-plugin-camera-preview">community
+                            camera plugin</a></dd>
+                        <dt>Datu bāze</dt>
+                        <dd><a href="https://www.postgresql.org/">Postgres</a> un <a href="http://www.postgis.org">PostGIS</a>
+                        </dd>
+                        <dt>Servera pielāgošana</dt>
+                        <dd><a href="https://nodejs.org">NodeJs</a></dd>
+                        <dt>Logotips</dt>
+                        <dd>Balstīts uz  <a href="http://www.freevector.com/tree-world">šo dizainu</a></dd>
+                    </dl>
+                </div>
+            </div>
+            <footer class="gapp-footer mdl-mini-footer">
+                <div class="mdl-mini-footer--left-section">
+                    <ul class="mdl-mini-footer--link-list">
+                        <li>&copy; 2017 Globe, NatureToday, Geodan</li>
+                    </ul>
+                </div>
+            </footer>
+        </div>
+
+        </div>
+    </main>
+</div>
+</div>
+</body>
+</html>

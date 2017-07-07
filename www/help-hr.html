@@ -1,0 +1,164 @@
+﻿<!doctype html>
+<html lang="nl">
+<head>
+    <title>growapp-mdl</title>
+    <meta charset="utf-8">
+    <meta name="description" content="growapp-mdl create vegetation time-lapses">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes"/>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+
+    <!--link rel="stylesheet" href="./node_modules/material-design-lite/material.min.css"-->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./node_modules/material-design-lite/material.min.js"></script>
+
+    <link rel="stylesheet" href="./iconfont/material-icons.css">
+    <link rel="stylesheet" href="./node_modules/mdi/css/materialdesignicons.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', 'Noto', sans-serif;
+        }
+		main {
+			background-color: #fff;
+			background-color: color: rgba(255, 255, 255, 0.56);
+		}
+        .content {
+            padding: 10px;
+        }
+        .page-content {
+            width: 80%;
+            max-width: 512px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+        .gapp-header .mdl-layout__header-row {
+            padding-left: 40px;
+        }
+
+        .gapp-container {
+            max-width: 1600px;
+            width: calc(100% - 16px);
+            margin: 0 auto;
+        }
+
+        .gapp-content {
+            border-radius: 2px;
+            padding: 80px 56px;
+            margin-bottom: 80px;
+        }
+
+        .gapp-layout.is-small-screen .gapp-content {
+            padding: 40px 28px;
+        }
+
+        .gapp-content h3 {
+            margin-top: 48px;
+        }
+
+        .gapp-footer {
+            padding-left: 40px;
+        }
+
+        .gapp-footer .mdl-mini-footer--link-list a {
+            font-size: 13px;
+        }
+    </style>
+    <script>
+        function init() {
+            document.querySelector('#backbutton').addEventListener('click', function () {
+                window.history.back();
+            }, false);
+        }
+    </script>
+</head>
+<body onload="init();">
+<div class="mdl-layout__container">
+    <!-- Always shows a header, even in smaller screens. -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header is-casting-shadow">
+            <div id="backbutton" class="mdl-layout__drawer-button"><i class="material-icons">&#xE5C4;<!--arrow_back--></i>
+            </div>
+            <div class="mdl-layout__header-row">
+                <!-- Title -->
+                <span class="mdl-layout-title"> GrowApp - Pomoć</span>
+            </div>
+        </header>
+
+        <main class="mdl-layout__content">
+            <div class="gapp-container mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+                <div class="gapp-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+                    <div id="content" class="mdl-color-text--grey-500">
+                    <div>
+                        <h4>Kako koristiti aplikaciju?</h4>
+                        <p>DOva aplikacija omogućuje vam da pratite i prikažete promjene u izgledu – fenologiji – drveća i druge vegetacije. Fenologija pojedinog drveta na određenoj lokaciji u određenom trenutku u vremenu je pohranjena u GrowApp karti u obliku fotografije prikupljene uz pomoć ove aplikacije. Aplikacija predstavlja zemljopisnu kartu s prikazanim lokacijama svih fotografija svih korisnika aplikacije. Fotografiju možete pregledati pritiskom na odgovarajuću lokaciju. Ukoliko je lokacija fotografije blizu vaše trenutne lokacije, možete dodati novu fotografiju istog subjekta. Aplikacija tada pokazuje napola prozirnu verziju prethodne fotografije iznad pogleda kamere kako bi se te dvije verzije mogle međusobno poravnati. Čim je za isti subjekt dostupno više od jedne fotografije, aplikacija automatski stvara animaciju. Ukoliko je dovoljno fotografija prikupljeno u dovoljno dugom vremenskom periodu, animacija bi trebala jasno prikazivati sve promjene u fenologiji kroz vrijeme.</p>
+
+
+                        <h4>Korisničko sučelje</h4>
+                        <dl class="dl-horizontal">
+
+                            <dt><img alt="voorbeeldafbeelding kaart" src="help-map.png"> <h4>Karta</h4></dt>
+                            <dd>Za zumiranje i odzumiravanje koristite dva prsta, a za pomicanje povucite kartu.
+Obojane ikone pokazuju lokacije fotografija.
+</dd>
+
+                            <dt><h4>Lokacija fotografija</h4></dt>
+                            <dd>
+                                <dl>
+                                    <dt><svg xml:space="preserve" width="21px" height="21px" viewBox="0 0 21 21" style="width:21px;height:21px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch --><title>singlemarker copy 7</title><desc>Created with Sketch.</desc><defs><circle id="path-1" cx="4.5" cy="4.5" r="4.5"></circle><filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-2"><feMorphology radius="1.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology><feOffset dx="0" dy="0" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset><feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur><feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite><feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.364470109 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix></filter></defs><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="iPad-Portrait-Copy" transform="translate(-588.000000, -521.000000)"><g id="Mappoints" transform="translate(126.000000, 321.000000)"><g id="Green-map-icons"><g id="Mapmarkers"><g id="singlemarker" transform="translate(468.000000, 206.000000)"><g id="Oval-Copy-19"><use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use><use stroke="#FFFFFF" stroke-width="2" fill="#44C783" fill-rule="evenodd" xlink:href="#path-1"></use></g></g></g></g></g></g></g></svg> pojedinačna fotografija</dt>
+                                    <dd>dotaknite za pregled pojedinačne fotografije</dd>
+
+                                    <dt><svg xml:space="preserve" width="33px" height="33px" viewBox="0 0 33 33" style="width:33px;height:33px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch --><title>playmarker</title><desc>Created with Sketch.</desc><defs><circle id="path-1" cx="10.5" cy="10.5" r="10.5"></circle><filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-2"><feMorphology radius="2" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology><feOffset dx="0" dy="1" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset><feGaussianBlur stdDeviation="1.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur><feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite><feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1856601 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix></filter></defs><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="iPad-Portrait-Copy" transform="translate(-428.000000, -583.000000)"><g id="Mappoints" transform="translate(126.000000, 321.000000)"><g id="Green-map-icons"><g id="Playmarkers-Copy-4" transform="translate(302.000000, 262.000000)"><g id="playmarker" transform="translate(6.000000, 5.000000)"><g id="Group-Copy-3"><g id="Oval-Copy-5"><use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use><use stroke="#FFFFFF" stroke-width="2" fill="#44C783" fill-rule="evenodd" xlink:href="#path-1"></use></g><path d="M8.12080168,13.9766451 C7.91278232,13.9766451 7.744128,13.8079907 7.744128,13.5999714 L7.744128,7.00823495 C7.744128,6.80021558 7.91278232,6.63157895 8.12080168,6.63157895 L14.241696,10.0215891 C14.241696,10.0215891 14.5242013,10.3040943 14.241696,10.5866173 C13.9591907,10.8691048 8.12080168,13.9766451 8.12080168,13.9766451 Z" id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path></g></g></g></g></g></g></g></svg> animacije fotografije</dt>
+                                    <dd>dotaknite za pregled animacije</dd>
+
+                                    <dt><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" style="width:24px;height:24px" enable-background="new 0 0 24 24" viewBox="0 0 24 24">
+  <circle cx="12" cy="10" r="10" fill="green"/><text x="9" y="13" font-size="10" fill="white">2</text></svg> 2 2 kombinirane lokacije fotografije</dt>
+                                    <dd>Zumirajte za prikaz pojedinih lokacija ili dotaknite za prikaz svih lokacija.</dd>
+                                </dl>
+                            </dd>
+
+                            <dt><h4><i class="material-icons">meni</i> Meni</h4></dt>
+                            <dd>Izaberite padajući meni za više opcija</dd>
+
+                            <dt><h4>Slojevi karte</h4></dt>
+                            <dd>Izaberite dodatni sloj karte.                                <dl>
+                                    <dt><i class="material-icons">&#xE545;<!-- local florist--></i> <i>Početak sezone</i></dt>
+                                    <dd>sloj pokazuje kada započinje vegetacijska sezona</dd>
+
+                                    <dt><i class="material-icons">&#xE6E1;<!-- show-chart --></i> <i>Vegetacijski trend</i></dt>
+                                    <dd>sloj pokazuje koliko se vegetacija promijenila od prošle godine.</dd>
+
+                                    <dt><i class="mdi mdi-thermometer-lines mdi-24px"></i> <i>Jučerašnja temperatura</i></dt>
+                                    <dd>prikazuje površinsku temperaturu (ne temperaturu zraka) za prethodni dan tamo gdje je ta informacija dostupna</dd>
+                                </dl>
+                            </dd>
+
+
+                            <dt><h4><i class="material-icons">&#xE55C;</i> Praćenje lokacije</h4></dt>
+                            <dd>Kada je opcija aktivirana karta automatski ostaje centrirana na trenutnoj lokaciji sve dok korisnik ručno ne promijeni lokaciju koju promatra. </dd>
+
+                            <dt><h4><i class="material-icons">&#xE412;</i> Fotografiranje</h4></dt>
+                            <dd>Pokreće kameru. Nije dostupno u web verziji aplikacije (samo unutar mobilne aplikacije)</dd>
+
+                            <dt><h4><i class="material-icons">&#xE439;</i> Dodaj dodatnu fotografiju</h4></dt>
+                            <dd>Dostupno samo za fotografije blizu vaše trenutne lokacije. Kliknite kako biste dodali novu fotografiju istog subjekta. Dodane fotografije automatski se dodaju u stvorenu animaciju                      </dd>
+
+                        </dl>
+
+                        <h4>Zahtjevi</h4>
+                        Trenutno bi aplikacija trebala raditi dobro na novijim verzijama Android (4.4+) uređaja s ugrađenim GPS-om i kamerom. Aplikacija zahtijeva pristup internetu. 
+
+                    </div>
+                </div>
+              </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>
