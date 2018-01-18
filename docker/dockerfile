@@ -61,6 +61,7 @@ RUN set -ex \
 
 RUN git clone https://github.com/anneb/growapp-mdl /home/node/growapp-mdl
 RUN cd /home/node/growapp-mdl/server && mkdir -p uploads/medium uploads/small && chown -R node * && yarn install
+RUN apt-get update && apt-get install -y graphicsmagick
 
 ENV PGHOST localhost
 ENV PGPORT 5432
