@@ -3,7 +3,29 @@
 
 // netconfig.json should look like:
 // {"trusted_proxies": "127.0.0.1, 2.2.2.2", "trusted_ips": ["1.1.1.1", "1.1.1.2"], "smtpserver": "host.domain.tld", "smtpport": "25", "smtpuser": "user", "smtppassword": "password", "smtpdomain": "domain.tld"}
-var netconfig = require('./netconfig.json');
+
+
+var netconfig;
+if (process.env.PS_TRUSTED_PROXIES &&
+    process.env.PS_TRUSTED_IPS &&
+    process.env.PS_SMTPSERVER &&
+    process.env.PS_SMTPPORT &&
+    process.env.PS_SMTPUSER &&
+    process.env.PS_SMTPPASSWORD &&
+    process.env.PS_SMTPDOMAIN)
+{
+    netconfig = {
+      trusted_proxies: process.env.PS_TRUSTED_PROXIES,
+      trusted_ips: process.env.PS_TRUSTED_IPS,
+      smtpserver: process.env.PS_SMTPSERVER,
+      smtpport: process.env.PS_SMTPPORT,
+      smtpuser: process.env.PS_SMTPUSER,
+      smtppassword: process.env.PS_SMTPPASSWORD,
+      smtpdomain: process.env.PS_SMTPDOMAIN
+    };
+} else {
+    netconfig = require('./netconfig.json');
+}
 
 var express = require('express');
 var fs = require('fs-extra');
@@ -25,11 +47,11 @@ if (netconfig.trusted_proxies && netconfig.trusted_proxies !== '') {
 
 var Pool = require('pg').Pool;
 var dbPool = new Pool({
-  user: 'geodb',
-  password: 'geodb',
-  host: 'localhost',
-  database: 'locophoto',
-  port: 5432,
+  user: process.env.PGUSER || 'geodb',
+  password: process.env.PGPASSWORD || 'geodb',
+  host: process.env.PGHOST || 'localhost',
+  database: process.env.PGDATABASE || 'locophoto',
+  port: process.env.PGPORT || 5432,
   max: 20, // max number of clients in pool
   idleTimeoutMillis: 1000 // close & remove clients which have been idle > 1 second
 });
