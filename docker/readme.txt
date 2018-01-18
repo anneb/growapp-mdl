@@ -5,9 +5,9 @@ docker build -t growapp-photoserver:1.0 .
 
 2. Start the Photoserver with the appropriate settings:
 
-docker run -p 3100:3100 -e "PGHOST=database.example.com" --dns=8.8.8.8 -v ./uploads:/home/node/growapp-mdl/server/uploads growapp-photoserver:1.0
+docker run -d -p 3100:3100 -e "PGHOST=database.example.com" --dns=8.8.8.8 -v ./uploads:/home/node/growapp-mdl/server/uploads growapp-photoserver:1.0
 
-Available Settings
+Available RUN Settings
 
 ENV PGHOST localhost
 ENV PGPORT 5432
@@ -25,4 +25,19 @@ ENV PS_SMTPDOMAIN example.com
 EXPOSE 3100
 VOLUME /home/node/growapp-mdl/server/uploads
 
+Some other commands:
+
+You can view the output logs with:
+
+docker logs container-id
+
+where the container-id is the (first few letters of) the container-id printed from the "docker run" command or the obtain with "docker ps"
+
+If you need to stop the server:
+
+docker stop container-id
+
+You can restart the container:
+
+docker start container-id
 
