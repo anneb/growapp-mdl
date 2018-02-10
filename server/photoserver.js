@@ -249,7 +249,7 @@ app.get('/photoserver/getphotos', cors(), function(req, res) {
 app.post('/photoserver/getphotoset', cors(), function(req, res) {
   console.log('POST /photoserver/getphotoset');
   var photoid = req.body.photoid;
-  var sql = 'select id, accuracy, filename, time, width, height, description, tags from photo where rootid=$1 or id=$1 order by time';
+  var sql = 'select id, accuracy, filename, time, width, height, description, tags, st_x(location) lon, st_y(location) lat from photo where rootid=$1 or id=$1 order by time';
   dbPool.query(sql, [photoid])
     .then(function(result){
       result.rows.forEach(function(row){
