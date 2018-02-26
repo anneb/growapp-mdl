@@ -265,6 +265,22 @@ app.post('/photoserver/getphotoset', cors(), function(req, res) {
     });
 });
 
+app.post('/photoserver/creategif', cors(), function(req, res) {
+  console.log('POST /photoserver/creategif');
+  var photoid = req.body.photoid;
+  updateAnimation2(photoid, 'uploads/small')
+  .then(function(animationFilename){
+    return updateAnimation2(photoid, 'uploads/medium');
+  }).then(function(animationFilename){
+    return updateAnimation2(photoid, 'uploads');
+  }).then(function(animationFilename){
+    res.json(['/uploads/' + animationFilename, '/uploads/medium/' + animationFilename, '/uploads/small/' + animationFilename]);
+  }).catch(function(reason){
+    res.writeHead(500, {'Content-Type' : 'text/html'});
+    res.end('error: ' + reason);
+  })
+});
+
 
 app.post('/photoserver/getmyphotos', cors(), function(req, res) {
   console.log('POST /photoserver/getmyphotos');
@@ -796,6 +812,54 @@ function updateAnimation(rootid, path)
          .catch(function(reason){
                console.log('error getting animation files: ' + reason);
          });
+}
+
+// creates or updates an animated gif from a set of photos linked to the the
+// photo with id of rootid, does not check for single file, works with any path
+// returns Promise(string gifFileName);
+function updateAnimation2(rootid, path)
+{
+  return new Promise(function(resolve, reject){
+    // enumerate all input foto's for animation
+    var sql = 'select  id, time, filename from photo where id=$1 or rootid=$1 order by time';
+    dbPool.query(sql, [rootid])
+    .then(function (result){
+      if (result.rows.length > 0) {
+        var outputfilename = Path.parse(result.rows[0].filename).name + '.gif';
+        var graphicsMagic = gm();
+        if (result.rows.length == 1) {
+          console.log(result.rows[0].filename);
+          graphicsMagic.in(Path.join(path, result.rows[0].filename));
+        } else if (result.rows.length > 1) {
+          for (var i = 0; i < result.rows.length; i++) {
+            console.log(result.rows[i].filename);
+            graphicsMagic.in('-delay', 100).in(Path.join(__dirname, path, result.rows[i].filename));
+          }
+        }
+        graphicsMagic.write(Path.join(__dirname, path, outputfilename), function(err){
+          if (err) {
+            reject('Failed to create animation: ' + err);
+          } else {
+              sql = 'update photo set animationfilename=$1, isroot=true where id=$2';
+              console.log('hier: ' + sql);
+              dbPool.query(sql, [outputfilename, rootid])
+                .then(resolve(Path.join(path, outputfilename)))
+                .catch(function(reason) {
+                  console.log('failed to upate animationfilename: ' + reason);
+                  reject('update failed(2)');
+                });
+          }
+        });
+      } else {
+        // zero results
+        reject('photoid not found')
+      }
+    })
+    .catch(function(reason){
+        console.log('error getting animation files: ' + reason);
+        reject ('update failed(1)')
+    });
+  });
 }
 
 function getUserid (email, hash) {
