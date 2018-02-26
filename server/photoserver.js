@@ -275,14 +275,19 @@ app.post('/photoserver/creategif', cors(), function(req, res) {
     return updateAnimation2(photoid, 'uploads/medium');
   }).then(function(animationFilename){
     result.push('/' + animationFilename);
-    return updateAnimation2(photoid, 'uploads');
+    return updateAnimation2(photoid, 'uploads', true);
   }).then(function(animationFilename){
     result.push('/' + animationFilename);
     res.json(result);
   }).catch(function(reason){
-    res.writeHead(500, {'Content-Type' : 'text/html'});
-    res.end('error: ' + reason);
-  })
+    if (reason == 'photoid not found') {
+      // empty result
+      res.json([]);
+    } else {
+      res.writeHead(500, {'Content-Type' : 'text/html'});
+      res.end('error: ' + reason);
+    }
+  });
 });
 
 
@@ -821,37 +826,52 @@ function updateAnimation(rootid, path)
 // creates or updates an animated gif from a set of photos linked to the the
 // photo with id of rootid, does not check for single file, works with any path
 // returns Promise(string gifFileName);
-function updateAnimation2(rootid, path)
+function updateAnimation2(rootid, path, resize)
 {
   return new Promise(function(resolve, reject){
     // enumerate all input foto's for animation
-    var sql = 'select  id, time, filename from photo where id=$1 or rootid=$1 order by time';
+    var sql = 'select  id, time, filename, width, height from photo where id=$1 or rootid=$1 order by time';
     dbPool.query(sql, [rootid])
     .then(function (result){
       if (result.rows.length > 0) {
         var outputfilename = Path.parse(result.rows[0].filename).name + '.gif';
         var graphicsMagic = gm();
         if (result.rows.length == 1) {
-          console.log(console.log('Add single file:' + Path.join(path, result.rows[0].filename)));
-          graphicsMagic.in(Path.join(path, result.rows[0].filename));
+          graphicsMagic.in(Path.join(__dirname, path, result.rows[0].filename));
         } else if (result.rows.length > 1) {
+          var minsize = result.rows.reduce(function(result, row){
+            if (row.width != result.minWidth || row.height != result.minHeight) {
+              result.resize = true;
+            }
+            if (result.minWidth > row.width) {
+              result.minWidth = row.width;
+            }
+            if (result.minHeight > row.height) {
+              result.minHeight = row.height;
+            }
+            return result;
+          }, {"minWidth": result.rows[0].width, "minHeight": result.rows[0].height, "resize": false});
           for (var i = 0; i < result.rows.length; i++) {
-            console.log(result.rows[i].filename);
-            console.log('Adding file:' + Path.join(__dirname, path, result.rows[i].filename))
             graphicsMagic.in('-delay', 100).in(Path.join(__dirname, path, result.rows[i].filename));
+            if (resize && minsize.resize && (result.rows[i].width != minsize.minWidth || result.rows[i].height != minsize.minHeight)) {
+              if (minsize.minHeight > minsize.minWidth) {
+                console.log('resizing ' + minsize.minHeight + ", " + minsize.minHeight);
+                graphicsMagic.resize(minsize.minHeight, minsize.minHeight, '^');
+              } else {
+                console.log('resizing ' + minsize.minWidth + ", " + minsize.minWidth);
+                graphicsMagic.resize(minsize.minWidth, minsize.minWidth, '^');
+              }
+            }
           }
         }
-        console.log('Outputting to: ' + Path.join(__dirname, path, outputfilename));
         graphicsMagic.write(Path.join(__dirname, path, outputfilename), function(err){
           if (err) {
             reject('Failed to create animation: ' + err);
           } else {
-              sql = 'update photo set animationfilename=$1, isroot=true where id=$2';
-              console.log('hier: ' + sql);
-              dbPool.query(sql, [outputfilename, rootid])
+              sql = 'update photo set animationfilename=$1, isroot=$3 where id=$2';
+              dbPool.query(sql, [outputfilename, rootid, (result.rows.length > 1)])
                 .then(resolve(Path.join(path, outputfilename)))
                 .catch(function(reason) {
-                  console.log('failed to upate animationfilename: ' + reason);
                   reject('update failed(2)');
                 });
           }
