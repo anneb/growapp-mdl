@@ -832,7 +832,7 @@ function updateAnimation2(rootid, path)
         var outputfilename = Path.parse(result.rows[0].filename).name + '.gif';
         var graphicsMagic = gm();
         if (result.rows.length == 1) {
-          console.log(console.log('Add single file:' + Path.join(path, result.rows[0].filename));
+          console.log(console.log('Add single file:' + Path.join(path, result.rows[0].filename)));
           graphicsMagic.in(Path.join(path, result.rows[0].filename));
         } else if (result.rows.length > 1) {
           for (var i = 0; i < result.rows.length; i++) {
