@@ -271,13 +271,13 @@ app.post('/photoserver/creategif', cors(), function(req, res) {
   var photoid = req.body.photoid;
   updateAnimation2(photoid, 'uploads/small')
   .then(function(animationFilename){
-    result.push(animationFilename);
+    result.push('/' + animationFilename);
     return updateAnimation2(photoid, 'uploads/medium');
   }).then(function(animationFilename){
-    result.push(animationFilename);
+    result.push('/' + animationFilename);
     return updateAnimation2(photoid, 'uploads');
   }).then(function(animationFilename){
-    result.push(animationFilename);
+    result.push('/' + animationFilename);
     res.json(result);
   }).catch(function(reason){
     res.writeHead(500, {'Content-Type' : 'text/html'});
