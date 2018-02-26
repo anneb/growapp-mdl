@@ -832,14 +832,16 @@ function updateAnimation2(rootid, path)
         var outputfilename = Path.parse(result.rows[0].filename).name + '.gif';
         var graphicsMagic = gm();
         if (result.rows.length == 1) {
-          console.log(result.rows[0].filename);
+          console.log(console.log('Add single file:' + Path.join(path, result.rows[0].filename));
           graphicsMagic.in(Path.join(path, result.rows[0].filename));
         } else if (result.rows.length > 1) {
           for (var i = 0; i < result.rows.length; i++) {
             console.log(result.rows[i].filename);
+            console.log('Adding file:' + Path.join(__dirname, path, result.rows[i].filename))
             graphicsMagic.in('-delay', 100).in(Path.join(__dirname, path, result.rows[i].filename));
           }
         }
+        console.log('Outputting to: ' + Path.join(__dirname, path, outputfilename));
         graphicsMagic.write(Path.join(__dirname, path, outputfilename), function(err){
           if (err) {
             reject('Failed to create animation: ' + err);
