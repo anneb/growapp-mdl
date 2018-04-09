@@ -56,9 +56,19 @@ router.get('/', function(req, res) {
     res.json({ message: 'growapp server api' });   
 });
 
-function jsonError(res, message)
+function jsonError(res, error)
 {
-    res.status(500).json({"error" : message});
+    if (error && error.name) {
+        switch(error.name) {
+            case "unknowndeviceerror":
+                res.status(403).json({"error" : {"name": error.name, "message": error.message}});
+                break;
+            default:
+                res.status(500).json({"error" : {"name": error.name, "message": error.message}});
+        }
+    } else {
+        res.status(500).json({"error" : {"name": "unexpected error", "message": error}});
+    }
 }
 
 // more routes for our API will happen here
@@ -76,6 +86,9 @@ router.route('/photos')
      photodb.createPhoto(req.body)
      .then(function(result){
          res.json(result);
+     })
+     .catch(function(error){
+         jsonError(res, error);
      });
   });
 

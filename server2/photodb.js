@@ -95,7 +95,7 @@
                               });
                         });
                     } else {
-                        throw "Error creating device";
+                        throw {"name": "createdeviceerror", "message": "Error creating device"};
                     }
                 });
             });
@@ -113,6 +113,29 @@
        return [];
       }
     }
+
+    function checkDevice(deviceid, devicehash)
+    {
+        return new Promise(function(resolve, reject){
+            if ((!deviceid) || (!devicehash)) {
+                resolve(0);
+            } else {
+                var sql = 'select id from device where deviceid=$1 and devicehash=$2';
+                dbPool.query(sql, [deviceid,devicehash])
+                    .then (function (result){
+                        if (result.rows.length) {
+                            resolve(result.rows[0].id);
+                        } else {
+                            resolve(0);
+                        }
+                    })
+                    .catch(function(err) {
+                        reject(err);
+                    });
+            }
+        });
+    }
+
     
     function createCollection(features, message, errno) {
         var featureCollection = new FeatureCollection(message, errno);
@@ -159,9 +182,18 @@
                 }
             };
             this.createPhoto = function (photoinfo) {
-                return _writePhoto(photoinfo.photo).then(function(filename){
-                    return ({"filename": filename});
-                });
+                console.log(photoinfo);
+                return checkDevice(photoinfo.deviceid, photoinfo.devicehash)
+                  .then(function(deviceid){
+                    if (deviceid > 0) {
+                        // known device
+                        return _writePhoto(photoinfo.photo).then(function(filename){
+                            return ({"filename": filename});
+                        });
+                    } else {
+                        throw {"name": "unknowndeviceerror", "message": "photo upload available for registered devices only"};
+                    }                    
+                  });
             };
             this.deletePhoto = function(photo) {
                 return _deletePhoto(photo);
