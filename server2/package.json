@@ -1,0 +1,11 @@
+{
+    "name": "photoserver",
+    "main": "photoserver2.js",
+    "dependencies": {
+        "body-parser": "~1.0.1",
+        "cors": "^2.8.4",
+        "express": "~4.0.0",
+        "fs-extra": "^5.0.0",
+        "pg": "^6.0.3"
+    }
+}
