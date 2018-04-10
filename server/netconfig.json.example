@@ -1,0 +1,10 @@
+{
+ "trusted_proxies": "127.0.0.1",
+ "trusted_ips": ["127.0.0.1"],
+ "smtpserver" : "smtp.example.com",
+ "smtpport" : "587",
+ "smtpuser" : "mailuser",
+ "smtpdomain" : "example.com",
+ "smtppassword" : "password"
+}
+
