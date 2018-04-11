@@ -2,7 +2,7 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var cors       = require('cors');
-var photodb    = require('./photodb');
+
 
 var netconfig;
 if (process.env.PS_TRUSTED_PROXIES &&
@@ -25,6 +25,8 @@ if (process.env.PS_TRUSTED_PROXIES &&
 } else {
     netconfig = require('./netconfig.json');
 }
+
+var photodb    = require('./photodb')(netconfig);
 
 // use trust proxy if configured 
 if (netconfig.trusted_proxies && netconfig.trusted_proxies !== '') {
@@ -61,6 +63,7 @@ function jsonError(res, error)
     if (error && error.name) {
         switch(error.name) {
             case "unknowndeviceerror":
+            case "unknownownererror":
                 res.status(403).json({"error" : {"name": error.name, "message": error.message}});
                 break;
             default:
@@ -83,7 +86,7 @@ router.route('/photos')
     });
   })
   .post(function(req, res){
-     photodb.createPhoto(req.body)
+     photodb.storePhoto(req.body)
      .then(function(result){
          res.json(result);
      })
@@ -91,6 +94,14 @@ router.route('/photos')
          jsonError(res, error);
      });
   });
+
+function fixIp(ip)
+{
+    if (ip.substr(0, 7) === '::ffff:') {
+        ip = ip.substr(7);
+    }
+    return ip;
+}
 
 router.route('/photos/:id')
   .get(function(req, res){
@@ -106,21 +117,18 @@ router.route('/photos/:id')
 
   })
   .delete(function(req, res){
-    photodb.deletePhoto(req.params.id)
+    photodb.deletePhoto(req.params.id, req.body, fixIp(req.ip))
       .then(function(photo){
           res.json(photo);
       })
-      .catch(function(err){
+      .catch(function(error){
           jsonError(res, error);
       });
   });
 
 router.route('/device')
    .post(function(req, res){
-        var ip = req.ip;
-        if (ip.substr(0, 7) === '::ffff:') {
-            ip = ip.substr(7);
-        }
+        var ip = fixIp(req.ip);        
         photodb.createDevice(req.body, ip)
             .then(function(deviceinfo){
                 res.json(deviceinfo);
