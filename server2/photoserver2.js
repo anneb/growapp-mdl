@@ -28,6 +28,39 @@ if (process.env.PS_TRUSTED_PROXIES &&
 
 var photodb    = require('./photodb')(netconfig);
 
+function fixIp(ip)
+{
+    if (ip.substr(0, 7) === '::ffff:') {
+        ip = ip.substr(7);
+    }
+    return ip;
+}
+
+function jsonError(res, error)
+{
+    if (error && error.name) {
+        switch(error.name) {
+            case "badrequest":
+                res.status(400).json({"error" : {"name": error.name, "message": error.message}});
+                break;
+            case "validationfailed":
+                res.status(401).json({"error" : {"name": error.name, "message": error.message}});
+                break;
+            case "userlocked":
+            case "unknowndevice":
+            case "unknownowner":
+            case "photonotfound":
+                res.status(403).json({"error" : {"name": error.name, "message": error.message}});
+                break;
+            default:
+                res.status(500).json({"error" : {"name": error.name, "message": error.message}});
+        }
+    } else {
+        res.status(500).json({"error" : {"name": "unexpected error", "message": error}});
+    }
+}
+
+
 // use trust proxy if configured 
 if (netconfig.trusted_proxies && netconfig.trusted_proxies !== '') {
     app.set('trust proxy', netconfig.trusted_proxies);
@@ -58,21 +91,6 @@ router.get('/', function(req, res) {
     res.json({ message: 'growapp server api' });   
 });
 
-function jsonError(res, error)
-{
-    if (error && error.name) {
-        switch(error.name) {
-            case "unknowndeviceerror":
-            case "unknownownererror":
-                res.status(403).json({"error" : {"name": error.name, "message": error.message}});
-                break;
-            default:
-                res.status(500).json({"error" : {"name": error.name, "message": error.message}});
-        }
-    } else {
-        res.status(500).json({"error" : {"name": "unexpected error", "message": error}});
-    }
-}
 
 // more routes for our API will happen here
 router.route('/photos')
@@ -95,13 +113,6 @@ router.route('/photos')
      });
   });
 
-function fixIp(ip)
-{
-    if (ip.substr(0, 7) === '::ffff:') {
-        ip = ip.substr(7);
-    }
-    return ip;
-}
 
 router.route('/photos/:id')
   .get(function(req, res){
@@ -126,6 +137,51 @@ router.route('/photos/:id')
       });
   });
 
+router.route('/photosets')
+  .get(function(req, res){
+      photodb.getPhotoSets()
+      .then(function(photosets){
+        res.json(photosets);
+    })
+    .catch(function(error){
+      jsonError(res, error);
+    });
+  });
+
+router.route('/photosets/:id')
+  .get(function(req, res){
+      photodb.getPhotoSets(req.params.id)
+        .then (function(photoset){
+            res.json(photoset);
+        })
+        .catch(function(error){
+            jsonError(res, error);
+        });
+  });
+
+  router.route('/photosets/:id/like')
+    .post(function(req, res){
+        photodb.like(req.params.id, 1, req.body)
+            .then (function(result){
+                res.json(result);
+            })
+            .catch(function(error){
+                jsonError(res, error);
+            });
+    });
+
+    router.route('/photosets/:id/dislike')
+    .post(function(req, res){
+        photodb.like(req.params.id, -1, req.body)
+            .then (function(result){
+                res.json(result);
+            })
+            .catch(function(error){
+                jsonError(res, error);
+            });
+    });
+
+
 router.route('/device')
    .post(function(req, res){
         var ip = fixIp(req.ip);        
@@ -137,6 +193,26 @@ router.route('/device')
                 jsonError(res, error);
             });
    });
+
+router.route('/users')
+    .post(function(req, res){
+        photodb.createUser(req.body)
+        .then(function(info){
+            res.json(info);
+        })
+        .catch(function(error){
+            jsonError(res, error);
+        });
+    })
+    .put(function(req, res){
+        photodb.updateUser(req.body)
+        .then(function(info){
+            res.json(info);
+        })
+        .catch(function(error){
+            jsonError(res, error);
+        });
+    });
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
