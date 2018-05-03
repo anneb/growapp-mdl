@@ -878,12 +878,12 @@ function updateAnimation2(rootid, path, resize)
         });
       } else {
         // zero results
-        reject('photoid not found')
+        reject('photoid not found');
       }
     })
     .catch(function(reason){
         console.log('error getting animation files: ' + reason);
-        reject ('update failed(1)')
+        reject ('update failed(1)');
     });
   });
 }
