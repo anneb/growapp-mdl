@@ -537,27 +537,27 @@
         return result.rows;
     }
 
-    async function dbLike (rootid, like, userinfo) {
+    async function dbPhotosetLike (photosetid, like, userinfo) {
         var userid = await getUserid(userinfo.username, userinfo.hash);
         if (userid > 0) {
-            var sql = "select id, rootid, userid, likes from likes where rootid=$1 and userid=$2";
-            var result = await dbPool.query(sql, [rootid, userid]);
+            var sql = "select id, photosetid, userid, likes from photosetlikes where photosetid=$1 and userid=$2";
+            var result = await dbPool.query(sql, [photosetid, userid]);
             if (result.rows.length) {
                 if (result.rows[0].likes==like) {
                     like = 0; // reset like
                 }
             }
-            sql = "insert into likes (rootid, userid, likes) values ($1,$2,$3) on conflict(rootid,userid) do update set likes=$3";
-            await dbPool.query(sql, [rootid, userid, like]);
-            sql = "select sum(case when likes=1 then 1 end) as likes, sum(case when likes=-1 then 1 end) as dislikes from likes where rootid=$1 group by rootid";
-            result = await dbPool.query(sql, [rootid]);
+            sql = "insert into photosetlikes (photosetid, userid, likes) values ($1,$2,$3) on conflict(photosetid,userid) do update set likes=$3";
+            await dbPool.query(sql, [photosetid, userid, like]);
+            sql = "select sum(case when likes=1 then 1 end) as likes, sum(case when likes=-1 then 1 end) as dislikes from photosetlikes where photosetid=$1 group by photosetid";
+            result = await dbPool.query(sql, [photosetid]);
             var likes = 0;
             var dislikes = 0;
             if (result.rows.length) {
                 likes = result.rows[0].likes ? result.rows[0].likes : 0;
                 dislikes = result.rows[0].dislikes ? result.rows[0].dislikes : 0;
             }
-            return {photoset: rootid, yourlikes: like, likes: likes, dislikes: dislikes};
+            return {photoset: photosetid, yourlikes: like, likes: likes, dislikes: dislikes};
         } else {
             throw {"name": "unknownuser", "message": "(dis)like allowed for registered users only"};
         }
@@ -572,7 +572,7 @@
                     return createCollection(result.rows, null, null);
                 });
         } else {
-            sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, filename, time, width, height, description, tags from photo where visible=true and rootid=0';
+            sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, filename, time, width, height, description, tags from photo where visible=true and photosetid=0';
             return dbPool.query(sql)
                 .then(function(result) {
                     return createCollection(result.rows, null, null);
@@ -608,11 +608,11 @@
             this.updateUser = function(userinfo) {
                 return dbUpdateUser(userinfo);
             };
-            this.like = function (rootid, like, userinfo) {
-                return dbLike (rootid, like, userinfo);
+            this.photosetLike = function (photosetid, like, userinfo) {
+                return dbPhotosetLike (photosetid, like, userinfo);
             };
-            this.dislike = function(rootid, like, userinfo) {
-                return dbLike (rootid, like, userinfo);
+            this.photosetDislike = function(photosetid, like, userinfo) {
+                return dbPhotosetLike (photosetid, like, userinfo);
             };
         }
     };

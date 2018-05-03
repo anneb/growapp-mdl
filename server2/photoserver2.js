@@ -170,7 +170,7 @@ router.route('/photosets/:id')
 
   router.route('/photosets/:id/like')
     .post(function(req, res){
-        photodb.like(req.params.id, 1, copyAuth(req, req.body))
+        photodb.photosetLike(req.params.id, 1, copyAuth(req, req.body))
             .then (function(result){
                 res.json(result);
             })
@@ -181,7 +181,7 @@ router.route('/photosets/:id')
 
     router.route('/photosets/:id/dislike')
     .post(function(req, res){
-        photodb.like(req.params.id, -1, copyAuth(req, req.body))
+        photodb.photosetLike(req.params.id, -1, copyAuth(req, req.body))
             .then (function(result){
                 res.json(result);
             })
