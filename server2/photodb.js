@@ -127,7 +127,7 @@
 
     async function dbStorePhoto(photoinfo) {
         if (!checkPhotoInfo(photoinfo)){
-            throw {"name": "badrequest", "message": "missing or bad upload parameters"};
+            throw {"name": "unprocessable", "message": "missing or bad upload parameters"};
         };
         var deviceid = await getDevice(photoinfo.deviceid, photoinfo.devicehash);
         if (deviceid == 0) {
@@ -245,6 +245,31 @@
     }
   
     /**
+     * @description get single user or all users
+     * @param {object} userinfo using userinfo.username and username.hash for single user, trustedip for all users
+     * @param {string} clientIp ip of client
+     * @returns array of userinfo
+     */
+    async function dbGetUsers(userinfo, clientip) {
+        var sql, params;
+        if (netconfig.trusted_ips.indexOf(clientip) > -1) {
+            // trusted clientIp, list all users
+            sql = "select email, displayname, validated, allowmailing from photouser";
+            params = [];
+        } else {
+            var userId = await getUserid(userinfo.username, userinfo.hash);
+            if (userId > 0) {
+                sql = "select email, displayname, validated, allowmailing from photouser where id=$1";
+                params = [userId];
+            } else {
+                throw {"name": "unknowuser", "message": "userinfo allowed for registered users only"};
+            }
+        }
+        var result = await dbPool.query(sql, params);
+        return {"users": result.rows};
+    }
+    
+    /**
      * @description creates or updates user for device, emails a verification code
      * @param {object} userinfo 
      * @returns {object} ok
@@ -256,7 +281,7 @@
         }
         var sql;
         if (!(userinfo.hasOwnProperty('allowmailing') && userinfo.hasOwnProperty('displayname'))) {
-            throw {"name": "badrequest", "message": "missing or bad upload parameters"};
+            throw {"name": "unprocessable", "message": "missing or bad upload parameters"};
         }
         var allowmailing = userinfo.allowmailing ? true : false;
         var validationcode;
@@ -274,7 +299,7 @@
                 await dbPool.query(sql, [userinfo.username.toLowerCase(), userinfo.displayname, validationcode, userinfo.allowmailing]);
             }
         } else {
-            throw {"name": "badrequest", "message": "email not provided or invalid"};
+            throw {"name": "unprocessable", "message": "email not provided or invalid"};
         }
         var info = await emailValidationCode(userinfo.username, validationcode);
         return { "message": "validationcode mailed to " + userinfo.username};
@@ -329,7 +354,7 @@
                     userId = result.rows[0].id;
                 }
             } else {
-                throw {"name": "badrequest", "message": "email and/or validationcode not provided or invalid"};
+                throw {"name": "unprocessable", "message": "email and/or validationcode not provided or invalid"};
             }
         }
         if (userId > 0) {
@@ -497,7 +522,7 @@
         var parameters = [];
         if (id) {
             if (!isNumeric(id)) {
-                throw {"name": "badrequest", "message": "parameter id must be numeric"};
+                throw {"name": "unprocessable", "message": "parameter id must be numeric"};
             }
             sql = 'select id, accuracy, filename, time, width, height, description, tags, st_x(location) lon, st_y(location) lat from photo where rootid=$1 or id=$1 order by time';
             parameters = [id];
@@ -524,19 +549,13 @@
             }
             sql = "insert into likes (rootid, userid, likes) values ($1,$2,$3) on conflict(rootid,userid) do update set likes=$3";
             await dbPool.query(sql, [rootid, userid, like]);
-            sql = "select likes, count(likes) as count from likes where rootid=$1 and likes in (1,-1) group by likes order by likes desc";
+            sql = "select sum(case when likes=1 then 1 end) as likes, sum(case when likes=-1 then 1 end) as dislikes from likes where rootid=$1 group by rootid";
             result = await dbPool.query(sql, [rootid]);
             var likes = 0;
             var dislikes = 0;
             if (result.rows.length) {
-                if (result.rows[0].likes == 1) {
-                    likes = result.rows[0].count;
-                    if (result.rows.length > 1) {
-                        dislikes = result.rows[1].count;
-                    }
-                } else {
-                    dislikes = result.rows[0].count;
-                }
+                likes = result.rows[0].likes ? result.rows[0].likes : 0;
+                dislikes = result.rows[0].dislikes ? result.rows[0].dislikes : 0;
             }
             return {photoset: rootid, yourlikes: like, likes: likes, dislikes: dislikes};
         } else {
@@ -579,6 +598,9 @@
             };
             this.createDevice = function(deviceInfo, deviceip) {
                 return dbCreateDevice(deviceInfo, deviceip);
+            };
+            this.getUsers = function(userinfo, clientip) {
+                return dbGetUsers(userinfo, clientip);
             };
             this.createUser = function(userinfo) {
                 return dbCreateUser(userinfo);

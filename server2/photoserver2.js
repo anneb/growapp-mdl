@@ -2,7 +2,7 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var cors       = require('cors');
-
+var auth       = require('basic-auth');
 
 var netconfig;
 if (process.env.PS_TRUSTED_PROXIES &&
@@ -40,8 +40,8 @@ function jsonError(res, error)
 {
     if (error && error.name) {
         switch(error.name) {
-            case "badrequest":
-                res.status(400).json({"error" : {"name": error.name, "message": error.message}});
+            case "unprocessable":
+                res.status(422).json({"error" : {"name": error.name, "message": error.message}});
                 break;
             case "validationfailed":
                 res.status(401).json({"error" : {"name": error.name, "message": error.message}});
@@ -49,6 +49,7 @@ function jsonError(res, error)
             case "userlocked":
             case "unknowndevice":
             case "unknownowner":
+            case "unknownuser":
             case "photonotfound":
                 res.status(403).json({"error" : {"name": error.name, "message": error.message}});
                 break;
@@ -60,6 +61,14 @@ function jsonError(res, error)
     }
 }
 
+function copyAuth(req, target) {
+    var info = auth(req);
+    if (info) {
+        target.username = info.name;
+        target.hash = info.pass;
+    }
+    return target;
+}
 
 // use trust proxy if configured 
 if (netconfig.trusted_proxies && netconfig.trusted_proxies !== '') {
@@ -104,7 +113,7 @@ router.route('/photos')
     });
   })
   .post(function(req, res){
-     photodb.storePhoto(req.body)
+     photodb.storePhoto(copyAuth(req, req.body))
      .then(function(result){
          res.json(result);
      })
@@ -125,10 +134,10 @@ router.route('/photos/:id')
       });
   })
   .put(function(req, res){
-
+     jsonError(res, {"name": "notyetimplemented", "message": "not yet implemented"});
   })
   .delete(function(req, res){
-    photodb.deletePhoto(req.params.id, req.body, fixIp(req.ip))
+    photodb.deletePhoto(req.params.id, copyAuth(req, req.body), fixIp(req.ip))
       .then(function(photo){
           res.json(photo);
       })
@@ -161,7 +170,7 @@ router.route('/photosets/:id')
 
   router.route('/photosets/:id/like')
     .post(function(req, res){
-        photodb.like(req.params.id, 1, req.body)
+        photodb.like(req.params.id, 1, copyAuth(req, req.body))
             .then (function(result){
                 res.json(result);
             })
@@ -172,7 +181,7 @@ router.route('/photosets/:id')
 
     router.route('/photosets/:id/dislike')
     .post(function(req, res){
-        photodb.like(req.params.id, -1, req.body)
+        photodb.like(req.params.id, -1, copyAuth(req, req.body))
             .then (function(result){
                 res.json(result);
             })
@@ -185,7 +194,7 @@ router.route('/photosets/:id')
 router.route('/device')
    .post(function(req, res){
         var ip = fixIp(req.ip);        
-        photodb.createDevice(req.body, ip)
+        photodb.createDevice(copyAuth(req, req.body), ip)
             .then(function(deviceinfo){
                 res.json(deviceinfo);
             })
@@ -195,8 +204,18 @@ router.route('/device')
    });
 
 router.route('/users')
+    .get(function(req, res){
+        photodb.getUsers(copyAuth(req, {}), fixIp(req.ip))
+            .then(function(info){
+            res.json(info);
+        })
+
+        .catch(function(error){
+            jsonError(res, error);
+        });
+    })
     .post(function(req, res){
-        photodb.createUser(req.body)
+        photodb.createUser(copyAuth(req, req.body))
         .then(function(info){
             res.json(info);
         })
@@ -205,7 +224,7 @@ router.route('/users')
         });
     })
     .put(function(req, res){
-        photodb.updateUser(req.body)
+        photodb.updateUser(copyAuth(req, req.body))
         .then(function(info){
             res.json(info);
         })

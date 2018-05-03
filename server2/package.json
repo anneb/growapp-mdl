@@ -2,6 +2,7 @@
     "name": "photoserver",
     "main": "photoserver2.js",
     "dependencies": {
+        "basic-auth": "^2.0.0",
         "body-parser": "~1.0.1",
         "cors": "^2.8.4",
         "express": "~4.0.0",
