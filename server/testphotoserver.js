@@ -58,18 +58,7 @@ async function testAll()
                 fs.writeFileSync(__dirname + '/userinfo.json', JSON.stringify(deviceinfo, null, 4));
             }            
         }
-
-        // retrieve all photos
-        const allPhotos = await request({
-            uri:baseUrl+'/photoserver/getphotos',
-            json: true
-        });
-        if (allPhotos.type=='FeatureCollection') {
-            console.log('Number of photo locations: ' + allPhotos.features.length);
-        } else {
-            throw 'unexpected result from getphotos';
-        }
-
+        
         // send a photo
         const sendPhotoresult = await request({
             uri: baseUrl + '/photoserver/sendphoto',
@@ -87,6 +76,21 @@ async function testAll()
             }
         });
         console.log(sendPhotoresult);
+
+        // retrieve all photos
+        const allPhotos = await request({
+            uri:baseUrl+'/photoserver/getphotos',
+            json: true
+        });
+        if (allPhotos.type=='FeatureCollection') {
+            console.log('Number of photo locations: ' + allPhotos.features.length);            
+        } else {
+            throw 'unexpected result from getphotos';
+        }
+        //get photo with highest id at test location
+        const insertedPhoto = allPhotos.features.reduce((result, feature)=>feature.geometry.coordinates[0]==4.91304&&feature.geometry.coordinates[1]==52.3423&&(result?feature.properties.id>result.properties.id:true)?feature:result);
+
+        console.log(JSON.stringify(insertedPhoto));
 
     } catch (error) {
         console.log(error);
