@@ -969,11 +969,11 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
             if (!err) {
                 fs.writeFile(filename, new Buffer(req.body.photo, 'base64'), 'binary', function(err) {
                     if (err) {
-                        console.log('Image Error: ', err);
+                        console.log('Image Error: ', err.message);
                         res.writeHead(500, {
                             'Content-Type': 'text/html'
                         });
-                        res.end('Server error: ', err);
+                        res.end('Server error: ', err.message);
                     } else {
                         var username = req.body.username;
                         var hash = req.body.hash;

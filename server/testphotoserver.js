@@ -83,7 +83,7 @@ async function testAll()
                 longitude: 4.913040,
                 accuracy: 10,
                 rootid: 0,
-                photo: fs.createReadStream(__dirname + '/../www/trees.jpg')                                    
+                photo: fs.readFileSync(__dirname + '/../www/trees.jpg').toString('base64')
             }
         });
         console.log(sendPhotoresult);
