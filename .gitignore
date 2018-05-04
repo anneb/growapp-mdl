@@ -39,4 +39,5 @@ jspm_packages
 platforms
 plugins
 
-netconfig.js
+netconfig.json
+userinfo.json

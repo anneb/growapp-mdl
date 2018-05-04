@@ -2,7 +2,7 @@
 
 sudo -u postgres psql -c "drop database locophoto";
 if [ $? -ne 0 ]; then
-   echo "Dropping database failed, exiting"
+   echo "Failed to drop database, exiting"
    exit 1
 fi
 sudo -u postgres psql -c "create database locophoto";

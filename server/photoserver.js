@@ -122,7 +122,8 @@ function createCollection(features, message, errno) {
         return featureCollection;
 }
 
-app.get('/photoserver/getallphotos', cors(), function(req, res) {
+/*
+  app.get('/photoserver/getallphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getallphotos');
   var ip = req.ip;
   if (ip.substr(0,7) === '::ffff:') { // fix for if you have both ipv4 and ipv6
@@ -150,7 +151,7 @@ app.get('/photoserver/getallphotos', cors(), function(req, res) {
       res.end('error: ' + reason);
     });
 });
-
+*/
 
 
 app.post('/photoserver/tocsi', cors(), function(req, res) {
@@ -878,12 +879,12 @@ function updateAnimation2(rootid, path, resize)
         });
       } else {
         // zero results
-        reject('photoid not found')
+        reject('photoid not found');
       }
     })
     .catch(function(reason){
         console.log('error getting animation files: ' + reason);
-        reject ('update failed(1)')
+        reject ('update failed(1)');
     });
   });
 }
