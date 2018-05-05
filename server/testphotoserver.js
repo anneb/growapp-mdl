@@ -71,6 +71,24 @@ async function getLastInsertedPhoto() {
     return insertedPhoto;
 }
 
+async function getMyPhotos() {
+    const myPhotos = await request({
+        uri:baseUrl+'/photoserver/getmyphotos',
+        method: 'POST',
+        json: true,
+        form: {
+            username: deviceinfo.email,
+            hash: deviceinfo.hash,
+            deviceid: deviceinfo.deviceid,
+            devicehash: deviceinfo.devicehash
+        }
+    });
+    if (!Array.isArray(myPhotos)) {
+        throw 'unexpected result from getmyphotos';
+    }
+    return myPhotos;
+}
+
 async function getPhotoset(rootid) {
     const result = await request({
         uri:baseUrl + '/photoserver/getphotoset',
@@ -85,18 +103,42 @@ async function getPhotoset(rootid) {
 
 async function testAll()
 {
-    try {    
+    try {
+        if (deviceinfo.deviceid==0 || deviceinfo.devicehash.length < 10) {
+            const device = await request({
+                uri: baseUrl + '/photoserver/createdevice',
+                method: 'POST',
+                json: true,
+                form: {
+                    'email': deviceinfo.email,
+                    'hash': deviceinfo.hash
+                }
+            });
+            deviceinfo.deviceid=device.deviceid;
+            deviceinfo.devicehash=device.devicehash;
+            fs.writeFileSync(__dirname + '/userinfo.json', JSON.stringify(deviceinfo, null, 4));
+        }
         // check validationcode
         const userHash = await request({
             uri: baseUrl + '/photoserver/validateuser',
             method: 'POST',
             form: {
                     'email': deviceinfo.email,
-                    'validationcode': deviceinfo.validationcode
+                    'validationcode': deviceinfo.validationcode,
+                    'deviceid': deviceinfo.deviceid,
+                    'devicehash': deviceinfo.devicehash
                 },
             headers: { /* 'Content-Type': 'application/x-www-form-urlencoded' */}
-            });
+        });
         if (userHash == 'wrong code') {
+            // reset deviceinfo
+            if (deviceinfo.validationcode > 0) {
+                deviceinfo.validationcode = 0;
+                deviceinfo.deviceid=0;
+                deviceinfo.devicehash=0;
+                deviceinfo.hash='';
+                fs.writeFileSync(__dirname + '/userinfo.json', JSON.stringify(deviceinfo, null, 4));
+            }
             // request new validationcode
             const responseMessage = await request({
                 uri: baseUrl + '/photoserver/validatemail',
@@ -108,22 +150,6 @@ async function testAll()
             console.log(responseMessage);
             console.log('update validationcode in file userinfo.json\nto value emailed to "' + deviceinfo.email + '"');
             process.exit(1);
-        } else {
-            if (deviceinfo.hash != userHash) {
-                deviceinfo.hash=userHash;
-                const device = await request({
-                    uri: baseUrl + '/photoserver/createdevice',
-                    method: 'POST',
-                    json: true,
-                    form: {
-                        'email': deviceinfo.email,
-                        'hash': deviceinfo.hash
-                    }
-                });
-                deviceinfo.deviceid=device.deviceid;
-                deviceinfo.devicehash=device.devicehash;                
-                fs.writeFileSync(__dirname + '/userinfo.json', JSON.stringify(deviceinfo, null, 4));
-            }            
         }
         
         const sendPhotoresult = await insertPhoto(0);
@@ -147,6 +173,9 @@ async function testAll()
 
         const photoset = await getPhotoset(rootid);
         console.log(JSON.stringify(photoset));
+
+        const myphotos = await getMyPhotos();
+        console.log(JSON.stringify(myphotos.sort((a,b)=>a.id>b.id).slice(-3)));
 
         const deletedPhoto = await deletePhoto(photoset[0].filename);
         console.log("delete: "  + deletedPhoto);

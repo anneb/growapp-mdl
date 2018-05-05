@@ -1251,36 +1251,6 @@ var App = function() {
                 // force css recalculation
                 document.body.style.zoom=1.00001;
                 setTimeout(function(){document.body.style.zoom=1;}, 50);
-/*
-                if (!window.localStorage.cameraAspectRatio) {
-                  // camera aspect not yet known, read from camera when started
-                  setTimeout(function() {
-                    var clientAspect = width / height;
-                    if (clientAspect < 1) {
-                      clientAspect = 1 / clientAspect;
-                    }
-                    var bestPictureAspect = 0;
-                    var difference = 1000;
-
-                    CameraPreview.getSupportedPictureSizes(function(sizes){
-                      sizes.forEach(function(size){
-                          var pictureAspect = (size.width / size.height);
-                          var nextDifference = Math.abs(clientAspect - pictureAspect);
-                          if (nextDifference < difference) {
-                            difference = nextDifference;
-                            bestPictureAspect = pictureAspect;
-                          }
-                          if (bestPictureAspect === 0) {
-                            // none found, assume 4 : 3
-                            bestPictureAspect = 4 / 3;
-                          }
-                          window.localStorage.cameraAspectRatio = bestPictureAspect;
-                          _app.cameraPopup.resetCamera(true);
-                      });
-                    });
-                  }, 1000);
-                }
-*/
             }
         };
         this.cameraPopup.stopCamera = function() {
@@ -1334,7 +1304,7 @@ var App = function() {
                         }
                         if (warningCount < 5) {
                             if (_app.hasNearbyFeatures()) {
-                                _app.showMessage(__('Creating a new photo set. To append to an existing photo set, use "camera+" button on nearby photo locations'), 10000)
+                                _app.showMessage(__('Creating a new photo set. To append to an existing photo set, use "camera+" button on nearby photo locations'), 10000);
                                 warningCount++;
                                 window.localStorage.warningCount = warningCount;
                             }
