@@ -128,6 +128,10 @@ async function getTagList(langcode) {
     return result;
 }
 
+function isNumeric(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 async function testAll()
 {
     try {
@@ -135,29 +139,37 @@ async function testAll()
             const device = await request({
                 uri: baseUrl + '/photoserver/createdevice',
                 method: 'POST',
-                json: true,
-                form: {
-                    'email': deviceinfo.email,
-                    'hash': deviceinfo.hash
-                }
+                json: true
             });
             deviceinfo.deviceid=device.deviceid;
             deviceinfo.devicehash=device.devicehash;
             fs.writeFileSync(__dirname + '/userinfo.json', JSON.stringify(deviceinfo, null, 4));
         }
         // check validationcode
-        const userHash = await request({
-            uri: baseUrl + '/photoserver/validateuser',
-            method: 'POST',
-            form: {
-                    'email': deviceinfo.email,
-                    'validationcode': deviceinfo.validationcode,
-                    'deviceid': deviceinfo.deviceid,
-                    'devicehash': deviceinfo.devicehash
-                },
-            headers: { /* 'Content-Type': 'application/x-www-form-urlencoded' */}
-        });
-        if (userHash == 'wrong code') {
+        let userHash = '';
+        if (deviceinfo.validationcode > 0) {
+            try {
+                userHash = await request({
+                    uri: baseUrl + '/photoserver/validateuser',
+                    method: 'POST',
+                    form: {
+                            'email': deviceinfo.email,
+                            'validationcode': deviceinfo.validationcode,
+                            'deviceid': deviceinfo.deviceid,
+                            'devicehash': deviceinfo.devicehash
+                        },
+                    headers: { /* 'Content-Type': 'application/x-www-form-urlencoded' */}
+                });
+                if (deviceinfo.hash != userHash && userHash != 'wrong code') {
+                    deviceinfo.hash=userHash;
+                    fs.writeFileSync(__dirname + '/userinfo.json', JSON.stringify(deviceinfo, null, 4));
+                }
+            } catch(err) {
+                    // user not yet known
+                    console.log(JSON.stringify(err));
+            }
+        }
+        if (userHash == '' || userHash == 'wrong code') {
             // reset deviceinfo
             if (deviceinfo.validationcode > 0) {
                 deviceinfo.validationcode = 0;
@@ -190,48 +202,77 @@ async function testAll()
         }
         
         const sendPhotoresult = await insertPhoto(0);
+        if (sendPhotoresult != "thanks") {
+            throw "Sendphoto should return 'thanks'";
+        }
         const insertedPhoto = await getLastInsertedPhoto();
+        if (!(insertedPhoto && insertedPhoto.properties && insertedPhoto.properties.hasOwnProperty('isroot') && insertedPhoto.properties.isroot==false)) {
+            throw "Inserted photo should have property 'isroot:false";
+        }
 
-        const rootid = insertedPhoto.properties.id;
-
-        const sendPhotoresult2 = await insertPhoto(rootid);
+        const photoid = insertedPhoto.properties.id;
+        if (!isNumeric(photoid) || parseInt(photoid) == 0) {
+            throw "photoid should be numeric and larger than 0";
+        }
+        const sendPhotoresult2 = await insertPhoto(photoid);
+        if (sendPhotoresult2 != "thanks") {
+            throw "Sendphoto should return 'thanks'";
+        }
 
         // wait for animation to finish
         await sleep(3000);
         const insertedPhoto2 = await getLastInsertedPhoto();
+        if (!(insertedPhoto2 && insertedPhoto2.properties && insertedPhoto2.properties.hasOwnProperty('isroot') && insertedPhoto2.properties.isroot==true && insertedPhoto2.properties.id==photoid)) {
+            throw `Inserted photo should have property 'id:${photoid},isroot:true`;
+        }
 
-        const sendPhotoresult3 = await insertPhoto(rootid);
+
+        const sendPhotoresult3 = await insertPhoto(photoid);
+        if (sendPhotoresult3 != "thanks") {
+            throw "Sendphoto should return 'thanks'";
+        }
         await sleep(3000);
         const insertedPhoto3 = await getLastInsertedPhoto();
+        if (!(insertedPhoto3 && insertedPhoto3.properties && insertedPhoto3.properties.hasOwnProperty('isroot') && insertedPhoto3.properties.isroot==true && insertedPhoto3.properties.id==photoid)) {
+            throw `Inserted photo should have property 'id:${photoid},isroot:true`;
+        }
 
-        console.log(JSON.stringify(insertedPhoto));
-        console.log(JSON.stringify(insertedPhoto2));
-        console.log(JSON.stringify(insertedPhoto3));
-
-        const photoset = await getPhotoset(rootid);
-        console.log(JSON.stringify(photoset));
+        const photoset = await getPhotoset(photoid);
+        if (!(Array.isArray(photoset) && photoset.length==3 && photoset[0].id == photoid)) {
+            throw `photoset should have 3 photos where first photo should have id: ${photoid}`;
+        }
 
         const myphotos = await getMyPhotos();
         console.log(JSON.stringify(myphotos.sort((a,b)=>a.id>b.id).slice(-3)));
+        if (myphotos.sort((a,b)=>a.id>b.id).slice(-3)[0].id != photoid) {
+            throw `third last myphoto should have id ${photoid}`;
+        }
 
         const deletedPhoto = await deletePhoto(photoset[0].filename);
-        console.log("delete: "  + deletedPhoto);
+        if (deletedPhoto.indexOf("photo removed") < 0) {
+            throw "deletedPhoto should contain string 'photo removed'";
+        }
         await sleep(3000);
         const lastPhoto = await getLastInsertedPhoto();
-        console.log(JSON.stringify(lastPhoto));
+        if (!(lastPhoto.properties.isroot==true && lastPhoto.properties.id>photoid)) {
+            throw "last photo should have property 'isroot:true' and id>photoid";
+        }
 
         const deletedPhoto2 = await deletePhoto(photoset[2].filename);
-        console.log("delete: "  + deletedPhoto2);
+        if (deletedPhoto2.indexOf("photo removed") < 0) {
+            throw "deletedPhoto2 should contain string 'photo removed'";
+        }
+
         await sleep(3000);
         const lastPhoto2 = await getLastInsertedPhoto();
-        console.log(JSON.stringify(lastPhoto2));
+        if (!(lastPhoto2.properties.isroot==false && lastPhoto.properties.id>photoid)) {
+            throw "last photo should have property 'isroot:false' and id>photoid";
+        }
 
         const deletedPhoto3 = await deletePhoto(photoset[1].filename);
-        console.log("delete: "  + deletedPhoto3);
-        await sleep(3000);
-        const lastPhoto3 = await getLastInsertedPhoto();
-        console.log(JSON.stringify(lastPhoto3));
-
+        if (deletedPhoto3.indexOf("photo removed") < 0) {
+            throw "deletedPhoto3 should contain string 'photo removed'";
+        }
     } catch (error) {
         console.log(error);
     };
