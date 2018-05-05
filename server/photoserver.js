@@ -122,8 +122,8 @@ function createCollection(features, message, errno) {
         return featureCollection;
 }
 
-/*
-  app.get('/photoserver/getallphotos', cors(), function(req, res) {
+// get all photos, access based on client id
+app.get('/photoserver/getallphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getallphotos');
   var ip = req.ip;
   if (ip.substr(0,7) === '::ffff:') { // fix for if you have both ipv4 and ipv6
@@ -151,7 +151,7 @@ function createCollection(features, message, errno) {
       res.end('error: ' + reason);
     });
 });
-*/
+
 
 
 app.post('/photoserver/tocsi', cors(), function(req, res) {

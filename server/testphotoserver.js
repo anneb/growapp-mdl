@@ -101,6 +101,33 @@ async function getPhotoset(rootid) {
     return result;
 }
 
+async function checkUser() {
+    const result = await request({
+        uri:baseUrl+'/photoserver/checkuser',
+        method: 'POST',
+        json: true,
+        form: {
+            email: deviceinfo.email,
+            hash: deviceinfo.hash,
+            deviceid: deviceinfo.deviceid,
+            devicehash: deviceinfo.devicehash
+        }
+    });
+    return result;
+}
+
+async function getTagList(langcode) {
+    const result = await request({
+        uri:baseUrl+'/photoserver/taglist',
+        method: 'GET',
+        json: true,
+        qs: {
+            langcode: langcode
+        }
+    });
+    return result;
+}
+
 async function testAll()
 {
     try {
@@ -150,6 +177,16 @@ async function testAll()
             console.log(responseMessage);
             console.log('update validationcode in file userinfo.json\nto value emailed to "' + deviceinfo.email + '"');
             process.exit(1);
+        }
+
+        const checkUserResult = await checkUser();
+        if (!checkUserResult.knownuser) {
+            throw "user not recognized?";
+        }
+
+        const tagList = await getTagList('nl');
+        if (!Array.isArray(tagList) || tagList.length < 1) {
+            throw "Taglist should be non-empty array";
         }
         
         const sendPhotoresult = await insertPhoto(0);
