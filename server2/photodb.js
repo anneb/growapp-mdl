@@ -561,7 +561,7 @@
         result = await dbPool.query(sql, parameters);   
         if (id) {
             // return single photoset
-            return photoSetObject(rows, 0);
+            return photosetObject(result.rows, 0);
         } else {
             // return photoset array
             let photoSets = [];
@@ -613,7 +613,7 @@
                     return result.rows;
                 });
         } else {
-            sql = 'select id, ST_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true';
+            sql = 'select id, ST_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true and rootid=0';
             return dbPool.query(sql)
                 .then(function(result) {
                     return result.rows;
