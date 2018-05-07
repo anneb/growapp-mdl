@@ -17,17 +17,6 @@
     var gm = require('gm');
     var nodemailer = require('nodemailer');
 
-    function FeatureCollection(message, errno){
-        this.type = 'FeatureCollection';
-        this.features = [];
-            if (message) {
-                    this.message = message;
-            }
-            if (errno) {
-                    this.errorcode = errno;
-            }
-    }
-
     // generates a random non-existing filename
     function getFilename (directory, extension) {
         return new Promise(function(resolve, reject){
@@ -493,27 +482,47 @@
         });
     }
 
-    function createCollection(features, message, errno) {
-        var featureCollection = new FeatureCollection(message, errno);
+    function photoObject(row) {
+        return {
+            id: row.id,
+            photoSetId: row.isroot? row.id : row.rootid,
+            latitude: row.lat,
+            longitude: row.lon,
+            filename: row.isroot? row.filename.slice(0, -3) + 'jpg' : row.filename,
+            accuracy: row.accuracy,
+            time: row.time,
+            width: row.width,
+            height: row.height,
+            description: row.description,
+            tags: tagStringToArray(row.tags)
+        };
+    }
 
-        for (var i = 0; i < features.length; i++)
-        {
-            featureCollection.features.push({ 'type': 'Feature',
-                'geometry': JSON.parse(features[i].geom),
-                'properties': {
-                        id: features[i].id,
-                        filename: features[i].filename,
-                        isroot: features[i].isroot,
-                        accuracy: features[i].accuracy,
-                        time: features[i].time,
-                        width: features[i].width,
-                        height: features[i].height,
-                            description: features[i].description,
-                        tags: tagStringToArray(features[i].tags)
-                }
-            });
+    function photoObjectArray(rows, index) {
+        let result = [];
+        for (let i = index; i < rows.length && rows[i].photosetid==rows[index].photosetid; i++) {
+            result.push(photoObject(rows[i]));
         }
-        return featureCollection;
+        return result;
+    }
+
+    function photosetObject(rows, index) {
+        if (rows.length > index) {
+            let result = {
+                id: rows[index].photosetid,
+                latitude: rows[index].lat,
+                longitude: rows[index].lon,
+                highlighted: true,
+                likes: rows[index].likes ? rows[index].likes : 0,
+                dislikes: rows[index].dislikes ? rows[index].dislikes : 0,
+                gif: rows[index].filename.slice(0, -3)+'gif',
+                photos: photoObjectArray(rows, index)
+            };
+            if (result.photos.length > 1) {
+                result.thumbnail = result.photos[result.photos.length - 1].filename;
+            }
+            return result;
+        };
     }
 
     async function dbGetPhotoSets(id) {
@@ -524,17 +533,47 @@
             if (!isNumeric(id)) {
                 throw {"name": "unprocessable", "message": "parameter id must be numeric"};
             }
-            sql = 'select id, accuracy, filename, time, width, height, description, tags, st_x(location) lon, st_y(location) lat from photo where rootid=$1 or id=$1 order by time';
+            sql = `with photosetlikes as 
+            (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid),
+            photosets as 
+            (select id, isroot, rootid, case when isroot=true then id else rootid end photosetid,
+                st_x(location) lon, st_y(location) lat, filename, accuracy, time, width, height, description, tags
+            from photo
+            where id=$1 or rootid=$1
+            )
+            select photosets.*,photosetlikes.likes, photosetlikes.dislikes 
+            from photosets left join photosetlikes on photosets.photosetid=photosetlikes.photosetid
+            order by photosetid, id`;
             parameters = [id];
         } else {
-            sql = 'select id, accuracy, filename, time, width, height, description, tags, st_x(location) lon, st_y(location) lat from photo where isroot=true order by time';
+            sql = `with photosetlikes as 
+            (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid),
+            photosets as 
+            (select id, isroot, rootid, case when isroot=true then id else rootid end photosetid, 
+                st_x(location) lon, st_y(location) lat, filename, accuracy, time, width, height, description, tags
+            from photo
+            where isroot=true or rootid>0 
+            )
+            select photosets.*,photosetlikes.likes, photosetlikes.dislikes 
+            from photosets left join photosetlikes on photosets.photosetid=photosetlikes.photosetid
+            order by photosetid, id`;
         }
-        result = await dbPool.query(sql, parameters);
-                
-        result.rows.forEach(function(row){
-            row.tags = tagStringToArray(row.tags);
-        });
-        return result.rows;
+        result = await dbPool.query(sql, parameters);   
+        if (id) {
+            // return single photoset
+            return photoSetObject(rows, 0);
+        } else {
+            // return photoset array
+            let photoSets = [];
+            for (let i = 0; i < result.rows.length; i++) {
+                let photosetid = result.rows[i].photosetid;
+                photoSets.push(photosetObject(result.rows, i));
+                while (i + 1< result.rows.length && result.rows[i+1].photosetid == photosetid) {
+                    i++;
+                }
+            }
+            return photoSets;
+        }
     }
 
     async function dbPhotosetLike (photosetid, like, userinfo) {
@@ -562,22 +601,41 @@
             throw {"name": "unknownuser", "message": "(dis)like allowed for registered users only"};
         }
     }
+
+
     
-    function dbGetPhotos(id) {
+    function dbGetPhotoRows(id) {
         var sql;
         if (id) {
-            sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, filename, time, width, height, description, tags from photo where visible=true and id=$1';
+            sql = 'select id, st_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true and id=$1';
             return dbPool.query(sql, [id])
                 .then(function(result){
-                    return createCollection(result.rows, null, null);
+                    return result.rows;
                 });
         } else {
-            sql = 'select id, ST_AsGeoJSON(location) geom, accuracy, isroot, filename, time, width, height, description, tags from photo where visible=true and photosetid=0';
+            sql = 'select id, ST_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true';
             return dbPool.query(sql)
                 .then(function(result) {
-                    return createCollection(result.rows, null, null);
+                    return result.rows;
             });
         }
+    }
+
+
+    function dbGetPhotos(id) {
+        return dbGetPhotoRows(id).then(function(rows){
+            if (id) {
+                // return single photo
+                if (rows.length == 1) {
+                    return photoObject(rows[0]);
+                } else {
+                    return undefined;
+                }
+            } else {
+                // return array of photos
+                return rows.map(row=>photoObject(row));
+            }
+        });
     }
     
     class Photodb {
