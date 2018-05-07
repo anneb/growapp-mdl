@@ -275,11 +275,15 @@
         var allowmailing = userinfo.allowmailing ? true : false;
         var validationcode;
         if (userinfo.username && userinfo.username.length > 5 && validateEmail(userinfo.username)) {
-            sql = "select id, validationcode from photouser where email=$1";
+            sql = "select id, validationcode, displayname, allowmailing from photouser where email=$1";
             let result = await dbPool.query(sql, [userinfo.username.toLowerCase()]);
             if (result.rows.length) {
                 // user already known
-                validationcode = result.rows[0].validationcode;                
+                validationcode = result.rows[0].validationcode;
+                if (result.rows[0].displayname != userinfo.displayname || result.rows[0].allowmailing != userinfo.allowmailing)
+                    // update allowmailing and displayname
+                    sql = 'update photouser set diplayname=$1, allowmailing=$2 where email=$3';
+                    await dbPool.query(sql, [userinfo.displayname, userinfo.allowmailing]);
             } else {
                 // new user
                 sql = "insert into photouser (email,displayname,validated,validationcode,hash,retrycount,allowmailing) values ($1,$2,false,$3,'',0,$4)";
