@@ -581,17 +581,26 @@
     }
 
     async function dbPhotosetLike (photosetid, like, userinfo) {
+        // like == 1: toggle like
+        // like == 0: get info only
+        // like == -1: toggle dislike
         var userid = await getUserid(userinfo.username, userinfo.hash);
         if (userid > 0) {
+            var currentMyLikes = 0;            
             var sql = "select id, photosetid, userid, likes from photosetlikes where photosetid=$1 and userid=$2";
             var result = await dbPool.query(sql, [photosetid, userid]);
             if (result.rows.length) {
-                if (result.rows[0].likes==like) {
-                    like = 0; // reset like
-                }
+                currentMyLikes = result.rows[0].likes;
             }
-            sql = "insert into photosetlikes (photosetid, userid, likes) values ($1,$2,$3) on conflict(photosetid,userid) do update set likes=$3";
-            await dbPool.query(sql, [photosetid, userid, like]);
+            if (like != 0){
+                if (like == currentMyLikes) {
+                    // reset myLikes to 0
+                    like = 0;
+                }
+                sql = "insert into photosetlikes (photosetid, userid, likes) values ($1,$2,$3) on conflict(photosetid,userid) do update set likes=$3";
+                await dbPool.query(sql, [photosetid, userid, like]);
+                currentMyLikes = like;
+            }
             sql = "select sum(case when likes=1 then 1 end) as likes, sum(case when likes=-1 then 1 end) as dislikes from photosetlikes where photosetid=$1 group by photosetid";
             result = await dbPool.query(sql, [photosetid]);
             var likes = 0;
@@ -600,7 +609,7 @@
                 likes = result.rows[0].likes ? result.rows[0].likes : 0;
                 dislikes = result.rows[0].dislikes ? result.rows[0].dislikes : 0;
             }
-            return {photoset: photosetid, yourlikes: like, likes: likes, dislikes: dislikes};
+            return {photoset: photosetid, yourlikes: currentMyLikes, likes: likes, dislikes: dislikes};
         } else {
             throw {"name": "unknownuser", "message": "(dis)like allowed for registered users only"};
         }

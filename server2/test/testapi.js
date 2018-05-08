@@ -107,6 +107,19 @@ async function likePhotoSet(userInfo, id)
     return result;
 }
 
+async function getPhotoSetLikes(userInfo, id)
+{
+    const result = await request({
+        uri: baseUrl + `/api/photosets/${id}/like`,
+        json: true,
+        method: 'GET',
+        auth: {
+            user: userInfo.username,
+            password: userInfo.hash
+        }
+    });
+    return result;
+}
 
 async function testAll()
 {
@@ -164,6 +177,9 @@ async function testAll()
     const singlePhotoSet = await getPhotoSets(737);
     console.log(`Photoset 737 has ${singlePhotoSet.likes} likes`);
     console.log(`Photoset 737 has ${singlePhotoSet.dislikes} dislikes`);
+
+    const getLikes = await getPhotoSetLikes(thisUser, 737);
+    console.log(JSON.stringify(getLikes));
 
     const likeResult = await likePhotoSet(thisUser, 737);
     console.log(JSON.stringify(likeResult));

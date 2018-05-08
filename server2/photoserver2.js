@@ -177,6 +177,15 @@ router.route('/photosets/:id')
             .catch(function(error){
                 jsonError(res, error);
             });
+    })
+    .get(function(req, res) {
+        photodb.photosetLike(req.params.id, 0, copyAuth(req, req.body))
+            .then(function(result) {
+                res.json(result);
+            })
+            .catch(function(error) {
+                jsonError(res, error);
+            });
     });
 
     router.route('/photosets/:id/dislike')
@@ -186,6 +195,15 @@ router.route('/photosets/:id')
                 res.json(result);
             })
             .catch(function(error){
+                jsonError(res, error);
+            });
+    })
+    .get(function(req, res) {
+        photodb.photosetLike(req.params.id, 0, copyAuth(req, req.body))
+            .then(function(result) {
+                res.json(result);
+            })
+            .catch(function(error) {
                 jsonError(res, error);
             });
     });
