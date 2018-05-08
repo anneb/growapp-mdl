@@ -2,6 +2,7 @@
 
 const request = require('request-promise-native');
 const fs = require('fs-extra');
+const assert = require('assert');
 
 // define photoserver
 const hostname = 'localhost';
@@ -243,7 +244,6 @@ async function testAll()
         }
 
         const myphotos = await getMyPhotos();
-        console.log(JSON.stringify(myphotos.sort((a,b)=>a.id>b.id).slice(-3)));
         if (myphotos.sort((a,b)=>a.id>b.id).slice(-3)[0].id != photoid) {
             throw `third last myphoto should have id ${photoid}`;
         }
@@ -279,3 +279,6 @@ async function testAll()
 }
 
 testAll();
+
+
+
