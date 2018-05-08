@@ -11,7 +11,7 @@ sudo -u postgres psql locophoto -f ~/locophoto.sql
 
 export PGPASSWORD=geodb
 export PGUSER=geodb
-psql -h localhost locophoto -c "create table photosetlikes (id serial, photosetid int, userid int, likes int)";
+psql -h localhost locophoto -c "create table photosetlikes (id serial primary key, photosetid int, userid int, likes int)";
 psql -h localhost locophoto -c "create unique index photosetlikesuseridx on photosetlikes (photosetid, userid)"
 psql -h localhost locophoto -c "alter table photouser add column displayname varchar"
 

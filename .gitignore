@@ -41,4 +41,5 @@ plugins
 
 netconfig.json
 userinfo.json
-
+testapi.config.js
+deviceinfo.json
