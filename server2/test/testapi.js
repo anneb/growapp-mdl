@@ -191,9 +191,10 @@ async function testAll()
     const singlePhoto = await getPhotos(1712);
     console.log(JSON.stringify(singlePhoto));
 
-    const singlePhotoSet = await getPhotoSets(737);
-    console.log(`Photoset 737 has ${singlePhotoSet.likes} likes`);
-    console.log(`Photoset 737 has ${singlePhotoSet.dislikes} dislikes`);
+    const singlePhotoset = await getPhotoSets(737);
+    console.log(`Photoset 737 has ${singlePhotoset.likes} likes`);
+    console.log(`Photoset 737 has ${singlePhotoset.dislikes} dislikes`);
+    console.log(`Photoset 737 is highlighted: ${singlePhotoset.highlighted}`);
 
     const getLikes = await getPhotoSetLikes(thisUser, 737);
     console.log(JSON.stringify(getLikes));
@@ -201,7 +202,7 @@ async function testAll()
     const likeResult = await likePhotoSet(thisUser, 737);
     console.log(JSON.stringify(likeResult));
 
-    const highlightResult = await highlightPhotoset(thisUser, 737, true);
+    const highlightResult = await highlightPhotoset(thisUser, 737, false);
     console.log(JSON.stringify(highlightResult));
 
     const highlightResult2 = await highlightPhotoset(thisUser, -1, true);

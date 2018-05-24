@@ -1,10 +1,10 @@
 (function () {
 
     'use strict';
-    var netconfig;
-    var fs = require('fs-extra');
-    var crypto = require('crypto');
-    var Pool = require('pg').Pool;
+    let netconfig;
+    const fs = require('fs-extra');
+    const crypto = require('crypto');
+    const Pool = require('pg').Pool;
         var dbPool = new Pool({
         user: process.env.PGUSER || 'geodb',
         password: process.env.PGPASSWORD || 'geodb',
@@ -14,8 +14,8 @@
         max: 20, // max number of clients in pool
         idleTimeoutMillis: 1000 // close & remove clients which have been idle > 1 second
     });
-    var gm = require('gm');
-    var nodemailer = require('nodemailer');
+    const gm = require('gm');
+    const nodemailer = require('nodemailer');
 
     // generates a random non-existing filename
     function getFilename (directory, extension) {
@@ -66,7 +66,7 @@
     }
 
     function emailValidationCode  (email, validationcode) {
-        var transporter = nodemailer.createTransport({
+        const transporter = nodemailer.createTransport({
           host: netconfig.smtpserver,
           port: netconfig.smtpport,
           auth: {
@@ -101,7 +101,7 @@
       
 
     function validateEmail(email) {
-        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
     }
 
@@ -118,13 +118,13 @@
         if (!checkPhotoInfo(photoinfo)){
             throw {"name": "unprocessable", "message": "missing or bad upload parameters"};
         };
-        var deviceid = await getDevice(photoinfo.deviceid, photoinfo.devicehash);
+        const deviceid = await getDevice(photoinfo.deviceid, photoinfo.devicehash);
         if (deviceid == 0) {
             // unknown device
             throw {"name": "unknowndevice", "message": "photo upload available for registered devices only"};
         }
-        var filenameObject = await getFilename(__dirname + "/uploads/", ".jpg");
-        var basename = await new Promise (function(resolve, reject){
+        const filenameObject = await getFilename(__dirname + "/uploads/", ".jpg");
+        const basename = await new Promise (function(resolve, reject){
                 fs.writeFile(filenameObject.fullfilename, photoinfo.photo, 'base64', function(err) {
                     if (err) {
                         reject(err);
@@ -132,18 +132,18 @@
                     resolve(filenameObject.basename);
                 });
             });
-        var imageInfo = await getImageInfo(filenameObject.fullfilename);
+        const imageInfo = await getImageInfo(filenameObject.fullfilename);
         if (!imageInfo) {
             fs.unlink(filenameObject.fullfilename);
             throw "Invalid or corrupted image";
         }
-        var location = 'SRID=4326;POINT(' + photoinfo.longitude + ' ' + photoinfo.latitude + ')';
-        var description = photoinfo.description ? photoinfo.description.substring(0, 400) : null;
-        var tags = photoinfo.tags;
-        var sqltags = tags.map(tag=>Object.entries(tag).map(keyval=>keyval.map(entry=>'"'+entry.replace('"', '')+'"').join(' => '))).join(', ');
-        var sql = 'insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid, description, tags) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7, $8, $9) returning id';
-        var result = await dbPool.query(sql, [basename, imageInfo.size.width, imageInfo.size.height, location, parseInt(photoinfo.accuracy, 10), photoinfo.rootid, deviceid, description, sqltags]);
-        var photoid = (result.rows && result.rows.length && result.rows[0].id) ? result.rows[0].id : 0;
+        const location = 'SRID=4326;POINT(' + photoinfo.longitude + ' ' + photoinfo.latitude + ')';
+        const description = photoinfo.description ? photoinfo.description.substring(0, 400) : null;
+        const tags = photoinfo.tags;
+        const sqltags = tags.map(tag=>Object.entries(tag).map(keyval=>keyval.map(entry=>'"'+entry.replace('"', '')+'"').join(' => '))).join(', ');
+        let sql = 'insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid, description, tags) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7, $8, $9) returning id';
+        let result = await dbPool.query(sql, [basename, imageInfo.size.width, imageInfo.size.height, location, parseInt(photoinfo.accuracy, 10), photoinfo.rootid, deviceid, description, sqltags]);
+        const photoid = (result.rows && result.rows.length && result.rows[0].id) ? result.rows[0].id : 0;
         await resizeImage(filenameObject.fullfilename, 200, 200, '^', __dirname + "/uploads/small/" + basename);
         await resizeImage(filenameObject.fullfilename, 640, 640, '^', __dirname + "/uploads/medium/" + basename);
         if (photoinfo.rootid > 0) {
@@ -162,7 +162,7 @@
           if ((!email) || (!hash) || (email==='') || (hash==='')) {
             resolve(0);
           } else {
-            var sql = 'select id from photouser where email=$1 and hash=$2';
+            const sql = 'select id from photouser where email=$1 and hash=$2';
             dbPool.query(sql, [email,hash])
               .then (function (result){
                 if (result.rows.length) {
@@ -181,10 +181,10 @@
     function encrypt (secret)
     {
         return new Promise(function(resolve, reject){
-            var cipher = crypto.createCipher('aes256', 'a password');
-            var encrypted = '';
+            const cipher = crypto.createCipher('aes256', 'a password');
+            let encrypted = '';
             cipher.on('readable', () => {
-              var data = cipher.read();
+              const data = cipher.read();
               if (data) {
                 encrypted += data.toString('hex');
               }
@@ -207,13 +207,13 @@
         return getUserid(deviceInfo.username, deviceInfo.hash)
             .then(function(userid){
             // userid = 0 if user not known
-            var sql = 'insert into device (userid,deviceip) values ($1, $2) returning id';
+            const sql = 'insert into device (userid,deviceip) values ($1, $2) returning id';
             return dbPool.query(sql, [userid,deviceip])
                 .then (function (result){
                     if (result.rows.length) {
-                        var deviceid = result.rows[0].id + 3141;
+                        const deviceid = result.rows[0].id + 3141;
                         return encrypt(deviceip + ',' + deviceid).then(function(encrypted){
-                            var sql = 'update device set deviceid=$1, devicehash=$2 where id=$3';
+                            const sql = 'update device set deviceid=$1, devicehash=$2 where id=$3';
                             return dbPool.query(sql, [deviceid, encrypted, result.rows[0].id])
                               .then(function(result){
                                 return {deviceid: deviceid, devicehash: encrypted};
@@ -240,7 +240,7 @@
      * @returns array of userinfo
      */
     async function dbGetUsers(userinfo, clientip) {
-        var sql, params;
+        let sql, params;
         if (netconfig.trusted_ips.indexOf(clientip) > -1) {
             // trusted clientIp, list all users
             sql = "select email, displayname, validated, allowmailing from photouser";
@@ -254,7 +254,7 @@
                 throw {"name": "unknowuser", "message": "userinfo allowed for registered users only"};
             }
         }
-        var result = await dbPool.query(sql, params);
+        const result = await dbPool.query(sql, params);
         return {"users": result.rows};
     }
     
@@ -264,16 +264,16 @@
      * @returns {object} ok
      */
     async function dbCreateUser(userinfo) {
-        var deviceId = await getDevice(userinfo.deviceid, userinfo.devicehash);
+        const deviceId = await getDevice(userinfo.deviceid, userinfo.devicehash);
         if (deviceId == 0) {
             throw {"name": "unknowndevice", "message": "create user is available for registered devices only"};
         }
-        var sql;
+        let sql;
         if (!(userinfo.hasOwnProperty('allowmailing') && userinfo.hasOwnProperty('displayname'))) {
             throw {"name": "unprocessable", "message": "missing or bad upload parameters"};
         }
-        var allowmailing = userinfo.allowmailing ? true : false;
-        var validationcode;
+        const allowmailing = userinfo.allowmailing ? true : false;
+        let validationcode;
         if (userinfo.username && userinfo.username.length > 5 && validateEmail(userinfo.username)) {
             sql = "select id, validationcode, displayname, allowmailing from photouser where email=$1";
             let result = await dbPool.query(sql, [userinfo.username.toLowerCase()]);
@@ -287,14 +287,14 @@
             } else {
                 // new user
                 sql = "insert into photouser (email,displayname,validated,validationcode,hash,retrycount,allowmailing) values ($1,$2,false,$3,'',0,$4)";
-                var raw = crypto.randomBytes(4);
+                const raw = crypto.randomBytes(4);
                 validationcode = pad(Math.floor((parseInt(raw.toString('hex'), 16) / 4294967295) * 99999), 5);
                 await dbPool.query(sql, [userinfo.username.toLowerCase(), userinfo.displayname, validationcode, userinfo.allowmailing]);
             }
         } else {
             throw {"name": "unprocessable", "message": "email not provided or invalid"};
         }
-        var info = await emailValidationCode(userinfo.username, validationcode);
+        const info = await emailValidationCode(userinfo.username, validationcode);
         return { "message": "validationcode mailed to " + userinfo.username};
     }
 
@@ -302,17 +302,17 @@
     {
         // store user with device if user is on known device
         if (deviceid && deviceid !== '' && devicehash && devicehash !== '') {
-            var sql = 'update device set userid=(select id from photouser where email=$1 limit 1) where deviceid=$2 and devicehash=$3';
+            let sql = 'update device set userid=(select id from photouser where email=$1 limit 1) where deviceid=$2 and devicehash=$3';
             await dbPool.query(sql, [email.toLowerCase(), deviceid, devicehash]);
         }
     }
 
 
     async function dbUpdateUser(userinfo) {
-        var sql;
-        var deviceId = 0;
-        var userId = 0;
-        var hash = userinfo.hash;
+        let sql;
+        let deviceId = 0;
+        let userId = 0;
+        let hash = userinfo.hash;
         if (userinfo.deviceid && userinfo.devicehash) {
             deviceId = await getDevice(userinfo.deviceid, userinfo.devicehash);
         }
@@ -322,7 +322,7 @@
         if (userId == 0) {
             if (userinfo.validationcode && userinfo.username && userinfo.username.length > 5 && validateEmail(userinfo.username)) {
                 sql = "select id, validationcode, retrycount, hash from photouser where email=$1";
-                var result = await dbPool.query(sql, [userinfo.username.toLowerCase()]);
+                const result = await dbPool.query(sql, [userinfo.username.toLowerCase()]);
                 if (result.rows.length) {
                     if (result.rows[0].retrycount > 5) {
                         throw {"name": "userlocked", "message": "too many failed validation attemps, contact support"};
@@ -338,7 +338,7 @@
                         hash = result.rows[0].hash;
                     } else {
                         // create new hash
-                        var raw = crypto.randomBytes(16);
+                        const raw = crypto.randomBytes(16);
                         hash = raw.toString('hex');
                     }    
                     // reset retrycount and update hash
@@ -364,7 +364,7 @@
                 await dbPool.query(sql, [userinfo.displayname, userId]);
             }
             sql = "select email, hash, allowmailing, displayname from photouser where id=$1";
-            result = await dbPool.query(sql, [userId]);
+            const result = await dbPool.query(sql, [userId]);
             if (result.rows.length) {
                 return {username: result.rows[0].email, hash: result.rows[0].hash, allowmailing: result.rows[0].allowmailing, displayname: result.rows[0].displayname};
             }
@@ -385,12 +385,12 @@
     }
 
     async function resetPhotoset(oldrootid) {
-        var sql = "select id, rootid from photo where rootid=$1 or id=$1 order by time";
-        var result = await dbPool.query(sql, [oldrootid]);
+        let sql = "select id, rootid from photo where rootid=$1 or id=$1 order by time";
+        const result = await dbPool.query(sql, [oldrootid]);
         if (result.rows.length) {
-            var newrootid = result.rows[0].id;
+            const newrootid = result.rows[0].id;
             sql = "update photo set isroot=$1, rootid=0 where id=$2";
-            var subresult = await dbPool.query(sql, [(result.rows.length > 1), newrootid]);
+            const subresult = await dbPool.query(sql, [(result.rows.length > 1), newrootid]);
             if (result.rows.length > 1 && oldrootid!=newrootid) {
                 sql = "update photo set isroot=false, rootid=$1 where rootid=$2";
                 await dbPool.query(sql, [newrootid, oldrootid]);
@@ -399,9 +399,9 @@
     }
 
     async function dbDeletePhoto(id, info, clientip) {
-        var userid = await getUserid(info.username, info.hash);
-        var sql = "";
-        var parameters = [];
+        const userid = await getUserid(info.username, info.hash);
+        let sql = "";
+        let parameters = [];
         if (userid > 0) {
             sql = 'select p.filename, p.animationfilename, p.rootid, isroot from photo p, device d where p.id=$1 and p.deviceid=d.id and d.userid=$2';
             parameters = [id, userid];            
@@ -421,14 +421,14 @@
                 }
             }
         }
-        var result = await dbPool.query(sql, parameters);
+        const result = await dbPool.query(sql, parameters);
         if (!(result.rows && result.rows.length)) {
             throw {"name": "photonotfound", "message": "photo not found"};
         }
-        var filename = result.rows[0].filename;
-        var animationfilename = result.rows[0].animationfilename;
-        var rootid = result.rows[0].rootid;
-        var isroot = result.rows[0].isroot;
+        const filename = result.rows[0].filename;
+        const animationfilename = result.rows[0].animationfilename;
+        const rootid = result.rows[0].rootid;
+        const isroot = result.rows[0].isroot;
         sql = "delete from photo where id=$1";
         await dbPool.query(sql, [id]);
         deleteFile(__dirname + '/uploads/small/' + filename);
@@ -470,7 +470,7 @@
             if ((!deviceid) || (!devicehash)) {
                 resolve(0);
             } else {
-                var sql = 'select id from device where deviceid=$1 and devicehash=$2';
+                const sql = 'select id from device where deviceid=$1 and devicehash=$2';
                 dbPool.query(sql, [deviceid,devicehash])
                     .then (function (result){
                         if (result.rows.length) {
@@ -512,11 +512,11 @@
 
     function photosetObject(rows, index) {
         if (rows.length > index) {
-            let result = {
+            const result = {
                 id: rows[index].photosetid,
                 latitude: rows[index].lat,
                 longitude: rows[index].lon,
-                highlighted: true,
+                highlighted: rows[index].highlight,
                 likes: rows[index].likes ? rows[index].likes : 0,
                 dislikes: rows[index].dislikes ? rows[index].dislikes : 0,
                 gif: rows[index].filename.slice(0, -3)+'gif',
@@ -530,9 +530,8 @@
     }
 
     async function dbGetPhotosets(id) {
-        var sql;
-        var result;
-        var parameters = [];
+        let sql;
+        let parameters = [];
         if (id) {
             if (!isNumeric(id)) {
                 throw {"name": "unprocessable", "message": "parameter id must be numeric"};
@@ -540,7 +539,7 @@
             sql = `with photosetlikes as 
             (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid),
             photosets as 
-            (select id, isroot, rootid, case when isroot=true then id else rootid end photosetid,
+            (select id, isroot, rootid, highlight, case when isroot=true then id else rootid end photosetid,
                 st_x(location) lon, st_y(location) lat, filename, accuracy, time, width, height, description, tags
             from photo
             where id=$1 or rootid=$1
@@ -553,7 +552,7 @@
             sql = `with photosetlikes as 
             (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid),
             photosets as 
-            (select id, isroot, rootid, case when isroot=true then id else rootid end photosetid, 
+            (select id, isroot, rootid, highlight, case when isroot=true then id else rootid end photosetid,
                 st_x(location) lon, st_y(location) lat, filename, accuracy, time, width, height, description, tags
             from photo
             where isroot=true or rootid>0 
@@ -562,7 +561,7 @@
             from photosets left join photosetlikes on photosets.photosetid=photosetlikes.photosetid
             order by photosetid, id`;
         }
-        result = await dbPool.query(sql, parameters);   
+        const result = await dbPool.query(sql, parameters);
         if (id) {
             // return single photoset
             return photosetObject(result.rows, 0);
@@ -584,11 +583,11 @@
         // like == 1: toggle like
         // like == 0: get info only
         // like == -1: toggle dislike
-        var userid = await getUserid(userinfo.username, userinfo.hash);
+        const userid = await getUserid(userinfo.username, userinfo.hash);
         if (userid > 0) {
-            var currentMyLikes = 0;            
-            var sql = "select id, photosetid, userid, likes from photosetlikes where photosetid=$1 and userid=$2";
-            var result = await dbPool.query(sql, [photosetid, userid]);
+            let currentMyLikes = 0;
+            let sql = "select id, photosetid, userid, likes from photosetlikes where photosetid=$1 and userid=$2";
+            let result = await dbPool.query(sql, [photosetid, userid]);
             if (result.rows.length) {
                 currentMyLikes = result.rows[0].likes;
             }
@@ -603,8 +602,8 @@
             }
             sql = "select sum(case when likes=1 then 1 end) as likes, sum(case when likes=-1 then 1 end) as dislikes from photosetlikes where photosetid=$1 group by photosetid";
             result = await dbPool.query(sql, [photosetid]);
-            var likes = 0;
-            var dislikes = 0;
+            let likes = 0;
+            let dislikes = 0;
             if (result.rows.length) {
                 likes = result.rows[0].likes ? result.rows[0].likes : 0;
                 dislikes = result.rows[0].dislikes ? result.rows[0].dislikes : 0;
@@ -616,7 +615,7 @@
     }
 
     async function dbUpdatePhotoset(photosetid, info, clientip) {
-        let queryResult = {}        
+        let queryResult = {};
         if (netconfig.trusted_ips.indexOf(clientip) < 0) {
             throw {"name": "unauthorized", "message": "photoset highlight allowed for admins only"};
         } else {
@@ -637,7 +636,7 @@
 
     
     function dbGetPhotoRows(id) {
-        var sql;
+        let sql;
         if (id) {
             sql = 'select id, st_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true and id=$1';
             return dbPool.query(sql, [id])
