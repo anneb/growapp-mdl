@@ -529,7 +529,7 @@
         };
     }
 
-    async function dbGetPhotoSets(id) {
+    async function dbGetPhotosets(id) {
         var sql;
         var result;
         var parameters = [];
@@ -615,6 +615,25 @@
         }
     }
 
+    async function dbUpdatePhotoset(photosetid, info, clientip) {
+        let queryResult = {}        
+        if (netconfig.trusted_ips.indexOf(clientip) < 0) {
+            throw {"name": "unauthorized", "message": "photoset highlight allowed for admins only"};
+        } else {
+            if (!isNumeric(photosetid)) {
+                throw {"name": "unprocessable", "message": "parameter photosetid must be numeric"};
+            }
+            if (!info.hasOwnProperty('highlight') || (info.highlight !== false && info.highlight !== true)) {
+                throw {"name": "unprocessable", "message": "parameter highlight must be true or false"};
+            }
+            const sql = "update photo set highlight=$1 where id=$2 or rootid=$2";
+            queryResult = await dbPool.query(sql, [info.highlight?true:false, photosetid]);
+            if (!queryResult.rowCount) {
+                throw {"name": "photonotfound", "message": "photoset id not found"};
+            }
+        }
+        return {"photoset": photosetid, "highlight": info.highlight, "photosetsize": queryResult.rowCount};
+    }
 
     
     function dbGetPhotoRows(id) {
@@ -658,8 +677,8 @@
             {
                 return dbGetPhotos(id);
             };
-            this.getPhotoSets = function(id) {
-                return dbGetPhotoSets(id);
+            this.getPhotosets = function(id) {
+                return dbGetPhotosets(id);
             };
             this.storePhoto = function (photoinfo) {
                 return dbStorePhoto(photoinfo);
@@ -684,6 +703,9 @@
             };
             this.photosetDislike = function(photosetid, like, userinfo) {
                 return dbPhotosetLike (photosetid, like, userinfo);
+            };
+            this.updatePhotoset = function(photosetid, info, clientip) {
+                return dbUpdatePhotoset(photosetid, info, clientip);
             };
         }
     };

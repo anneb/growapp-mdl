@@ -50,6 +50,7 @@ function jsonError(res, error)
             case "unknowndevice":
             case "unknownowner":
             case "unknownuser":
+            case "unauthorized":
             case "photonotfound":
                 res.status(403).json({"error" : {"name": error.name, "message": error.message}});
                 break;
@@ -148,7 +149,7 @@ router.route('/photos/:id')
 
 router.route('/photosets')
   .get(function(req, res){
-      photodb.getPhotoSets()
+      photodb.getPhotosets()
       .then(function(photosets){
         res.json(photosets);
     })
@@ -159,11 +160,20 @@ router.route('/photosets')
 
 router.route('/photosets/:id')
   .get(function(req, res){
-      photodb.getPhotoSets(req.params.id)
+      photodb.getPhotosets(req.params.id)
         .then (function(photoset){
             res.json(photoset);
         })
         .catch(function(error){
+            jsonError(res, error);
+        });
+  })
+  .put(function(req, res) {
+      photodb.updatePhotoset(req.params.id, copyAuth(req, req.body), fixIp(req.ip))
+        .then(function(photoset) {
+            res.json(photoset);
+        })
+        .catch(function(error) {
             jsonError(res, error);
         });
   });

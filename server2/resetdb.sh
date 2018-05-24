@@ -14,6 +14,7 @@ export PGUSER=geodb
 psql -h localhost locophoto -c "create table photosetlikes (id serial primary key, photosetid int, userid int, likes int)";
 psql -h localhost locophoto -c "create unique index photosetlikesuseridx on photosetlikes (photosetid, userid)"
 psql -h localhost locophoto -c "alter table photouser add column displayname varchar"
+psql -h localhost locophoto -c "alter table photo add column highlight bool default false"
 
 
 

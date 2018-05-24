@@ -80,6 +80,8 @@ async function getPhotos(id) {
         uri: baseUrl + '/api/photos' + (id?`/${id}`:''),
         method: 'GET',
         json: true
+    }).catch(function (error) {
+        return error;
     });
     return result;
 }
@@ -117,6 +119,21 @@ async function getPhotoSetLikes(userInfo, id)
             user: userInfo.username,
             password: userInfo.hash
         }
+    });
+    return result;
+}
+
+async function highlightPhotoset(userInfo, id, highlight)
+{
+    const result = await request({
+        uri: baseUrl + `/api/photosets/${id}`,
+        json: true,
+        method: 'PUT',
+        body: {
+            highlight: highlight
+        }
+    }).catch(function(error){
+        return error;
     });
     return result;
 }
@@ -183,6 +200,12 @@ async function testAll()
 
     const likeResult = await likePhotoSet(thisUser, 737);
     console.log(JSON.stringify(likeResult));
+
+    const highlightResult = await highlightPhotoset(thisUser, 737, true);
+    console.log(JSON.stringify(highlightResult));
+
+    const highlightResult2 = await highlightPhotoset(thisUser, -1, true);
+    console.log(JSON.stringify(highlightResult2));
 
 }
 
