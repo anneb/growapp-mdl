@@ -123,6 +123,10 @@
             // unknown device
             throw {"name": "unknowndevice", "message": "photo upload available for registered devices only"};
         }
+        const userId = await getUserid(photoinfo.username, photoinfo.hash);
+        if (userId > 0) {
+            await linkUserToDevice(photoinfo.username, photoinfo.deviceid, photoinfo.devicehash);
+        }
         const filenameObject = await randomFilename(__dirname + "/uploads/", ".jpg");
         const basename = await new Promise (function(resolve, reject){
                 fs.writeFile(filenameObject.fullfilename, photoinfo.photo, 'base64', function(err) {
@@ -139,7 +143,7 @@
         }
         const location = 'SRID=4326;POINT(' + photoinfo.longitude + ' ' + photoinfo.latitude + ')';
         const description = photoinfo.description ? photoinfo.description.substring(0, 400) : null;
-        const tags = photoinfo.tags;
+        const tags = Array.isArray(photoinfo.tags)?photoinfo.tags:[];
         const sqltags = tags.map(tag=>Object.entries(tag).map(keyval=>keyval.map(entry=>'"'+entry.replace('"', '')+'"').join(' => '))).join(', ');
         let sql = 'insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid, description, tags) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7, $8, $9) returning id';
         let result = await dbPool.query(sql, [basename, imageInfo.size.width, imageInfo.size.height, location, parseInt(photoinfo.accuracy, 10), photoinfo.rootid, deviceid, description, sqltags]);
@@ -154,9 +158,15 @@
             }
         }
 
-        return {"uri": "/uploads/" + basename, "id": photoid, "width": imageInfo.size.width, "height": imageInfo.size.height};
+        return {"uri": basename, "id": photoid, "width": imageInfo.size.width, "height": imageInfo.size.height};
     }
 
+    /**
+     *
+     * @param {string} username
+     * @param {staring} password
+     * @returns {number} internal user id, 0 if not found
+     */
     function getUserid (email, hash) {
         return new Promise(function (resolve, reject){
           if ((!email) || (!hash) || (email==='') || (hash==='')) {
@@ -246,7 +256,7 @@
             sql = "select email, displayname, validated, allowmailing from photouser";
             params = [];
         } else {
-            var userId = await getUserid(userinfo.username, userinfo.hash);
+            const userId = await getUserid(userinfo.username, userinfo.hash);
             if (userId > 0) {
                 sql = "select email, displayname, validated, allowmailing from photouser where id=$1";
                 params = [userId];
@@ -315,6 +325,9 @@
         let hash = userinfo.hash;
         if (userinfo.deviceid && userinfo.devicehash) {
             deviceId = await getDevice(userinfo.deviceid, userinfo.devicehash);
+            if (deviceId == 0) {
+                throw {"name": "unprocessable", "message": "missing or wrong deviceid and/or devicehash"};
+            }
         }
         if (userinfo.username && hash) {
             userId = await getUserid(userinfo.username, userinfo.hash);
@@ -527,6 +540,7 @@
             }
             return result;
         };
+        return {photos:[]};
     }
 
     function isValidDate(d) {
@@ -585,6 +599,11 @@
         } else {
             const sqlQueryExpressions = [];
             const havingExpressions = [];
+            if (query.hasOwnProperty('minPhotos')) {
+                if (!isValidNumericValue(query.minPhotos, 0, 2000)) {
+                    throw {"name": "unprocessable", "message" : `error parsing minPhotos value: ${minPhotos}`};
+                }
+            }
             if (query.fromUtc) {
                 const fromTime = new Date(query.fromUtc);
                 if (!isValidDate(fromTime)) {
@@ -621,16 +640,6 @@
                 sqlParams.push(highlighted);
                 sqlQueryExpressions.push ('highlight=$' + sqlParams.length);
             }
-            if (query.hasOwnProperty('minPhotos')) {
-                const minPhotos = query.minPhotos;
-                if (!isValidNumericValue(minPhotos, 0, 2000)) {
-                    throw {"name": "unprocessable", "message" : `error parsing minPhotos value: ${minPhotos}`};
-                }
-                if (minPhotos > 0) {
-                    sqlParams.push(minPhotos-1);
-                    havingExpressions.push('count(rootid) > $' + sqlParams.length);
-                }
-            }
             const whereClause = sqlQueryExpressions.length ? " where "+sqlQueryExpressions.join(" and ") : "";
             sql  = `with photosetlikes as 
             (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid
@@ -652,10 +661,15 @@
             return photosetObject(result.rows, 0);
         } else {
             // return photoset array
+            const minPhotos = query.hasOwnProperty('minPhotos') ? query.minPhotos : 0;
+
             let photoSets = [];
             for (let i = 0; i < result.rows.length; i++) {
                 let photosetid = result.rows[i].photosetid;
-                photoSets.push(photosetObject(result.rows, i));
+                let photosetObj = photosetObject(result.rows, i);
+                if (photosetObj.photos.length >= minPhotos) {
+                    photoSets.push(photosetObj);
+                }
                 while (i + 1< result.rows.length && result.rows[i+1].photosetid == photosetid) {
                     i++;
                 }
@@ -720,27 +734,58 @@
     }
 
     
-    function dbGetPhotoRows(id) {
+    async function dbGetPhotoRows(params) {
         let sql;
-        if (id) {
+        if (params.id) {
+            // get photo for given id
             sql = 'select id, st_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true and id=$1';
-            return dbPool.query(sql, [id])
+            return dbPool.query(sql, [params.id])
                 .then(function(result){
                     return result.rows;
                 });
         } else {
-            sql = 'select id, ST_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true and rootid=0 order by id desc';
-            return dbPool.query(sql)
-                .then(function(result) {
-                    return result.rows;
-            });
+            if (params.myphotos) {
+                let sqlParams;
+                // get photo for user or device identified by credentials
+                if (!(params.username && params.hash)) {
+                    throw {"name":"unprocessable", "message": "myphotos requires authentication"};
+                }
+                if (params.username.indexOf('@') > -1) {
+                    // user auth
+                    const userId = await getUserid(params.username, params.hash);
+                    if (userId == 0) {
+                        throw {"name": "unauthorized", "message":"user unknown or wrong password"};
+                    }
+                    sql = 'select p.id, ST_x(p.location) lon, st_y(p.location) lat, p.accuracy, p.isroot, p.rootid, p.filename, p.time, p.width, p.height, p.description, p.tags from photo p,device d where p.visible=true and p.deviceid=d.id and d.userid=$1 order by id desc';
+                    sqlParams = [userId];
+                } else {
+                    // device auth
+                    const deviceId = await getDevice(params.username, params.hash);
+                    if (deviceId == 0) {
+                        throw {"name": "unauthorized", "message":"device unknown or wrong password"};
+                    }
+                    sql = 'select p.id, ST_x(p.location) lon, st_y(p.location) lat, p.accuracy, p.isroot, p.rootid, p.filename, p.time, p.width, p.height, p.description, p.tags from photo p where p.visible=true and p.deviceid=$1 order by id desc';
+                    sqlParams = [deviceId];
+                }
+                return dbPool.query(sql, sqlParams)
+                    .then(function(result){
+                        return result.rows;
+                });
+            } else {
+                // get all photos
+                sql = 'select id, ST_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true and rootid=0 order by id desc';
+                return dbPool.query(sql)
+                    .then(function(result) {
+                        return result.rows;
+                });
+            }
         }
     }
 
 
-    function dbGetPhotos(id) {
-        return dbGetPhotoRows(id).then(function(rows){
-            if (id) {
+    function dbGetPhotos(params) {
+        return dbGetPhotoRows(params).then(function(rows){
+            if (params.id) {
                 // return single photo
                 if (rows.length == 1) {
                     return photoObject(rows[0]);
@@ -751,6 +796,8 @@
                 // return array of photos
                 return rows.map(row=>photoObject(row));
             }
+        }).catch(function(error){
+            throw error;
         });
     }
     

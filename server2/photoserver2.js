@@ -64,6 +64,12 @@ function jsonError(res, error)
 
 function copyAuth(req, target) {
     var info = auth(req);
+    if (target.hasOwnProperty('username')) {
+        delete target.name;
+    }
+    if (target.hasOwnProperty('hash')) {
+        delete target.pass;
+    }
     if (info) {
         target.username = info.name;
         target.hash = info.pass;
@@ -105,7 +111,7 @@ router.get('/', function(req, res) {
 // more routes for our API will happen here
 router.route('/photos')
   .get(function(req, res){
-    photodb.getPhotos()
+    photodb.getPhotos(copyAuth(req, req.query))
     .then(function(photos){
         res.json(photos);
     })
@@ -126,7 +132,7 @@ router.route('/photos')
 
 router.route('/photos/:id')
   .get(function(req, res){
-    photodb.getPhotos(req.params.id)
+    photodb.getPhotos(req.params)
       .then(function(photos){
           res.json(photos);
       })
@@ -261,10 +267,21 @@ router.route('/users')
         });
     });
 
+
+    var uploadRouter = express.Router();              // get an instance of the express Router
+
+    uploadRouter.use(function(req, res, next) {
+        // do logging
+        console.log(new Date().toString() + " " + req.method + ' ' + req.originalUrl);
+        next(); // make sure we go to the next routes and don't stop here
+    });
+
+    uploadRouter.use(express.static(__dirname + '/uploads'));
+
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use('/api', router);
-
+app.use('/uploads', uploadRouter);
 
 
 // START THE SERVER

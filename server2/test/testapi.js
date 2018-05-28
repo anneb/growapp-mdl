@@ -75,15 +75,30 @@ async function getUser(userInfo) {
     return result;
 }
 
-async function getPhotos(id) {
-    const result = await request({
-        uri: baseUrl + '/api/photos' + (id?`/${id}`:''),
+async function getPhotos(param, deviceInfo, userInfo) {
+    const requestOptions = {
         method: 'GET',
         json: true
-    }).catch(function (error) {
-        return error;
-    });
-    return result;
+    };
+    if (userInfo) {
+        requestOptions.auth = {
+            user: userInfo.username,
+            password: userInfo.hash
+        };
+    } else if (deviceInfo) {
+        requestOptions.auth = {
+            user: deviceInfo.deviceid.toString(),
+            password: deviceInfo.devicehash
+        };
+    }
+    if (typeof param === "string") {
+        // pass param as URL query parameter
+        requestOptions.uri = baseUrl + '/api/photos?' + param;
+    } else {
+        // pass id as REST path parameter
+        requestOptions.uri = baseUrl + '/api/photos' + (param?`/${param}`:'');
+    }
+    return await request(requestOptions);
 }
 
 async function getPhotoSets(param) {
@@ -145,6 +160,100 @@ async function highlightPhotoset(userInfo, id, highlight)
         return error;
     });
     return result;
+}
+
+async function insertPhoto(deviceInfo, userInfo, rootid) {
+    // send a photo
+    const requestOptions = {
+        uri: baseUrl + '/api/photos',
+        method: 'POST',
+        json: true,
+        body: {
+            deviceid: deviceInfo.deviceid,
+            devicehash: deviceInfo.devicehash,
+            latitude: 52.3423,
+            longitude: 4.913040,
+            accuracy: 10,
+            rootid: rootid,
+            photo: fs.readFileSync(__dirname + '/trees.jpg').toString('base64')
+        }
+    };
+    if (userInfo) {
+        requestOptions.auth = {
+            user: userInfo.username,
+            password: userInfo.hash
+        };
+    }
+    const insertPhotoresult = await request(requestOptions);
+    return insertPhotoresult;
+}
+
+async function downloadPhoto(uri) {
+    const downloadResult = await request({
+        uri: baseUrl + '/uploads/' + uri,
+        method: 'GET',
+        json: false
+    });
+    return downloadResult;
+}
+
+async function deletePhoto(deviceInfo, userInfo, id) {
+    const requestOptions = {
+        uri: baseUrl + '/api/photos' + (id?`/${id}`:''),
+        method: 'DELETE',
+        json: true,
+        body: {
+            deviceid: deviceInfo.deviceid,
+            devicehash: deviceInfo.devicehash
+        }
+    };
+    if (userInfo) {
+        requestOptions.auth = {
+            user: userInfo.username,
+            password: userInfo.hash
+        };
+    }
+    const deletePhotoResult = await request(requestOptions);
+    return deletePhotoResult;
+}
+
+async function testInsertAndDelete(thisDevice, thisUser)
+{
+    const insertFirstPhotoResult = await insertPhoto(thisDevice, thisUser, 0);
+    console.log(JSON.stringify(insertFirstPhotoResult));
+
+    const smallFirstPhoto = await downloadPhoto('small/' + insertFirstPhotoResult.uri);
+    console.log(`smallFirstPhoto downloaded, size: ${smallFirstPhoto.length}`);
+
+    const insertSecondPhotoResult = await insertPhoto(thisDevice, thisUser, insertFirstPhotoResult.id);
+    console.log(JSON.stringify(insertSecondPhotoResult));
+
+    const insertThirdPhotoResult = await insertPhoto(thisDevice, thisUser, insertFirstPhotoResult.id);
+    console.log(JSON.stringify(insertThirdPhotoResult));
+
+    const myPhotoList = await getPhotos('myphotos=true', thisDevice, thisUser);
+    console.log(`My photo list has ${myPhotoList.length} photos`);
+
+    const testPhotoset = await getPhotoSets(insertFirstPhotoResult.id);
+    console.log(`testPhoteset now has ${testPhotoset.photos.length} photos`);
+
+    const deleteSecondPhotoResult = await deletePhoto(thisDevice, thisUser, insertSecondPhotoResult.id);
+    console.log(JSON.stringify(deleteSecondPhotoResult));
+
+    const testSmallerPhotoset = await getPhotoSets(insertFirstPhotoResult.id);
+    console.log(`testSmallerPhoteset now has ${testSmallerPhotoset.photos.length} photos`);
+
+    const deleteFirstPhotoResult = await deletePhoto(thisDevice, thisUser, insertFirstPhotoResult.id);
+    console.log(JSON.stringify(deleteFirstPhotoResult));
+
+    const testEmptyPhotoset = await getPhotoSets(insertFirstPhotoResult.id);
+    console.log(`testEmptyPhoteset now has ${testEmptyPhotoset.photos.length} photos`);
+
+    const lastPhotoPhotoset = await getPhotoSets(insertThirdPhotoResult.id);
+    console.log(`lastPhotoPhoteset now has ${lastPhotoPhotoset.photos.length} photos`);
+
+    const deleteThirdPhotoResult = await deletePhoto(thisDevice, thisUser, insertThirdPhotoResult.id);
+    console.log(JSON.stringify(deleteThirdPhotoResult));
 }
 
 async function testAll()
@@ -214,11 +323,17 @@ async function testAll()
     const highlightedPhotosets = await getPhotoSets('highlighted=true');
     console.log(`Number of highlighted photosets: ${highlightedPhotosets.length}`);
 
+    const longPhotosets = await getPhotoSets('minPhotos=85');
+    console.log(`Number of long photosets: ${longPhotosets.length}`);
+
     const getLikes = await getPhotoSetLikes(thisUser, 737);
     console.log(JSON.stringify(getLikes));
 
     const likeResult = await likePhotoSet(thisUser, 737);
     console.log(JSON.stringify(likeResult));
+
+    await testInsertAndDelete(thisDevice, null);
+    await testInsertAndDelete(thisDevice, thisUser);
 
     const highlightResult = await highlightPhotoset(thisUser, 737, false);
     console.log(JSON.stringify(highlightResult));

@@ -15,6 +15,7 @@ psql -h localhost locophoto -c "create table photosetlikes (id serial primary ke
 psql -h localhost locophoto -c "create unique index photosetlikesuseridx on photosetlikes (photosetid, userid)"
 psql -h localhost locophoto -c "alter table photouser add column displayname varchar"
 psql -h localhost locophoto -c "alter table photo add column highlight bool default false"
+psql -h localhost locophoto -c "create index photorootididx on photo(rootid)"
 
 
 
