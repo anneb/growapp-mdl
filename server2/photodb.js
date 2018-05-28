@@ -18,7 +18,7 @@
     const nodemailer = require('nodemailer');
 
     // generates a random non-existing filename
-    function getFilename (directory, extension) {
+    function randomFilename (directory, extension) {
         return new Promise(function(resolve, reject){
               crypto.pseudoRandomBytes(16, function(err, raw){
                   if (err) {
@@ -123,7 +123,7 @@
             // unknown device
             throw {"name": "unknowndevice", "message": "photo upload available for registered devices only"};
         }
-        const filenameObject = await getFilename(__dirname + "/uploads/", ".jpg");
+        const filenameObject = await randomFilename(__dirname + "/uploads/", ".jpg");
         const basename = await new Promise (function(resolve, reject){
                 fs.writeFile(filenameObject.fullfilename, photoinfo.photo, 'base64', function(err) {
                     if (err) {
@@ -489,7 +489,7 @@
     function photoObject(row) {
         return {
             id: row.id,
-            photoSetId: row.isroot? row.id : row.rootid,
+            photoSetId: row.photosetid,
             latitude: row.lat,
             longitude: row.lon,
             filename: row.isroot? row.filename.slice(0, -3) + 'jpg' : row.filename,
@@ -529,40 +529,125 @@
         };
     }
 
-    async function dbGetPhotosets(id) {
+    function isValidDate(d) {
+        if ( Object.prototype.toString.call(d) === "[object Date]" ) {
+            // it is a date
+            if ( isNaN( d.getTime() ) ) {  // d.valueOf() could also work
+              // date is not valid
+              return false;
+            }
+            else {
+              // date is valid
+              return true;
+            }
+        }
+        return false;
+    }
+
+    function isValidNumericValue(number, min, max)
+    {
+        if (isNaN(number)) {
+            return false;
+        }
+        return (number >= min && number <= max);
+    }
+
+    async function dbGetPhotosets(query) {
         let sql;
-        let parameters = [];
-        if (id) {
-            if (!isNumeric(id)) {
+        let sqlParams = [];
+        if (query.id) {
+            if (!isNumeric(query.id)) {
                 throw {"name": "unprocessable", "message": "parameter id must be numeric"};
             }
             sql = `with photosetlikes as 
             (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid),
             photosets as 
-            (select id, isroot, rootid, highlight, case when isroot=true then id else rootid end photosetid,
+            (select id, isroot, rootid, highlight, case when rootid=0 then id else rootid end photosetid,
                 st_x(location) lon, st_y(location) lat, filename, accuracy, time, width, height, description, tags
             from photo
             where id=$1 or rootid=$1
             )
             select photosets.*,photosetlikes.likes, photosetlikes.dislikes 
             from photosets left join photosetlikes on photosets.photosetid=photosetlikes.photosetid
-            order by photosetid, id`;
-            parameters = [id];
-        } else {
+            order by photosetid desc, id asc`;
+            sqlParams = [query.id];
+        } else if (Object.keys(query).length == 0) {
             sql = `with photosetlikes as 
             (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid),
             photosets as 
-            (select id, isroot, rootid, highlight, case when isroot=true then id else rootid end photosetid,
+            (select id, isroot, rootid, highlight, case when rootid=0 then id else rootid end photosetid,
                 st_x(location) lon, st_y(location) lat, filename, accuracy, time, width, height, description, tags
             from photo
-            where isroot=true or rootid>0 
             )
             select photosets.*,photosetlikes.likes, photosetlikes.dislikes 
             from photosets left join photosetlikes on photosets.photosetid=photosetlikes.photosetid
-            order by photosetid, id`;
+            order by photosetid desc, id asc`;
+        } else {
+            const sqlQueryExpressions = [];
+            const havingExpressions = [];
+            if (query.fromUtc) {
+                const fromTime = new Date(query.fromUtc);
+                if (!isValidDate(fromTime)) {
+                    throw {"name": "unprocessable", "message" : "parsing frommUtc failed"};
+                }
+                sqlParams.push(fromTime);
+                sqlQueryExpressions.push("time>=$" + sqlParams.length);
+            }
+            if (query.toUtc) {
+                const toTime = new Date(query.toUtc);
+                if (!isValidDate(toTime)) {
+                    throw {"name": "unprocessable", "message" : "parsing fromUtc failed"};
+                }
+                sqlParams.push(toTime);
+                sqlQueryExpressions.push("time<$" + sqlParams.length);
+            }
+            if (query.boundingbox) {
+                const coords = query.boundingbox.split(',').map((coord, index)=>{
+                    let result=parseFloat(coord);
+                    if (!isValidNumericValue(result, index % 2 ? -90.0 : -180, index % 2 ? 90.0 : 180.0)) { 
+                        throw {"name": "unprocessable", "message" : `error parsing boundingbox value: ${coord}`};
+                    }
+                    return result;});
+                sqlParams.push(`SRID=4326;LINESTRING(${coords[0]} ${coords[1]}, ${coords[2]} ${coords[3]})`);
+                sqlQueryExpressions.push("ST_Intersects(location, ST_Envelope(ST_GeomFromEWKT($"+sqlParams.length+")))");
+            }
+            if (query.hasOwnProperty('highlighted')) {
+                let highlighted = query.highlighted;
+                if (highlighted === false || highlighted == 0 || highlighted === "false" || highlighted == "0") {
+                    highlighted = false;
+                } else {
+                    highlighted = true;
+                }
+                sqlParams.push(highlighted);
+                sqlQueryExpressions.push ('highlight=$' + sqlParams.length);
+            }
+            if (query.hasOwnProperty('minPhotos')) {
+                const minPhotos = query.minPhotos;
+                if (!isValidNumericValue(minPhotos, 0, 2000)) {
+                    throw {"name": "unprocessable", "message" : `error parsing minPhotos value: ${minPhotos}`};
+                }
+                if (minPhotos > 0) {
+                    sqlParams.push(minPhotos-1);
+                    havingExpressions.push('count(rootid) > $' + sqlParams.length);
+                }
+            }
+            const whereClause = sqlQueryExpressions.length ? " where "+sqlQueryExpressions.join(" and ") : "";
+            sql  = `with photosetlikes as 
+            (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid
+            ), selectedphotos as (
+                select case when rootid=0 then id else rootid end as photosetid from photo `+whereClause+`
+            ), selectedphotosets as (
+                select photosetid from selectedphotos group by photosetid
+            ), photosets as (
+                select id, isroot, rootid, highlight, case when rootid=0 then id else rootid end photosetid,
+                st_x(location) lon, st_y(location) lat, filename, accuracy, time, width, height, description, tags
+            from photo p join selectedphotosets s on (p.id=s.photosetid or p.rootid=s.photosetid)
+            ) select photosets.*,photosetlikes.likes, photosetlikes.dislikes 
+            from photosets left join photosetlikes on photosets.photosetid=photosetlikes.photosetid
+            order by photosetid desc, id asc;`;
         }
-        const result = await dbPool.query(sql, parameters);
-        if (id) {
+        const result = await dbPool.query(sql, sqlParams);
+        if (query.id) {
             // return single photoset
             return photosetObject(result.rows, 0);
         } else {
@@ -644,7 +729,7 @@
                     return result.rows;
                 });
         } else {
-            sql = 'select id, ST_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true and rootid=0';
+            sql = 'select id, ST_x(location) lon, st_y(location) lat, accuracy, isroot, rootid, filename, time, width, height, description, tags from photo where visible=true and rootid=0 order by id desc';
             return dbPool.query(sql)
                 .then(function(result) {
                     return result.rows;
@@ -676,8 +761,8 @@
             {
                 return dbGetPhotos(id);
             };
-            this.getPhotosets = function(id) {
-                return dbGetPhotosets(id);
+            this.getPhotosets = function(params) {
+                return dbGetPhotosets(params);
             };
             this.storePhoto = function (photoinfo) {
                 return dbStorePhoto(photoinfo);

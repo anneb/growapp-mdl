@@ -86,12 +86,21 @@ async function getPhotos(id) {
     return result;
 }
 
-async function getPhotoSets(id) {
-    const result = await request({
-        uri: baseUrl + '/api/photosets' + (id?`/${id}`:''),
-        method: 'GET',
-        json: true
-    });
+async function getPhotoSets(param) {
+    let result;
+    if (typeof param === "string") {
+        result = await request({
+            uri: baseUrl + '/api/photosets?' + param,
+            method: 'GET',
+            json: true
+        });
+    } else {
+        result = await request({
+            uri: baseUrl + '/api/photosets' + (param?`/${param}`:''),
+            method: 'GET',
+            json: true
+        });
+    }
     return result;
 }
 
@@ -195,6 +204,15 @@ async function testAll()
     console.log(`Photoset 737 has ${singlePhotoset.likes} likes`);
     console.log(`Photoset 737 has ${singlePhotoset.dislikes} dislikes`);
     console.log(`Photoset 737 is highlighted: ${singlePhotoset.highlighted}`);
+
+    const singleDayPhotoset = await getPhotoSets('fromUtc=2018-04-07T00:00:00&toUtc=2018-04-08T00:00:00');
+    console.log(`Number of photosets on 27 april 2018: ${singleDayPhotoset.length}`);
+
+    const amsterdamPhotosets = await getPhotoSets('boundingbox=4.72876,52.27817,5.06843,52.43106');
+    console.log(`Number of photosets in Amsterdam boundingbox: ${amsterdamPhotosets.length}`);
+
+    const highlightedPhotosets = await getPhotoSets('highlighted=true');
+    console.log(`Number of highlighted photosets: ${highlightedPhotosets.length}`);
 
     const getLikes = await getPhotoSetLikes(thisUser, 737);
     console.log(JSON.stringify(getLikes));

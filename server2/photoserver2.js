@@ -149,7 +149,7 @@ router.route('/photos/:id')
 
 router.route('/photosets')
   .get(function(req, res){
-      photodb.getPhotosets()
+      photodb.getPhotosets(req.query)
       .then(function(photosets){
         res.json(photosets);
     })
@@ -160,7 +160,7 @@ router.route('/photosets')
 
 router.route('/photosets/:id')
   .get(function(req, res){
-      photodb.getPhotosets(req.params.id)
+      photodb.getPhotosets(req.params)
         .then (function(photoset){
             res.json(photoset);
         })
