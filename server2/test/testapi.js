@@ -183,10 +183,39 @@ async function insertPhoto(deviceInfo, userInfo, rootid) {
             user: userInfo.username,
             password: userInfo.hash
         };
+    } else if (deviceInfo) {
+        requestOptions.auth = {
+            user: deviceInfo.deviceid.toString(),
+            password: deviceInfo.devicehash
+        };
     }
     const insertPhotoresult = await request(requestOptions);
     return insertPhotoresult;
 }
+
+async function updatePhoto(deviceInfo, userInfo, id, photoInfo) {
+    // send a photo
+    const requestOptions = {
+        uri: baseUrl +  `/api/photos/${id}`,
+        method: 'PUT',
+        json: true,
+        body: photoInfo
+    };
+    if (userInfo) {
+        requestOptions.auth = {
+            user: userInfo.username,
+            password: userInfo.hash
+        };
+    } else if (deviceInfo) {
+        requestOptions.auth = {
+            user: deviceInfo.deviceid.toString(),
+            password: deviceInfo.devicehash
+        };
+    }
+    const updatePhotoresult = await request(requestOptions);
+    return updatePhotoresult;
+}
+
 
 async function downloadPhoto(uri) {
     const downloadResult = await request({
@@ -233,6 +262,11 @@ async function testInsertAndDelete(thisDevice, thisUser)
 
     const myPhotoList = await getPhotos('myphotos=true', thisDevice, thisUser);
     console.log(`My photo list has ${myPhotoList.length} photos`);
+
+    const updatedPhoto = await updatePhoto(thisDevice, thisUser, insertThirdPhotoResult.id, {description:'updated description', tags: [{"5":"2 cm"}], rotate: 90});
+    console.log('updatedPhoto: ' + JSON.stringify(updatedPhoto));
+    const rotatedPhoto = await updatePhoto(thisDevice, thisUser, insertThirdPhotoResult.id, {rotate: -90});
+    console.log('rotatedPhoto: ' + JSON.stringify(rotatedPhoto));
 
     const testPhotoset = await getPhotoSets(insertFirstPhotoResult.id);
     console.log(`testPhoteset now has ${testPhotoset.photos.length} photos`);

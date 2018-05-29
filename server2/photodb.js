@@ -713,9 +713,36 @@
         }
     }
 
+    async function authenticateRequest(info, clientip) {
+        const result =  {
+            authenticated: false,
+            deviceId: 0,
+            userId: 0,
+            clientip: 0
+        };
+        if (clientip && netconfig.trusted_ips.indexOf(clientip) > -1) {
+            result.authenticated = true;
+            result.clientip = clientip;
+        }
+        if (!(info.username && info.hash)) {
+            return result;
+        }
+        if (info.username.indexOf('@') > -1) {
+            // user auth
+            result.userId = await getUserid(info.username, info.hash);
+            result.authenticated |= (result.userId !== 0);
+        } else {
+            // device auth
+            result.deviceId = await getDevice(info.username, info.hash);
+            result.authenticated |= (result.deviceId !== 0);
+        }
+        return result;
+    }
+
     async function dbUpdatePhotoset(photosetid, info, clientip) {
         let queryResult = {};
-        if (netconfig.trusted_ips.indexOf(clientip) < 0) {
+        const auth = await authenticateRequest(info, clientip);
+        if (!(auth.authenticated && auth.clientip)) {
             throw {"name": "unauthorized", "message": "photoset highlight allowed for admins only"};
         } else {
             if (!isNumeric(photosetid)) {
@@ -733,6 +760,61 @@
         return {"photoset": photosetid, "highlight": info.highlight, "photosetsize": queryResult.rowCount};
     }
 
+    function rotatePhoto(filename, degrees) {
+        degrees = degrees == 90 ? 90 : -90;
+        return new Promise(function(resolve, reject){
+            gm(filename).rotate('white', degrees).write(filename, function(err){
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(filename);
+                }
+            });
+        });
+    }
+
+    async function dbUpdatePhoto(photoid, info, clientip) {
+        const auth = await authenticateRequest(info, clientip);
+        if (!auth.authenticated) {
+            throw {"name": "unauthorized", "message": "photo update requires credentials"};
+        }
+        const sqlParams = [];
+        sqlParams.push(photoid);
+        let whereClause = "where p.id=$1";
+        if (auth.userId) {
+            sqlParams.push(auth.userId);
+            whereClause = ", device d " + whereClause + " and p.deviceid=d.id and d.userid=$2";
+        } else if (auth.deviceid) {
+            sqlParams.push(auth.deviceId);
+            whereClause += " and p.deviceid=$2";
+        }
+        const sql = "select p.id, ST_x(p.location) lon, st_y(p.location) lat, p.accuracy, p.isroot, p.rootid, p.filename, p.time, p.width, p.height, p.description, p.tags from photo p " + whereClause;
+        const queryResult = await dbPool.query(sql, sqlParams);
+        if (!queryResult.rowCount) {
+            throw {"name": "photonotfound", "message": "cannot access photo for update"};
+        }
+        const photo = photoObject(queryResult.rows[0]);
+        if (info.hasOwnProperty('description')) {
+            photo.description = info.description.toString();
+        }
+        if (info.hasOwnProperty('tags') && Array.isArray(info.tags)) {
+            photo.tags = info.tags;
+        }
+        if (info.hasOwnProperty('rotate')) {
+            const degrees = parseInt(info.rotate);
+            await rotatePhoto(__dirname + '/uploads/' + photo.filename);
+            await rotatePhoto(__dirname + '/uploads/medium/' + photo.filename);
+            await rotatePhoto(__dirname + '/uploads/small/' + photo.filename);
+            const tmp = photo.width;
+            photo.width = photo.height;
+            photo.height = tmp;
+        }
+        const sqltags = photo.tags.map(tag=>Object.entries(tag).map(keyval=>keyval.map(entry=>'"'+entry.replace('"', '')+'"').join(' => '))).join(', ');
+        const updateSQL = "update photo set description=$1, tags=$2, width=$3, height=$4 where id=$5";
+        const updateResult = await dbPool.query(updateSQL, [photo.description, sqltags, photo.width, photo.height, photoid]);
+        return photo;
+    }
+
     
     async function dbGetPhotoRows(params) {
         let sql;
@@ -746,26 +828,21 @@
         } else {
             if (params.myphotos) {
                 let sqlParams;
+                const auth = await authenticateRequest(params);
                 // get photo for user or device identified by credentials
-                if (!(params.username && params.hash)) {
-                    throw {"name":"unprocessable", "message": "myphotos requires authentication"};
+                if (!auth.authenticated) {
+                    throw {"name":"unauthorized", "message": "authentication (user/password) failed"};
                 }
-                if (params.username.indexOf('@') > -1) {
+                if (auth.userId) {
                     // user auth
-                    const userId = await getUserid(params.username, params.hash);
-                    if (userId == 0) {
-                        throw {"name": "unauthorized", "message":"user unknown or wrong password"};
-                    }
                     sql = 'select p.id, ST_x(p.location) lon, st_y(p.location) lat, p.accuracy, p.isroot, p.rootid, p.filename, p.time, p.width, p.height, p.description, p.tags from photo p,device d where p.visible=true and p.deviceid=d.id and d.userid=$1 order by id desc';
-                    sqlParams = [userId];
-                } else {
+                    sqlParams = [auth.userId];
+                } else if (auth.deviceId) {
                     // device auth
-                    const deviceId = await getDevice(params.username, params.hash);
-                    if (deviceId == 0) {
-                        throw {"name": "unauthorized", "message":"device unknown or wrong password"};
-                    }
                     sql = 'select p.id, ST_x(p.location) lon, st_y(p.location) lat, p.accuracy, p.isroot, p.rootid, p.filename, p.time, p.width, p.height, p.description, p.tags from photo p where p.visible=true and p.deviceid=$1 order by id desc';
-                    sqlParams = [deviceId];
+                    sqlParams = [auth.deviceId];
+                } else {
+                    throw {"name": "assertionfailed", "message": "both userId and deviceId are 0, this should not happen"};
                 }
                 return dbPool.query(sql, sqlParams)
                     .then(function(result){
@@ -834,6 +911,9 @@
             };
             this.photosetDislike = function(photosetid, like, userinfo) {
                 return dbPhotosetLike (photosetid, like, userinfo);
+            };
+            this.updatePhoto = function(photoid, info, clientip) {
+                return dbUpdatePhoto(photoid, info, clientip);
             };
             this.updatePhotoset = function(photosetid, info, clientip) {
                 return dbUpdatePhotoset(photosetid, info, clientip);

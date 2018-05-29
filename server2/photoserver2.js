@@ -141,7 +141,13 @@ router.route('/photos/:id')
       });
   })
   .put(function(req, res){
-     jsonError(res, {"name": "notyetimplemented", "message": "not yet implemented"});
+     photodb.updatePhoto(req.params.id, copyAuth(req, req.body), fixIp(req.ip))
+        .then(function(photo){
+            res.json(photo);
+        })
+        .catch(function(error){
+            jsonError(res, error);
+        });
   })
   .delete(function(req, res){
     photodb.deletePhoto(req.params.id, copyAuth(req, req.body), fixIp(req.ip))
