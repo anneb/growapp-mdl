@@ -16,6 +16,8 @@ psql -h localhost locophoto -c "create unique index photosetlikesuseridx on phot
 psql -h localhost locophoto -c "alter table photouser add column displayname varchar"
 psql -h localhost locophoto -c "alter table photo add column highlight bool default false"
 psql -h localhost locophoto -c "create index photorootididx on photo(rootid)"
+psql -h localhost locophoto -c "create table if not exists hashtags (id serial primary key, photoid int, hashtag varchar)";
+psql -h localhost locophoto -c "create index if not exists hashtagshastagidx on hashtags(hashtag)";
 
 
 

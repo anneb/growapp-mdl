@@ -114,6 +114,22 @@
         }
     }
 
+    async function dbUpdateHashTags(photoid, description)
+    {
+        const deleteSQL = "delete from hashtags where photoid=$1";
+        await dbPool.query(deleteSQL, [photoid]);
+        if (description && typeof description == "string") {
+            const tags = description.toLowerCase().match(/#[a-z0-9_]+/g);
+            if (tags && tags.length) {
+                const uniqueTags = [...new Set(tags)];
+                for (let i=0; i < uniqueTags.length; i++) {
+                    const addSQL = "insert into hashtags (photoid, hashtag) values ($1, $2)";
+                    await dbPool.query(addSQL, [photoid, uniqueTags[i].replace('#', '')]);
+                }
+            }
+        }
+    }
+
     async function dbStorePhoto(photoinfo) {
         if (!checkPhotoInfo(photoinfo)){
             throw {"name": "unprocessable", "message": "missing or bad upload parameters"};
@@ -157,7 +173,7 @@
                 throw {"name": "photonotfound", "message": "rootid of uploaded photo not valid"};
             }
         }
-
+        await dbUpdateHashTags(photoid, description);
         return {"uri": basename, "id": photoid, "width": imageInfo.size.width, "height": imageInfo.size.height};
     }
 
@@ -444,6 +460,7 @@
         const isroot = result.rows[0].isroot;
         sql = "delete from photo where id=$1";
         await dbPool.query(sql, [id]);
+        await dbUpdateHashTags(id);
         deleteFile(__dirname + '/uploads/small/' + filename);
         deleteFile(__dirname + '/uploads/medium/' + filename);
         if (! await deleteFile(__dirname + '/uploads/' + filename)) {
@@ -796,6 +813,7 @@
         const photo = photoObject(queryResult.rows[0]);
         if (info.hasOwnProperty('description')) {
             photo.description = info.description.toString();
+            await dbUpdateHashTags(photoid, photo.description);
         }
         if (info.hasOwnProperty('tags') && Array.isArray(info.tags)) {
             photo.tags = info.tags;
