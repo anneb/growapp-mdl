@@ -612,7 +612,7 @@
             order by photosetid desc, id asc`;
         } else {
             const sqlQueryExpressions = [];
-            const havingExpressions = [];
+            const sqlTables = [];
             if (query.hasOwnProperty('minPhotos')) {
                 if (!isValidNumericValue(query.minPhotos, 0, 2000)) {
                     throw {"name": "unprocessable", "message" : `error parsing minPhotos value: ${minPhotos}`};
@@ -654,11 +654,23 @@
                 sqlParams.push(highlighted);
                 sqlQueryExpressions.push ('highlight=$' + sqlParams.length);
             }
+            if (query.hasOwnProperty('tags') && typeof query.tags == 'string') {
+                const tags = [...new Set(query.tags.split(',').map(tag=>tag.toLowerCase().trim().replace('#','')))];
+                const tagParams = [];
+                for (let i = 0; i < tags.length; i++) {
+                    tagParams.push('$' + (sqlParams.length + i + 1));
+                }
+                sqlParams.push(...tags);
+                sqlTables.push('hashtags h');
+                sqlQueryExpressions.push("h.hashtag in ("+tagParams.join(",")+") and photo.id=h.photoid");
+
+            }
             const whereClause = sqlQueryExpressions.length ? " where "+sqlQueryExpressions.join(" and ") : "";
+            const tablesClause = sqlTables.length ? "," + sqlTables.join(",") : "";
             sql  = `with photosetlikes as 
             (select photosetid, sum(case when likes > 0 then 1 else 0 end) as likes, sum(case when likes < 0 then -1 else 0 end) as dislikes from photosetlikes group by photosetid
             ), selectedphotos as (
-                select case when rootid=0 then id else rootid end as photosetid from photo `+whereClause+`
+                select distinct case when rootid=0 then photo.id else photo.rootid end as photosetid from photo${tablesClause} ${whereClause}
             ), selectedphotosets as (
                 select photosetid from selectedphotos group by photosetid
             ), photosets as (

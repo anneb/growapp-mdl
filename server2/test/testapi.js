@@ -387,6 +387,12 @@ async function testAll()
     const longPhotosets = await getPhotoSets('minPhotos=85');
     console.log(`Number of long photosets: ${longPhotosets.length}`);
 
+    const taggedFigPhotosets = await getPhotoSets('tags=fig');
+    console.log(`Number of photosets with photos tagged '#fig': ${taggedFigPhotosets.length}`);
+
+    const taggedFigOrOakPhotosets = await getPhotoSets('tags=fig,oak');
+    console.log(`Number of photosets with photos tagged '#fig' or '#oak': ${taggedFigOrOakPhotosets.length}`);
+    
     const getLikes = await getPhotoSetLikes(thisUser, 737);
     console.log(JSON.stringify(getLikes));
 
