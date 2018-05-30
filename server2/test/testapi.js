@@ -62,6 +62,28 @@ async function validateUser(deviceInfo, username ,validationcode)
     return userInfo;
 }
 
+async function updateUser(deviceInfo, userInfo, fieldInfo)
+{
+    const requestOptions = {
+        uri: baseUrl + '/api/users',
+        method: 'PUT',
+        json: true,
+        auth: {
+            user: userInfo.username,
+            password: userInfo.hash
+        },
+        body: {
+            deviceid: deviceInfo.deviceid,
+            devicehash: deviceInfo.devicehash,
+        }
+    };
+    if (fieldInfo) {
+        // merge body with fieldInfo
+        requestOptions.body = Object.assign(requestOptions.body,fieldInfo);
+    }
+    return await request(requestOptions);
+}
+
 async function getUser(userInfo) {
     const result = await request({
         uri: baseUrl + '/api/users',
@@ -333,6 +355,11 @@ async function testAll()
     // Get my user info, using basic auth
     const aboutMe = await getUser(thisUser);
     console.log(JSON.stringify(aboutMe));
+
+    aboutMe.users[0].allowmailing = !aboutMe.users[0].allowmailing;
+    aboutMe.users[0].displayname = aboutMe.users[0].displayname ? null : 'My Full Displayname';
+    const updatedMe = await updateUser(thisDevice, thisUser, aboutMe.users[0]);
+    console.log(JSON.stringify(updatedMe));
 
     const allPhotos = await getPhotos();
     console.log(`Number of photos: ${allPhotos.length}`);
