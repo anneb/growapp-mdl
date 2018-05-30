@@ -122,6 +122,20 @@ function createCollection(features, message, errno) {
         return featureCollection;
 }
 
+async function dbUpdateHashTags(photoid, description)
+{
+    const deleteSQL = "delete from hashtags where photoid=$1";
+    await dbPool.query(deleteSQL, [photoid]);
+    if (description && typeof description == "string") {
+        const tags = [...new Set(description.toLowerCase().match(/#[a-z0-9_]+/g))];
+        for (let uniqueTag of tags) {
+            const addSQL = "insert into hashtags (photoid, hashtag) values ($1, $2)";
+            await dbPool.query(addSQL, [photoid, uniqueTag.replace('#', '')]);
+        }
+    }
+}
+
+
 // get all photos, access based on client id
 app.get('/photoserver/getallphotos', cors(), function(req, res) {
   console.log('GET /photoserver/getallphotos');
@@ -467,7 +481,9 @@ app.post('/photoserver/deletemyphoto', cors(), function(req, res) {
                     var sql = 'delete from photo where id=$1';
                     dbPool.query(sql, [photoid])
                         .then(function(result) {
-                            // photo deleted from table, now delete from disk
+                            // photo deleted from table
+                            dbUpdateHashTags(photoid);
+                            // now delete photo from disk
                             fs.unlink(__dirname + '/uploads/small/' + filename, function(err) {});
                             fs.unlink(__dirname + '/uploads/medium/' + filename, function(err) {});
                             fs.unlink(__dirname + '/uploads/' + filename, function(err, result) {
@@ -1029,7 +1045,7 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                             tagstring += '"' + name.replace('"', '') + '" => "' + tag[name].replace('"', '') +  '"';
                                           }
                                         }
-                                        var sql = 'insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid, description, tags) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7, $8, $9)';
+                                        var sql = 'insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid, description, tags) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7, $8, $9) returning id';
                                         dbPool.query(sql, [shortfilename, imageinfo.width, imageinfo.height, location, accuracy, rootid, deviceid, description, tagstring])
                                             .catch(function(reason) {
                                                 console.log(reason);
@@ -1041,6 +1057,7 @@ app.post('/photoserver/sendphoto', cors(), function(req, res) {
                                             })
                                             .then(function(result) {
                                                 console.log('photo inserted!');
+                                                dbUpdateHashTags(result.rows[0].id, description);
                                                 gm(filename).resize('200', '200', '^').write(__dirname + '/uploads/small/' + shortfilename,
                                                     function(err) {
                                                       if (err) {

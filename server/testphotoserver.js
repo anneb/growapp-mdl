@@ -35,7 +35,8 @@ async function insertPhoto(rootid) {
             longitude: 4.913040,
             accuracy: 10,
             rootid: rootid,
-            photo: fs.readFileSync(__dirname + '/../www/trees.jpg').toString('base64')
+            photo: fs.readFileSync(__dirname + '/../www/trees.jpg').toString('base64'),
+            description: 'Hallo dit is een #test'
         }
     });
     return sendPhotoresult;
