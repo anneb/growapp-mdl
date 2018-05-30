@@ -14,13 +14,10 @@ async function dbUpdateHashTags(photoid, description)
     const deleteSQL = "delete from hashtags where photoid=$1";
     await dbPool.query(deleteSQL, [photoid]);
     if (description && typeof description == "string") {
-        const tags = description.toLowerCase().match(/#[a-z0-9_]+/g);
-        if (tags && tags.length) {
-            const uniqueTags = [...new Set(tags)];
-            for (let i=0; i < uniqueTags.length; i++) {
-                const addSQL = "insert into hashtags (photoid, hashtag) values ($1, $2)";
-                await dbPool.query(addSQL, [photoid, uniqueTags[i].replace('#', '')]);
-            }
+        const tags = [...new Set(description.toLowerCase().match(/#[a-z0-9_]+/g))];
+        for (let uniqueTag of tags) {
+            const addSQL = "insert into hashtags (photoid, hashtag) values ($1, $2)";
+            await dbPool.query(addSQL, [photoid, uniqueTag.replace('#', '')]);
         }
     }
 }
