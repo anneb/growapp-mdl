@@ -1,0 +1,16 @@
+// growapp server parameters
+
+let config = {
+    hostname: 'host.domain.tld',
+    port: 443,
+    proto: 'https://',
+    username: 'user@example.com',
+    displayName: '',
+    allowMailing: false,
+    validationcode:0 
+};
+
+config.baseUrl = config.proto + config.hostname + ':' + config.port;
+
+module.exports = config;
+
