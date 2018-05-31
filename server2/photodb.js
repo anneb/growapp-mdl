@@ -549,7 +549,7 @@
                 gif: rows[index].filename.slice(0, -3)+'gif',
                 photos: photoObjectArray(rows, index)
             };
-            if (result.photos.length > 1) {
+            if (result.photos.length) {
                 result.thumbnail = result.photos[result.photos.length - 1].filename;
             }
             return result;
