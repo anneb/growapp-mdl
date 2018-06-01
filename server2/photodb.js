@@ -423,58 +423,6 @@
             }
         }
     }
-
-    async function dbDeletePhoto(id, info, clientip) {
-        const userid = await getUserid(info.username, info.hash);
-        let sql = "";
-        let parameters = [];
-        if (userid > 0) {
-            sql = 'select p.filename, p.animationfilename, p.rootid, isroot from photo p, device d where p.id=$1 and p.deviceid=d.id and d.userid=$2';
-            parameters = [id, userid];            
-        } else {
-            // user unknown, get device
-            let deviceid = await getDevice(info.deviceid, info.devicehash);
-            if (deviceid > 0) {
-                sql = 'select p.filename, p.animationfilename, p.rootid, isroot from photo p, device d where p.id=$1 and p.deviceid=d.id and d.id=$2';
-                parameters = [id, deviceid];
-            } else {
-                // both user and device unknown, check if clientip is trusted
-                if (netconfig.trusted_ips.indexOf(clientip) < 0) {
-                    throw {"name": "unknownowner", "message": "photo delete allowed for owners only"};
-                } else {
-                    sql = 'select p.filename, p.animationfilename, p.rootid, isroot from photo p where p.id=$1';
-                    parameters = [id];
-                }
-            }
-        }
-        const result = await dbPool.query(sql, parameters);
-        if (!(result.rows && result.rows.length)) {
-            throw {"name": "photonotfound", "message": "photo not found"};
-        }
-        const filename = result.rows[0].filename;
-        const animationfilename = result.rows[0].animationfilename;
-        const rootid = result.rows[0].rootid;
-        const isroot = result.rows[0].isroot;
-        sql = "delete from photo where id=$1";
-        await dbPool.query(sql, [id]);
-        await dbUpdateHashTags(id);
-        deleteFile(__dirname + '/uploads/small/' + filename);
-        deleteFile(__dirname + '/uploads/medium/' + filename);
-        if (! await deleteFile(__dirname + '/uploads/' + filename)) {
-            throw "failed to delete file " + filename;
-        }
-        if (isroot) {
-            if (animationfilename && animationfilename.length) {
-                deleteFile(__dirname + '/uploads/small/' + animationfilename);
-                deleteFile(__dirname + '/uploads/medium/' + animationfilename);
-                deleteFile(__dirname + '/uploads/' + animationfilename);
-            }
-        }
-        if (isroot || rootid > 0) {
-            await resetPhotoset(id);
-        }
-        return {"file": filename, "id": id, "deleted": true};
-    }
     
     function tagStringToArray(tagstring)
     {
@@ -804,13 +752,16 @@
         if (!auth.authenticated) {
             throw {"name": "unauthorized", "message": "photo update requires credentials"};
         }
+        if (!isNumeric(photoid)) {
+            throw {"name": "unprocessable", "message": "photo id must be numeric"};
+        }
         const sqlParams = [];
         sqlParams.push(photoid);
         let whereClause = "where p.id=$1";
         if (auth.userId) {
             sqlParams.push(auth.userId);
             whereClause = ", device d " + whereClause + " and p.deviceid=d.id and d.userid=$2";
-        } else if (auth.deviceid) {
+        } else if (auth.deviceId) {
             sqlParams.push(auth.deviceId);
             whereClause += " and p.deviceid=$2";
         }
@@ -842,6 +793,62 @@
         return photo;
     }
 
+    async function dbDeletePhoto(photoid, info, clientip) {
+        const auth = await authenticateRequest(info, clientip);
+        if (!auth.authenticated) {
+            throw {"name": "unauthorized", "message": "delete photo requires credentials"};
+        }
+        if (!isNumeric(photoid)) {
+            throw {"name": "unprocessable", "message": "parameter id must be numeric"};
+        }
+        let sql = "";
+        let parameters = [];
+        if (auth.userId > 0) {
+            sql = 'select p.filename, p.animationfilename, p.rootid, isroot from photo p, device d where p.id=$1 and p.deviceid=d.id and d.userid=$2';
+            parameters = [photoid, auth.userId]; 
+        } else {
+            // user unknown, get device
+            if (auth.deviceId > 0) {
+                sql = 'select p.filename, p.animationfilename, p.rootid, isroot from photo p, device d where p.id=$1 and p.deviceid=d.id and d.id=$2';
+                parameters = [photoid, auth.deviceId];
+            } else {
+                // both user and device unknown, check if clientip is trusted
+                if (netconfig.trusted_ips.indexOf(clientip) < 0) {
+                    throw {"name": "unauthorized", "message": "photo delete allowed for admins and owners only"};
+                } else {
+                    sql = 'select p.filename, p.animationfilename, p.rootid, isroot from photo p where p.id=$1';
+                    parameters = [photoid];
+                }
+            }
+        }
+        const result = await dbPool.query(sql, parameters);
+        if (!(result.rows && result.rows.length)) {
+            throw {"name": "photonotfound", "message": "photo not found"};
+        }
+        const filename = result.rows[0].filename;
+        const animationfilename = result.rows[0].animationfilename;
+        const rootid = result.rows[0].rootid;
+        const isroot = result.rows[0].isroot;
+        sql = "delete from photo where id=$1";
+        await dbPool.query(sql, [photoid]);
+        await dbUpdateHashTags(photoid);
+        deleteFile(__dirname + '/uploads/small/' + filename);
+        deleteFile(__dirname + '/uploads/medium/' + filename);
+        if (! await deleteFile(__dirname + '/uploads/' + filename)) {
+            throw "failed to delete file " + filename;
+        }
+        if (isroot) {
+            if (animationfilename && animationfilename.length) {
+                deleteFile(__dirname + '/uploads/small/' + animationfilename);
+                deleteFile(__dirname + '/uploads/medium/' + animationfilename);
+                deleteFile(__dirname + '/uploads/' + animationfilename);
+            }
+        }
+        if (isroot || rootid > 0) {
+            await resetPhotoset(photoid);
+        }
+        return {"file": filename, "id": photoid, "deleted": true};
+    }
     
     async function dbGetPhotoRows(params) {
         let sql;

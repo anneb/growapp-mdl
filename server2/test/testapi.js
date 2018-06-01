@@ -253,15 +253,17 @@ async function deletePhoto(deviceInfo, userInfo, id) {
         uri: baseUrl + '/api/photos' + (id?`/${id}`:''),
         method: 'DELETE',
         json: true,
-        body: {
-            deviceid: deviceInfo.deviceid,
-            devicehash: deviceInfo.devicehash
-        }
+        body: {}
     };
     if (userInfo) {
         requestOptions.auth = {
             user: userInfo.username,
             password: userInfo.hash
+        };
+    } else if (deviceInfo) {
+        requestOptions.auth = {
+            user: deviceInfo.deviceid.toString(),
+            password: deviceInfo.devicehash
         };
     }
     const deletePhotoResult = await request(requestOptions);
