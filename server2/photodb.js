@@ -303,9 +303,10 @@
             if (result.rows.length) {
                 // user already known
                 validationcode = result.rows[0].validationcode;
-                if (result.rows[0].displayname != userinfo.displayname || result.rows[0].allowmailing != userinfo.allowmailing) {                    // update allowmailing and displayname
+                if (result.rows[0].displayname != userinfo.displayname || result.rows[0].allowmailing != userinfo.allowmailing) {
+                    // update allowmailing and displayname
                     sql = 'update photouser set displayname=$1, allowmailing=$2 where email=$3';
-                    await dbPool.query(userSQL, [userinfo.displayname, userinfo.allowmailing, userinfo.username]);
+                    await dbPool.query(sql, [userinfo.displayname, userinfo.allowmailing, userinfo.username]);
                 }
             } else {
                 // new user
