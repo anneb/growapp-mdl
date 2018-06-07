@@ -292,17 +292,22 @@
             throw {"name": "unknowndevice", "message": "create user is available for registered devices only"};
         }
         let sql;
-        if (!(userinfo.hasOwnProperty('allowmailing') && userinfo.hasOwnProperty('displayname'))) {
-            throw {"name": "unprocessable", "message": "missing or bad upload parameters"};
-        }
-        const allowmailing = userinfo.allowmailing ? true : false;
+        let allowmailing = userinfo.hasOwnProperty('allowmailing') ? (userinfo.allowmailing ? true : false) : undefined;
+        let displayname = userinfo.hasOwnProperty('displayname') ? userinfo.displayName.toString() : undefined;
         let validationcode;
         if (userinfo.username && userinfo.username.length > 5 && validateEmail(userinfo.username)) {
+            // valid username
             sql = "select id, validationcode, displayname, allowmailing from photouser where email=$1";
             let result = await dbPool.query(sql, [userinfo.username.toLowerCase()]);
             if (result.rows.length) {
                 // user already known
                 validationcode = result.rows[0].validationcode;
+                if (allowmailing === undefined) {
+                    allowmailing = rows[0].allowmailing;
+                }
+                if (displayname === undefined) {
+                    displayname = rows[0].displayname;
+                }
                 if (result.rows[0].displayname != userinfo.displayname || result.rows[0].allowmailing != userinfo.allowmailing) {
                     // update allowmailing and displayname
                     sql = 'update photouser set displayname=$1, allowmailing=$2 where email=$3';
@@ -310,10 +315,16 @@
                 }
             } else {
                 // new user
+                if (allowmailing === undefined) {
+                    allowmailing = false;
+                }
+                if (displayname === undefined) {
+                    displayname = '';
+                }
                 sql = "insert into photouser (email,displayname,validated,validationcode,hash,retrycount,allowmailing) values ($1,$2,false,$3,'',0,$4)";
                 const raw = crypto.randomBytes(4);
                 validationcode = pad(Math.floor((parseInt(raw.toString('hex'), 16) / 4294967295) * 99999), 5);
-                await dbPool.query(sql, [userinfo.username.toLowerCase(), userinfo.displayname, validationcode, userinfo.allowmailing]);
+                await dbPool.query(sql, [userinfo.username.toLowerCase(), displayname, validationcode, allowmailing]);
             }
         } else {
             throw {"name": "unprocessable", "message": "email not provided or invalid"};
