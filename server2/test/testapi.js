@@ -52,6 +52,7 @@ async function validateUser(deviceInfo, username ,validationcode)
         uri: baseUrl + '/api/users',
         method: 'PUT',
         json: true,
+        simple: false, // only throw errors for technical reasons, ignore status codes
         body: {
             deviceid: deviceInfo.deviceid,
             devicehash: deviceInfo.devicehash,
@@ -333,31 +334,56 @@ async function testAll()
 
     // check if validationcode is known
     if (config.validationcode == 0) {
+        // delete userinfo.json, to be replaced later with info from testapi.config.js
         if (fs.existsSync(__dirname + "/userinfo.json")) {
             fs.unlinkSync(__dirname + "/userinfo.json");    
         }
-        if (config.validationcode == 0) {
-            thisUser = await createUser(thisDevice, config.username, config.displayName, config.allowMailing);
-            console.log(JSON.stringify(thisUser));
-            console.log('update validiationcode in testapi.config.js');
-            process.exit(1);
-        }        
+        thisUser = await createUser(thisDevice, config.username, config.displayName, config.allowMailing);
+        console.log(JSON.stringify(thisUser));
+        console.log('update validiationcode in testapi.config.js');
+        process.exit(1);
     }
+
+    // verify that validation fails with wrong validationcode
+    const invalidUser = await validateUser(thisDevice, config.username, config.validationcode+1);
+    console.log(JSON.stringify(invalidUser));
+    if (!invalidUser.hasOwnProperty('error')) {
+        // user is not invalid?
+        console.log("User validated with wrong validation code, this should never happen");
+        process.exit(1);
+    }
+    
+    // get user hash by validating user with validation code 
+    const validatedUser = await validateUser(thisDevice, config.username, config.validationcode);
+    if (validatedUser.hasOwnProperty('error')) {
+        // validationcode failed
+        console.log("validationcode failed, cannot continue, " + JSON.stringify(validatedUser));
+        process.exit(1);
+    }
+    console.log(JSON.stringify(validatedUser));
 
     // reload or download user credentials
     if (fs.existsSync(__dirname + '/userinfo.json')) {
         // reload credentials from file
         thisUser = require(__dirname + "/userinfo.json");
+        if (thisUser.hash !== validatedUser.hash) {
+            console.log('Stored user hash and validated user hash are not identical, this should never happen');
+            process.exit(1);
+        } else {
+            console.log("stored user hash is valid");
+        }
     } else {
         // download from api
-        thisUser = await validateUser(thisDevice, config.username, config.validationcode);
+        thisUser = validatedUser;
         fs.writeFileSync(__dirname + '/userinfo.json', JSON.stringify(thisUser));
+        console.log("stored user information");
     }
 
     // Get my user info, using basic auth
     const aboutMe = await getUser(thisUser);
     console.log(JSON.stringify(aboutMe));
 
+    // update toggled allowmailing and displayname
     aboutMe.users[0].allowmailing = !aboutMe.users[0].allowmailing;
     aboutMe.users[0].displayname = aboutMe.users[0].displayname ? null : 'My Full Displayname';
     const updatedMe = await updateUser(thisDevice, thisUser, aboutMe.users[0]);

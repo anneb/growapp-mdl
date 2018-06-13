@@ -291,46 +291,27 @@
         if (deviceId == 0) {
             throw {"name": "unknowndevice", "message": "create user is available for registered devices only"};
         }
-        let sql;
-        let allowmailing = userinfo.hasOwnProperty('allowmailing') ? (userinfo.allowmailing ? true : false) : undefined;
-        let displayname = userinfo.hasOwnProperty('displayname') ? userinfo.displayName.toString() : undefined;
-        let validationcode;
-        if (userinfo.username && userinfo.username.length > 5 && validateEmail(userinfo.username)) {
+        let sql, email, validationcode;
+        if (userinfo.username && (typeof userinfo.username === 'string') && userinfo.username.length > 5 && validateEmail(userinfo.username)) {
             // valid username
-            sql = "select id, validationcode, displayname, allowmailing from photouser where email=$1";
-            let result = await dbPool.query(sql, [userinfo.username.toLowerCase()]);
+            email = userinfo.username.toLowerCase().trim();
+            sql = "select id, validationcode from photouser where email=$1";
+            let result = await dbPool.query(sql, [email]);
             if (result.rows.length) {
                 // user already known
                 validationcode = result.rows[0].validationcode;
-                if (allowmailing === undefined) {
-                    allowmailing = rows[0].allowmailing;
-                }
-                if (displayname === undefined) {
-                    displayname = rows[0].displayname;
-                }
-                if (result.rows[0].displayname != userinfo.displayname || result.rows[0].allowmailing != userinfo.allowmailing) {
-                    // update allowmailing and displayname
-                    sql = 'update photouser set displayname=$1, allowmailing=$2 where email=$3';
-                    await dbPool.query(sql, [userinfo.displayname, userinfo.allowmailing, userinfo.username]);
-                }
             } else {
                 // new user
-                if (allowmailing === undefined) {
-                    allowmailing = false;
-                }
-                if (displayname === undefined) {
-                    displayname = '';
-                }
-                sql = "insert into photouser (email,displayname,validated,validationcode,hash,retrycount,allowmailing) values ($1,$2,false,$3,'',0,$4)";
+                sql = "insert into photouser (email,displayname,validated,validationcode,hash,retrycount,allowmailing) values ($1,'',false,$2,'',0,false)";
                 const raw = crypto.randomBytes(4);
                 validationcode = pad(Math.floor((parseInt(raw.toString('hex'), 16) / 4294967295) * 99999), 5);
-                await dbPool.query(sql, [userinfo.username.toLowerCase(), displayname, validationcode, allowmailing]);
+                await dbPool.query(sql, [email, validationcode]);
             }
         } else {
             throw {"name": "unprocessable", "message": "email not provided or invalid"};
         }
-        const info = await emailValidationCode(userinfo.username, validationcode);
-        return { "message": "validationcode mailed to " + userinfo.username};
+        const info = await emailValidationCode(email, validationcode);
+        return { "message": "validationcode mailed to " + email};
     }
 
     async function linkUserToDevice(email, deviceid, devicehash)
@@ -357,17 +338,18 @@
         if (userinfo.username && hash) {
             userId = await getUserid(userinfo.username, userinfo.hash);
         }
-        if (userId == 0) {
+        if (userId === 0) {
             if (userinfo.validationcode && userinfo.username && userinfo.username.length > 5 && validateEmail(userinfo.username)) {
+                const email = userinfo.username.toLowerCase().trim();
                 sql = "select id, validationcode, retrycount, hash from photouser where email=$1";
-                const result = await dbPool.query(sql, [userinfo.username.toLowerCase()]);
+                const result = await dbPool.query(sql, [email]);
                 if (result.rows.length) {
                     if (result.rows[0].retrycount > 5) {
                         throw {"name": "userlocked", "message": "too many failed validation attemps, contact support"};
                     }
                     if (userinfo.validationcode != result.rows[0].validationcode) {
                         sql = "update photouser set retrycount=retrycount+1 where email=$1";
-                        await dbPool.query(sql, [userinfo.username.toLowerCase()]);
+                        await dbPool.query(sql, [email]);
                         throw {"name": "validationfailed", "message": "wrong validationcode, check and try again"};
                     }
                     // validation succeeded
@@ -381,7 +363,7 @@
                     }    
                     // reset retrycount and update hash
                     sql = 'update photouser set hash=$1, retrycount=0, validated=true where email=$2';
-                    await dbPool.query(sql, [hash, userinfo.username.toLowerCase()]);
+                    await dbPool.query(sql, [hash, email]);
                     userId = result.rows[0].id;
                 }
             } else {
@@ -408,7 +390,7 @@
             }
         }
         // user not known
-        throw {"name": "unknownuser", "message": "failed to update user " + userinfo.username.toLowerCase()};
+        throw {"name": "unknownuser", "message": "failed to update user " + userinfo.username.toLowerCase().trim()};
     }
 
     function deleteFile(filename) {
