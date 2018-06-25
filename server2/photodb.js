@@ -107,7 +107,7 @@
 
     function checkPhotoInfo(info)
     {
-        if (info.hasOwnProperty('latitude') && info.hasOwnProperty('longitude') && info.hasOwnProperty('accuracy') && info.hasOwnProperty('rootid') && info.hasOwnProperty('deviceid') && info.hasOwnProperty('devicehash')) {
+        if (info.hasOwnProperty('latitude') && info.hasOwnProperty('longitude') && info.hasOwnProperty('accuracy') && info.hasOwnProperty('deviceid') && info.hasOwnProperty('devicehash')) {
             return isNumeric(info.latitude) && isNumeric(info.longitude) && isNumeric(info.accuracy) && isNumeric(info.deviceid) && info.devicehash.length && info.devicehash.length>4;
         } else {
             return false;
@@ -140,6 +140,12 @@
         if (userId > 0) {
             await linkUserToDevice(photoinfo.username, photoinfo.deviceid, photoinfo.devicehash);
         }
+        const header = photoinfo.photo.match(/^data:image\/[a-z]+;base64,/);
+        if (header) {
+            // uploader included browser image header, so this is not a bare binary image
+            // however, memory-wise it is harder for the webclient than the server to remove the header
+            photoinfo.photo = photoinfo.photo.replace(/^data:image\/[a-z]+;base64,/, "");
+        }
         const filenameObject = await randomFilename(__dirname + "/uploads/", ".jpg");
         const basename = await new Promise (function(resolve, reject){
                 fs.writeFile(filenameObject.fullfilename, photoinfo.photo, 'base64', function(err) {
@@ -155,15 +161,16 @@
             throw "Invalid or corrupted image";
         }
         const location = 'SRID=4326;POINT(' + photoinfo.longitude + ' ' + photoinfo.latitude + ')';
+        const rootid = photoinfo.hasOwnProperty('rootid') ? (photoinfo.rootid > 0 ? photoinfo.rootid : 0) : 0;
         const description = photoinfo.description ? photoinfo.description.substring(0, 400) : null;
         const tags = Array.isArray(photoinfo.tags)?photoinfo.tags:[];
         const sqltags = tags.map(tag=>Object.entries(tag).map(keyval=>keyval.map(entry=>'"'+entry.replace('"', '')+'"').join(' => '))).join(', ');
         let sql = 'insert into photo (filename, width, height, location, accuracy, time, visible, rootid, deviceid, description, tags) values ($1, $2, $3, ST_GeomFromEWKT($4), $5, Now(), TRUE, $6, $7, $8, $9) returning id';
-        let result = await dbPool.query(sql, [basename, imageInfo.size.width, imageInfo.size.height, location, parseInt(photoinfo.accuracy, 10), photoinfo.rootid, deviceid, description, sqltags]);
+        let result = await dbPool.query(sql, [basename, imageInfo.size.width, imageInfo.size.height, location, parseInt(photoinfo.accuracy, 10), rootid, deviceid, description, sqltags]);
         const photoid = (result.rows && result.rows.length && result.rows[0].id) ? result.rows[0].id : 0;
         await resizeImage(filenameObject.fullfilename, 200, 200, '^', __dirname + "/uploads/small/" + basename);
         await resizeImage(filenameObject.fullfilename, 640, 640, '^', __dirname + "/uploads/medium/" + basename);
-        if (photoinfo.rootid > 0) {
+        if (rootid > 0) {
             sql = "update photo set isroot=true where id=$1 returning id";
             result = await dbPool.query(sql, [photoinfo.rootid]);
             if (result.rows[0].id != photoinfo.rootid) {

@@ -185,6 +185,8 @@ async function highlightPhotoset(userInfo, id, highlight)
     return result;
 }
 
+let header = 'data:image/jpeg;base64,';
+
 async function insertPhoto(deviceInfo, userInfo, rootid) {
     // send a photo
     const requestOptions = {
@@ -198,9 +200,10 @@ async function insertPhoto(deviceInfo, userInfo, rootid) {
             longitude: 4.913040,
             accuracy: 10,
             rootid: rootid,
-            photo: fs.readFileSync(__dirname + '/trees.jpg').toString('base64')
+            photo: header + fs.readFileSync(__dirname + '/trees.jpg').toString('base64')
         }
     };
+    header = ""; // next tests should be done without header
     if (userInfo) {
         requestOptions.auth = {
             user: userInfo.username,
@@ -273,7 +276,7 @@ async function deletePhoto(deviceInfo, userInfo, id) {
 
 async function testInsertAndDelete(thisDevice, thisUser)
 {
-    const insertFirstPhotoResult = await insertPhoto(thisDevice, thisUser, 0);
+    const insertFirstPhotoResult = await insertPhoto(thisDevice, thisUser, undefined);
     console.log(JSON.stringify(insertFirstPhotoResult));
 
     const smallFirstPhoto = await downloadPhoto('small/' + insertFirstPhotoResult.uri);
