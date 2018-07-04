@@ -736,7 +736,7 @@
     }
 
     function rotatePhoto(filename, degrees) {
-        degrees = degrees == 90 ? 90 : -90;
+        degrees = (degrees == 90) ? 90 : -90;
         return new Promise(function(resolve, reject){
             gm(filename).rotate('white', degrees).write(filename, function(err){
                 if (err) {
@@ -781,9 +781,9 @@
         }
         if (info.hasOwnProperty('rotate')) {
             const degrees = parseInt(info.rotate);
-            await rotatePhoto(__dirname + '/uploads/' + photo.filename);
-            await rotatePhoto(__dirname + '/uploads/medium/' + photo.filename);
-            await rotatePhoto(__dirname + '/uploads/small/' + photo.filename);
+            await rotatePhoto(__dirname + '/uploads/' + photo.filename, degrees);
+            await rotatePhoto(__dirname + '/uploads/medium/' + photo.filename, degrees);
+            await rotatePhoto(__dirname + '/uploads/small/' + photo.filename, degrees);
             const tmp = photo.width;
             photo.width = photo.height;
             photo.height = tmp;

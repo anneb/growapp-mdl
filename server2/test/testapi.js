@@ -199,10 +199,11 @@ async function insertPhoto(deviceInfo, userInfo, rootid) {
             latitude: 52.3423,
             longitude: 4.913040,
             accuracy: 10,
-            rootid: rootid,
             photo: header + fs.readFileSync(__dirname + '/trees.jpg').toString('base64')
-        }
-    };
+        }};
+    if (rootid) {
+        requestOptions.rootid = rootid;
+    }
     header = ""; // next tests should be done without header
     if (userInfo) {
         requestOptions.auth = {
@@ -247,7 +248,8 @@ async function downloadPhoto(uri) {
     const downloadResult = await request({
         uri: baseUrl + '/uploads/' + uri,
         method: 'GET',
-        json: false
+        json: false,
+        encoding: null
     });
     return downloadResult;
 }
@@ -281,6 +283,7 @@ async function testInsertAndDelete(thisDevice, thisUser)
 
     const smallFirstPhoto = await downloadPhoto('small/' + insertFirstPhotoResult.uri);
     console.log(`smallFirstPhoto downloaded, size: ${smallFirstPhoto.length}`);
+    fs.writeFileSync(__dirname + "/original.jpg", smallFirstPhoto);
 
     const insertSecondPhotoResult = await insertPhoto(thisDevice, thisUser, insertFirstPhotoResult.id);
     console.log(JSON.stringify(insertSecondPhotoResult));
@@ -293,8 +296,15 @@ async function testInsertAndDelete(thisDevice, thisUser)
 
     const updatedPhoto = await updatePhoto(thisDevice, thisUser, insertThirdPhotoResult.id, {description:'updated description', tags: [{"5":"2 cm"}], rotate: 90});
     console.log('updatedPhoto: ' + JSON.stringify(updatedPhoto));
+    
+    const photoRotatedRight = await downloadPhoto('small/' + insertThirdPhotoResult.uri);
+    fs.writeFileSync(__dirname + "/rotateright.jpg", photoRotatedRight);
+
     const rotatedPhoto = await updatePhoto(thisDevice, thisUser, insertThirdPhotoResult.id, {rotate: -90});
     console.log('rotatedPhoto: ' + JSON.stringify(rotatedPhoto));
+
+    const photoRotatedLeft = await downloadPhoto('small/' + rotatedPhoto.filename);
+    fs.writeFileSync(__dirname + "/rotateleft.jpg", photoRotatedLeft);
 
     const testPhotoset = await getPhotoSets(insertFirstPhotoResult.id);
     console.log(`testPhoteset now has ${testPhotoset.photos.length} photos`);
