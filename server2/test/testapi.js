@@ -300,6 +300,10 @@ async function testInsertAndDelete(thisDevice, thisUser)
     const photoRotatedRight = await downloadPhoto('small/' + insertThirdPhotoResult.uri);
     fs.writeFileSync(__dirname + "/rotateright.jpg", photoRotatedRight);
 
+    const upsideDownPhoto = await updatePhoto(thisDevice, thisUser, insertThirdPhotoResult.id, {rotate: 180});
+    const photoUpsideDown = await downloadPhoto('small/' + upsideDownPhoto.filename);
+    fs.writeFileSync(__dirname + "/upsidedown.jpg", photoUpsideDown);
+
     const rotatedPhoto = await updatePhoto(thisDevice, thisUser, insertThirdPhotoResult.id, {rotate: -90});
     console.log('rotatedPhoto: ' + JSON.stringify(rotatedPhoto));
 

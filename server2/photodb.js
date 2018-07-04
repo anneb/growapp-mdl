@@ -736,7 +736,10 @@
     }
 
     function rotatePhoto(filename, degrees) {
-        degrees = (degrees == 90) ? 90 : -90;
+        degrees = parseInt(degrees) || 90;
+        if (degrees !== 90 && degrees !== -90 && degrees !== 180 && degrees !== -180) {
+            degrees = 90;
+        }
         return new Promise(function(resolve, reject){
             gm(filename).rotate('white', degrees).write(filename, function(err){
                 if (err) {
