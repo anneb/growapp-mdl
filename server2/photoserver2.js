@@ -85,8 +85,8 @@ if (netconfig.trusted_proxies && netconfig.trusted_proxies !== '') {
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+app.use(bodyParser.json({limit: '5mb' }));
 
 var port = process.env.PORT || 8081;        // set our port
 
