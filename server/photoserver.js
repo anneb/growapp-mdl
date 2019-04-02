@@ -805,10 +805,22 @@ function getFilename (directory, extension, retrycount, cb) {
     }
 }
 
+async function emulateUpdateAnimation(rootid, path) {
+  let sql = 'select  id, time, filename from photo where id=$1 or rootid=$1 order by time';
+  const result = await dbPool.query(sql, [rootid]);
+  if (result.rows.length > 1) {
+    const outputfilename = Path.parse(result.rows[0].filename).name + '.gif';
+    sql = 'update photo set animationfilename=$1, isroot=true where id=$2';
+    dbPool.query(sql, [outputfilename, rootid])
+      .catch(reason=>console.log(`failed to insert animationfilename ${reason}`));
+  }
+}
+
 // creates or updates an animated gif from a set of photos linked to the the
 // photo with id of rootid
 function updateAnimation(rootid, path)
 {
+       return emulateUpdateAnimation(rootid, path);
        // enumerate all input foto's for animation
        var sql = 'select  id, time, filename from photo where id=$1 or rootid=$1 order by time';
        dbPool.query(sql, [rootid])
