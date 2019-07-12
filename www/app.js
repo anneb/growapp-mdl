@@ -1539,7 +1539,7 @@ var App = function() {
                           _app.activeFeature.set('isroot', true);
                         }
                         _app.clickFeatureHandler(_app.activeFeature); // reload feature
-                        _app.showMessage(__('Photo is now publicly visible on map'), 5000);
+                        _app.showMessage(__("Photo is now publicly visible on map, remove with `Manage Photo's`"), 5000);
                       }, 1000);
                     }, 5000);
                 }
