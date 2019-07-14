@@ -1513,7 +1513,7 @@ var App = function() {
         this.buttonSendPhoto = document.querySelector('#gapp_camera_photo_send');
         this.buttonSendPhoto.addEventListener('click', function() {
             _app.buttonSendPhoto.setAttribute('disabled', '');
-            _app.showMessage(__('uploading photo...'));
+            _app.showMessage(__('publishing photo...'));
             var p = _app.cameraPreviewPhoto;
             photoServer.uploadPhotoData(p.rawdata, p.photoid, p.myLocation, p.accuracy, _app.getFullPhotoDescription(), function(err, message) {
                 _app.buttonSendPhoto.removeAttribute('disabled');
