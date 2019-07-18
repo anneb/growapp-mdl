@@ -695,6 +695,14 @@ var App = function() {
     var _app = this;
 
     this.init = function(server, mapId, isMobileDevice) {
+      if (isMobileDevice && !this.mobileDeviceIsReady) {
+        window.setTimeout(function(){_app.init(server, mapId, isMobileDevice)}, 100);
+        return;
+      }
+      this.init2(server, mapId, isMobileDevice);
+    }
+
+    this.init2 = function(server, mapId, isMobileDevice) {
         var language;
         if (window.localStorage && window.localStorage.language) {
           language = window.localStorage.language;
@@ -1604,7 +1612,7 @@ var App = function() {
     };
 
     this.cordovaDeviceReady = function () {
-
+      _app.mobileDeviceIsReady = true;
     };
 
     this.geoLocationErrorHandler = function(message) {
