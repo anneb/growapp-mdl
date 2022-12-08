@@ -5,7 +5,7 @@
         "basic-auth": "^2.0.0",
         "body-parser": "^1.18.3",
         "cors": "^2.8.4",
-        "express": "^4.16.3",
+        "express": "^4.17.3",
         "fs-extra": "^5.0.0",
         "gm": "^1.23.1",
         "nodemailer": "^4.6.4",
