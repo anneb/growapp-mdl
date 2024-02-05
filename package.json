@@ -1,5 +1,7 @@
 {
   "devDependencies": {
+    "cordova-android": "^9.1.0",
+    "cordova-browser": "^6.0.0",
     "cordova-plugin-android-permissions": "^0.10.0",
     "cordova-plugin-camera-preview": "git+https://github.com/anneb/cordova-plugin-camera-preview.git",
     "cordova-plugin-geolocation": "^2.4.3",
@@ -17,11 +19,11 @@
       "cordova-plugin-insomnia": {}
     },
     "platforms": [
+      "browser",
       "android"
     ]
   },
   "dependencies": {
-    "cordova-android": "^8.0.0",
     "cordova-plugin-compat": "^1.2.0"
   }
 }
